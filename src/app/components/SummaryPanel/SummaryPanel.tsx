@@ -1,14 +1,19 @@
 import { Card, CardContent, Typography, Grid, Box } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
-import styles from "../home.module.css";
-import { poppins } from "../fonts/fonts";
-import SvgComponent from "./SvgComponent";
+import styles from "../../styles/home.module.css";
+import summaryStyles from "./summaryPanel.module.scss";
+import { poppins } from "../../fonts/fonts";
+import SvgComponent from "../../icons/SvgComponent";
 
 const SummaryPanel = () => {
   return (
-    <Box className={styles["Summary-panels"]}>
-      <Box className={styles["Summary-panels-boxes"]}>
-        <Box className={styles["Summary-panels-boxes-children1"]}>
+    <Box className={summaryStyles["Summary-panels"]}>
+      {/* cajon contactos */}
+      <Box className={summaryStyles["Summary-panels-boxes"]}>
+        <Box
+          className={summaryStyles["Summary-panels-boxes-children1"]}
+          // sx={{ justifyContent: "space-between" }}
+        >
           <Typography
             className={`${styles["Title-regular"]} ${poppins.className}`}
           >
@@ -20,21 +25,23 @@ const SummaryPanel = () => {
         </Box>
       </Box>
 
-      <Box className={styles["Summary-panels-boxes"]}>
-        <Box className={styles["Summary-panels-boxes-children1"]}>
+      {/* cajon suscripciones activas */}
+      <Box className={summaryStyles["Summary-panels-boxes"]}>
+        <Box className={summaryStyles["Summary-panels-boxes-children1"]}>
           <Typography
             className={`${styles["Title-regular"]} ${poppins.className}`}
           >
-            Suscripciones activas
+            Suscripciones activash
           </Typography>
           <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-            03
+            3.4k
           </Typography>
         </Box>
       </Box>
 
-      <Box className={styles["Summary-panels-boxes"]}>
-        <Box className={styles["Summary-panels-boxes-children1"]}>
+      {/* cajon comisiones cobradas */}
+      <Box className={summaryStyles["Summary-panels-boxes"]}>
+        <Box className={summaryStyles["Summary-panels-boxes-children1"]}>
           <Box sx={{ display: "flex", alignItems: "center", gap: "4px" }}>
             <Typography
               className={`${styles["Title-regular"]} ${poppins.className}`}

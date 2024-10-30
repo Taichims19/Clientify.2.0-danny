@@ -1,8 +1,10 @@
-import { Poppins } from "next/font/google";
+import { Poppins, Lusitana } from "next/font/google";
 
 export const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // Importamos todos los pesos necesarios
+  weight: ["400", "500", "600", "700"], // ajusta los pesos que estés usando
+  display: "swap",
+  variable: "--font-poppins",
 });
 
 // export const lusitana = Lusitana({

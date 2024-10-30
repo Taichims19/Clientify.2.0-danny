@@ -2,9 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Importa la fuente de Google */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-poppins: 'Poppins', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
