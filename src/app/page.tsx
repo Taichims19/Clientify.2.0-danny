@@ -16,7 +16,7 @@ export default function Home() {
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>
       {/* paneles y factura 2 cajones  */}
-      <Grid item xs={12} md={9}>
+      <Grid item xs={12} md={9} lg={9}>
         {/* cajon 427320182 */}
         <Grid
           // className={variables["background-patatas"]}
@@ -55,15 +55,15 @@ export default function Home() {
           item
           xs={12}
           md={12}
-          sx={{
-            display: "flex",
-            width: "1052px",
-            height: "488px",
-            padding: "32px 32px 0px 32px",
-            flexDirection: "column",
-            alignItems: "flex-start",
-            flexShrink: 0,
-          }}
+          // sx={{
+          //   display: "flex",
+          //   width: "1052px",
+          //   height: "488px",
+          //   padding: "32px 32px 0px 32px",
+          //   flexDirection: "column",
+          //   alignItems: "flex-start",
+          //   flexShrink: 0,
+          // }}
         >
           {/* Tabla de facturas */}
           <Grid item xs={12}>
@@ -75,7 +75,13 @@ export default function Home() {
       {/* Cajon vertical MRR Partner */}
 
       {/* MRR fila  */}
-      <Grid item xs={12} md={3} sx={{ background: "blue", widows: "100%" }}>
+      <Grid
+        item
+        xs={12}
+        md={3}
+        lg={3}
+        sx={{ background: "blue", widows: "100%" }}
+      >
         <Box mb={3}>
           <MRRPartner />
         </Box>

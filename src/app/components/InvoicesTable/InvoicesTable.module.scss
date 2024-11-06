@@ -1,0 +1,34 @@
+.DataGrid-clientify{
+  display: flex;
+  width: 100%;
+  height: 488px;
+  margin-top: 16px;
+  padding: 32px 32px 0px 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  border-radius: 10px;
+background: var(--Surface-Modal, #FFF);
+
+  .DataGrid-clientify_BoxFilter{
+    display: flex;
+    background: blueviolet;
+    width: 100%;
+    justify-content: space-between;
+    .BoxFilter-Children1{
+      display: flex;
+    }
+  }
+
+}
+
+.DataGrid-clientify-box1{
+  width: 100%;
+  // background: red;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  align-self: stretch;
+}
+
