@@ -1,8 +1,8 @@
 import { Card, CardContent, Typography, Grid, Box } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
 import styles from "../../styles/home.module.css";
-import summaryStyles from "./summaryPanel.module.scss";
 import { poppins } from "../../fonts/fonts";
+import summaryStyles from "./summaryPanel.module.scss";
 import SvgComponent from "../../icons/SvgComponent";
 
 const SummaryPanel = () => {

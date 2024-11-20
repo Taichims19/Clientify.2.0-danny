@@ -1,0 +1,50 @@
+.Box-AccountsHome-father{
+  display: flex;
+  width: 340px;
+  padding: 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--Surface-Modal, #FFF);
+
+  // child 1
+  .Box-AccountsHome-child-1{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+
+    //child 1 grandson 1
+    .Box-AccountsHome-child-1-grandson-1{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+    }
+  }
+  // child 2
+  .Box-AccountsHome-child-2{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+    
+    
+    //child 2 grandson 1
+    .Box-AccountsHome-child-2-grandson-1{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+    }
+    //child 2 grandson 2
+    .Box-AccountsHome-child-2-grandson-2{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+    }
+  }
+}

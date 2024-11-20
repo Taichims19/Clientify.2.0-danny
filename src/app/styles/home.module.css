@@ -1,11 +1,9 @@
-
 /* estilos de titulos y subtitulos  */
-
 
 /* Tipos de letras  */
 
 /* Header/Bold */
-.Header-bold{
+.Header-bold {
   color: var(--Text-Title, #262626);
   font-family: var(--font-poppins);
   font-size: 18px;
@@ -14,8 +12,28 @@
   line-height: 25px; /* 138.889% */
 }
 
+/* Header/Medium */
+.Header-Medium {
+  color: var(--Text-Subtitle, #8d8d8d);
+  font-family: Poppins;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 25px; /* 138.889% */
+}
+
+/* Sub header/Regular */
+.SubHeader-Regular {
+  color: var(--Text-Default, #525252);
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 137.5% */
+}
+
 /* H1/Bold */
-.H1-bold{
+.H1-bold {
   color: var(--Text-Title, #262626);
   font-family: var(--font-poppins);
   font-size: 40px;
@@ -24,24 +42,20 @@
   line-height: 55px; /* 137.5% */
 }
 
-
-
-
 /* Title Regular */
-.Title-regular{
-  color: var(--Text-Inactive, #8A8A8A);
+.Title-regular {
+  color: var(--Text-Inactive, #8a8a8a);
   font-family: var(--font-poppins);
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
   line-height: 19px; /* 135.714% */
-
 }
 
 /* Title/Medium 1 azules*/
-.Title-medium-blue1{
-  color: var(--Azul, #0067EE);
-  text-align: center;  
+.Title-medium-blue1 {
+  color: var(--Azul, #0067ee);
+  text-align: center;
   font-family: var(--font-poppins);
   font-size: 14px;
   font-style: normal;
@@ -50,16 +64,17 @@
 }
 
 /* Title/Medium 2 azules*/
-.Title-medium-blue2{
-color: var(--Text-Highlighted, #0067EE);
-font-family: var(--font-poppins);
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: 19px; /* 135.714% */
+.Title-medium-blue2 {
+  color: var(--Text-Highlighted, #0067ee);
+  font-family: var(--font-poppins);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 19px; /* 135.714% */
 }
+
 /* Title/Medium 1 grises*/
-.Title-medium-grey1{
+.Title-medium-grey1 {
   color: var(--Text-Default, #525252);
   text-align: right;
   font-family: var(--font-poppins);
@@ -69,9 +84,8 @@ line-height: 19px; /* 135.714% */
   line-height: 19px; /* 135.714% */
 }
 
-
- /* Title/Semibold */
-.Title-semibold{
+/* Title/Semibold */
+.Title-semibold {
   color: var(--Text-Default, #525252);
   font-family: var(--font-poppins);
   font-size: 14px;
@@ -80,8 +94,8 @@ line-height: 19px; /* 135.714% */
   line-height: 19px; /* 135.714% */
 }
 
- /* Title/Semibold 2*/
-.Title-semibold2-right{
+/* Title/Semibold 2*/
+.Title-semibold2-right {
   color: var(--Text-Default, #525252);
   text-align: right;
   font-family: var(--font-poppins);
@@ -92,7 +106,7 @@ line-height: 19px; /* 135.714% */
 }
 
 /* Caption/Semibold */
-.Caption-semibold{
+.Caption-semibold {
   color: var(--Text-Default, #525252);
   font-family: var(--font-poppins);
   font-size: 10px;
@@ -101,20 +115,38 @@ line-height: 19px; /* 135.714% */
   line-height: 14px; /* 140% */
   text-transform: uppercase;
 }
-
-/* Body/Regular */
-.Body-regular{
-color: var(--Text-Default, #525252);
-font-family: var(--font-poppins);
-font-size: 12px;
-font-style: normal;
-font-weight: 400;
-line-height: 17px; /* 141.667% */
+/* Caption/Medium */
+.Caption-Medium {
+  color: var(--Avatar-Text, #fff);
+  text-align: center;
+  font-family: Poppins;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 14px; /* 140% */
 }
 
+/* Body/Regular */
+.Body-regular {
+  color: var(--Text-Default, #525252);
+  font-family: var(--font-poppins);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px; /* 141.667% */
+}
+/* Body/Regular */
+.Body-regular-2 {
+  color: var(--Text-Inactive, #8a8a8a);
+  font-family: var(--font-poppins);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px; /* 141.667% */
+}
 
 /* Body/Medium */
-.Body-medium{
+.Body-medium {
   color: var(--Text-Default, #525252);
   font-family: var(--font-poppins);
   font-size: 12px;
@@ -123,44 +155,100 @@ line-height: 17px; /* 141.667% */
   line-height: 17px; /* 141.667% */
 }
 
-.body{
-  background: var(--Surface-Background, #F4F4F4);
+.body {
+  background: var(--Surface-Background, #f4f4f4);
+  /* height: 100vh; */
+}
+
+.header-layout-box {
+  display: flex;
+  width: 100%;
+  padding: var(--Spacing-Medium, 16px) var(--Spacing-Large, 24px);
+  justify-content: space-between;
+  align-items: center;
+  background: var(--Surface-Modal, #fff);
+
+  .layout-box-1 {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .layout-box-2 {
+    display: flex;
+    height: 36px;
+    align-items: center;
+    gap: 8px;
+
+    .box-2-childrenBox1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .box-img-user {
+        display: flex;
+        width: 32px;
+        height: 32px;
+        justify-content: center;
+        align-items: center;
+
+        .box-img-user-children1 {
+          display: flex;
+          width: var(--Avatar-Regular, 32px);
+          height: var(--Avatar-Regular, 32px);
+          justify-content: center;
+          align-items: center;
+          flex-shrink: 0;
+
+          .img-user {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+          }
+        }
+      }
+
+      .box-info-user {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+
+        .box-info-user-children1 {
+          display: flex;
+          align-items: center;
+          gap: 2px;
+        }
+      }
+    }
+  }
 }
 
 /* className={`${styles["Title-regular"]} ${poppins.className}`} */
 
-
 /* import styles from "../home.module.css"; */
 /* className={styles["Recurrence-plans"]}  */
 
-
-
-
-.HelpIcon{
+.HelpIcon {
   width: var(--Frame-Small, 16px);
-height: var(--Frame-Small, 16px);
-fill: var(--interactive-icon-frame-default, rgba(255, 255, 255, 0.00));
+  height: var(--Frame-Small, 16px);
+  fill: var(--interactive-icon-frame-default, rgba(255, 255, 255, 0));
 }
 
- /* Recurrence plans 0160 
-.Recurrence-plans{
+.Box-Planes-father {
   display: flex;
-  width: 340px;
-  height: 251px ;
-  padding: 32px;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.BoxRowPrincipalMrr-father {
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  align-self: stretch;
-}
-
-
-.Recurrence-plans-boxes{
-  display: flex;
-  flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  background: red;
-  align-self: stretch;
-} */
+  gap: 16px;
+  /* background: var(--Surface-Modal, #fff); */
+  background: orangered;
+}

@@ -1,0 +1,64 @@
+.Box-ResourcesHome-father{
+  display: flex;
+  width: 340px;
+  height: 289px;
+  padding: 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--Surface-Modal, #FFF);
+
+  // child 1
+  .Box-ResourcesHome-child1{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+
+    // Grandson1
+    .Box-ResourcesHome-child1-grandson1{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+    }
+  }
+
+  // CHILD 2
+  .Box-ResourcesHome-child2{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1 0 0;
+    align-self: stretch;
+  
+    // child 2 CHILDRENDS
+    .Box-ResourcesHome-child2-childrens{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+
+        // grandson childrens
+      .Box-ResourcesHome-childrens-child{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex: 1 0 0;
+
+        .child-box-new{
+          display: flex;
+          min-width: 18px;
+          padding: 0px var(--Spacing-XXsmall, 2px);
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          border-radius: var(--Radius-Xsmall, 2px);
+          background: var(--Badge-New, #0067EE);
+        }
+      }
+    }
+  }
+}

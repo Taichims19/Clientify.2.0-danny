@@ -1,22 +1,27 @@
 .DataGrid-clientify{
   display: flex;
   width: 100%;
-  height: 488px;
+  min-height: 488px;
+  max-height: 100%;
   margin-top: 16px;
   padding: 32px 32px 0px 32px;
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
   border-radius: 10px;
+  // background: yellow;
   background: var(--Surface-Modal, #FFF);
 
   // cajon contenedor facturas
   .DataGrid-clientify_BoxFilter{
     display: flex;
+    max-height: 100%;
+    // height: 100%;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
     align-self: stretch;
+    // background: orangered;
 
     .DataGrid-clientify_BoxFilter-children{
       display: flex;
@@ -25,11 +30,14 @@
       gap: 16px;
       align-self: stretch;
 
+
+      //Box of factures
       .BoxFilter-boxfilter2{
         display: flex;
         justify-content: space-between;
         align-items: center;
         align-self: stretch;
+        // background: red;
 
         .BoxFilter-boxfilter2-children1{
           display: flex;
@@ -42,6 +50,7 @@
           align-items: center;
           gap: 12px;
 
+          // box icon
           .boxfilter2-children-icon1{
             display: flex;
             align-items: flex-start;
@@ -56,6 +65,7 @@
               background: var(--interactive-icon-frame-default, rgba(255, 255, 255, 0.00));
             }
           }
+          // box search
           .boxfilter2-children-icon2{
             display: flex;
             flex-direction: column;
@@ -73,6 +83,8 @@
                 padding: 8px 8px 8px 16px;
                 align-items: center;
                 gap: 8px;
+                border-radius: var(--Radius-Small, 4px);
+                background: var(--searchbar-frame-default, #F4F4F4);
               }
             }
           }
@@ -81,33 +93,38 @@
     }
   }
 
-  
+
 
 }
 
+// box data grid
 .DataGrid-clientify-box1{
   width: 100%;
-  // min-height: 200px;
-  // max-height: auto;
+  min-height: 488px;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
   align-self: stretch;
+  // background: yellowgreen;
 }
 
 .Footer-DataGrid-father{
   display: flex;
-  width: 100%;
-  padding: 16px 24px;
+  width: 115%;
+  // padding: 16px 24px;
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
-  border-top: 1px solid var(--Divider-External, #E0E0E0);
+  border-top: 0px solid var(--Divider-External, white);
+  // background-color: red;
+
   .Footer-DataGrid-child{
     display: flex;
     align-items: center;
     gap: 8px;
+    // background: grey;
     .Box-row-footer-1{
       display: flex;
       align-items: center;
@@ -136,4 +153,23 @@
   width: var(--Frame-Small, 16px);
   height: var(--Frame-Small, 16px);
   fill: var(--interactive-icon-frame-default, rgba(255, 255, 255, 0.00));
+}
+
+.Box-Data-grid-header{
+  display: flex;
+  padding-right: 36px;
+  align-items: center;
+  // background: blueviolet !important;
+}
+.Box-Data-grid-celdas{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-start;
+  align-self: stretch;
+  // background-color: rgb(230, 147, 39);
+  overflow: hidden; /* Oculta el contenido que exceda los límites */
+  text-overflow: ellipsis; /* Muestra puntos suspensivos si el texto es demasiado largo */
+  white-space: wrap; /* Evita que el texto se ajuste a múltiples líneas */
+  
 }

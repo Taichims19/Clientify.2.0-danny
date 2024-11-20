@@ -1,0 +1,74 @@
+.Box-MrrPartner-father{
+  display: flex;
+  width: 340px;
+  padding: 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  border-radius: 10px;
+  // background: red;
+  background: var(--Surface-Modal, #FFF);
+
+  // chlid 1 mrr partner
+  .Box-MrrPartner-child-1{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: stretch;
+
+    .MrrPartner-grandson-1{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      align-self: stretch;
+
+      .grandson-1-child-1{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .grandson-1-child-2{
+        display: flex;
+        padding: var(--Spacing-XXsmall, 2px) 8px;
+        align-items: center;
+        gap: 8px;
+        border-radius: var(--Radius-Small, 4px);
+        background: var(--tems-frame-pressed, #E8F6FF);
+
+        .child-2-box1{
+          display: flex;
+          align-items: center;
+          gap: 2px;
+        }
+      }
+    }
+  }
+  // child 2 bronce plata oro
+  .Box-MrrPartner-child-2{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    // grandson 1
+    .MrrPartner-child2-grandson-1{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    // grandson 2
+    .MrrPartner-child2-grandson-2{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .grandson-2-box-childrens{
+        display: flex;
+        width: 64px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  }
+}

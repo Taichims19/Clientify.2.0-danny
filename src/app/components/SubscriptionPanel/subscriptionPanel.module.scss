@@ -1,7 +1,7 @@
 /* Planes de suscripcion  */
 .Subscription-header{
   display: flex;
-  flex: 1 0 0;
+  // flex: 1 0 0;
 }
 
 
@@ -9,15 +9,18 @@
 .Subscription-plans{
  
   display: flex;
-  width: 340px;
-  height: 251px;
-  padding: 32px;
   flex-direction: column;
   align-items: flex-start;
+  min-width: 310px;
+  width: 100%;
+  padding: 32px;
+  height: 251px;
   gap: 16px;
-  flex-shrink: 0;
+  flex-grow: 1;
+  flex-shrink: 0; /* Permite que se reduzcan si es necesario */
   border-radius: 10px;
   background: var(--Surface-Modal, #FFF);
+  // background: red;
 }
 
 .Subscription-plans-boxes{
@@ -26,7 +29,7 @@
   align-items: flex-start;
   gap: 8px;
   align-self: stretch;
-  width: 276px;
+  min-width: 276px;
 }
 
 .Subscription-plans-boxes-children1{
@@ -34,4 +37,26 @@
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
+}
+
+
+@media only screen and (min-width: 1400px) and (max-width: 1600px) {
+  .Subscription-plans{
+    min-width: 290px;
+    width: 335px;
+    flex-grow: 1;
+    flex-shrink: 0; /* Permite que se reduzcan si es necesario */
+   
+  }
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1400px) {
+  .Subscription-plans{
+      min-width: 280px;
+      width: 315px;
+      gap: 16px;
+      flex-grow: 1;
+      flex-shrink: 0; /* Permite que se reduzcan si es necesario */
+     
+    }
 }

@@ -5,45 +5,34 @@ import SubscriptionPanel from "./components/SubscriptionPanel/SubscriptionPanel"
 import SummaryPanel from "./components/SummaryPanel/SummaryPanel";
 import InvoicesTable from "./components/InvoicesTable/InvoicesTable";
 import MRRPartner from "./components/MrrPartner/MrrPartner";
-
+import AccountsHome from "./components/AccountsHome/AccountsHome";
 import ResourcesHome from "./components/ResourcesHome/ResourcesHome";
+
 import RecurrenceChart from "./components/RecurrenceChart/RecurrenceChart";
 import styles from "./styles/home.module.css";
-import AccountsHome from "./components/AccountsHome/AccountsHome";
-import variables from "./styles/variables.module.scss";
+import { RowPrincipalMrr } from "./components/RowPrincipalMrr/RowPrincipalMrr";
+// import variables from "./styles/variables.module.scss";
 
 export default function Home() {
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>
       {/* paneles y factura 2 cajones  */}
-      <Grid item xs={12} md={9} lg={9}>
+      <Grid item xs={12} md={9} lg={9} xl={9}>
         {/* cajon 427320182 */}
-        <Grid
-          // className={variables["background-patatas"]}
-          item
-          xs={12}
-          md={12}
-          sx={{
-            display: "flex",
-            width: "100%",
-            height: "251px",
-            alignItems: "center",
-            gap: "16px",
-          }}
-        >
+        <Grid item xs={12} md={12} className={styles["Box-Planes-father"]}>
           {/* Panel izquierdo (Suscripciones) */}
-          <Grid item>
+          <Grid item sx={{ flexGrow: 1 }}>
             {/* Panel principal */}
             <SubscriptionPanel />
           </Grid>
 
-          <Grid item>
+          <Grid item sx={{ flexGrow: 1 }}>
             {/* Panel de resumen */}
 
             <SummaryPanel />
           </Grid>
 
-          <Grid item>
+          <Grid item sx={{ flexGrow: 1 }}>
             {/* Panel de resumen */}
 
             <RecurrenceChart />
@@ -51,46 +40,28 @@ export default function Home() {
         </Grid>
 
         {/* Panel derecho (Gráfica de recurrencia y Tabla de facturas) */}
-        <Grid
-          item
-          xs={12}
-          md={12}
-          // sx={{
-          //   display: "flex",
-          //   width: "1052px",
-          //   height: "488px",
-          //   padding: "32px 32px 0px 32px",
-          //   flexDirection: "column",
-          //   alignItems: "flex-start",
-          //   flexShrink: 0,
-          // }}
+        <Box
+        // className={styles["Box-Facturas-father"]}
         >
           {/* Tabla de facturas */}
-          <Grid item xs={12}>
-            <InvoicesTable />
-          </Grid>
-        </Grid>
+
+          <InvoicesTable />
+        </Box>
       </Grid>
 
       {/* Cajon vertical MRR Partner */}
 
       {/* MRR fila  */}
-      <Grid
-        item
-        xs={12}
-        md={3}
-        lg={3}
-        sx={{ background: "blue", widows: "100%" }}
-      >
-        <Box mb={3}>
+      <Grid item xs={12} md={3} className={styles["BoxRowPrincipalMrr-father"]}>
+        <Grid item>
           <MRRPartner />
-        </Box>
-        <Box mb={3}>
+        </Grid>
+        <Grid item>
           <AccountsHome />
-        </Box>
-        <Box>
+        </Grid>
+        <Grid item>
           <ResourcesHome />
-        </Box>
+        </Grid>
       </Grid>
     </Grid>
   );

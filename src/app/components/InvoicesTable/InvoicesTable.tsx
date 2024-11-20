@@ -6,7 +6,9 @@ import {
   DataGrid,
   GridColDef,
   GridRenderCellParams,
+  GridColumnHeaderParams,
   GridToolbar,
+  GridRenderEditCellParams,
 } from "@mui/x-data-grid";
 
 import { Typography, Box } from "@mui/material";
@@ -64,11 +66,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -81,11 +98,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: false,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -93,17 +125,32 @@ const columns: GridColDef[] = [
   {
     field: "importe",
     headerName: "IMPORTE",
-    type: "number",
+    // type: "number",
     flex: 1,
     minWidth: 57,
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -116,11 +163,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -133,11 +195,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -150,11 +227,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -167,11 +259,26 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box>
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -184,15 +291,29 @@ const columns: GridColDef[] = [
     editable: true,
     disableColumnMenu: false,
     disableReorder: true,
+    // renderEditCell:(params: GridRenderEditCellParams)=> {
+
+    // },
+    renderHeader: (params: GridColumnHeaderParams) => {
+      return (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      );
+    },
     renderCell: (params: GridRenderCellParams) => {
       const { row } = params;
       return (
-        <Box
-          sx={{
-            width: 100,
-          }}
-        >
-          <Typography>{params.value}</Typography>
+        <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
+          <Typography
+            className={`${styles["Body-regular"]} ${poppins.className}`}
+          >
+            {params.value}
+          </Typography>
         </Box>
       );
     },
@@ -256,6 +377,7 @@ export default function InvoicesTable() {
         >
           {/* box facture */}
           <Box className={invoicesTableStyles["BoxFilter-boxfilter2"]}>
+            {/* Box factures 1*/}
             <Box
               className={invoicesTableStyles["BoxFilter-boxfilter2-children1"]}
             >
@@ -265,15 +387,18 @@ export default function InvoicesTable() {
                 FACTURAS
               </Typography>
             </Box>
+            {/* Box filter search 2*/}
             <Box
               className={invoicesTableStyles["BoxFilter-boxfilter2-children2"]}
             >
+              {/* box icon 1 */}
               <Box className={invoicesTableStyles["boxfilter2-children-icon1"]}>
                 <Box className={invoicesTableStyles["box-icon-1"]}>
                   <IconFilterFactures />
                 </Box>
               </Box>
 
+              {/* box filter search */}
               <Box className={invoicesTableStyles["boxfilter2-children-icon2"]}>
                 <Box className={invoicesTableStyles["box-icon-2"]}>
                   <Box className={invoicesTableStyles["box-icon-2-children"]}>
@@ -314,26 +439,57 @@ export default function InvoicesTable() {
             pagination: CustomPagination,
           }}
           sx={{
-            width: "100%", // Ocupa todo el ancho disponible
-            height: "100%", // Ocupa toda la altura disponible
-            overflow: "hidden", // Oculta la barra de desplazamiento
+            "& .MuiDataGrid-container--top [role=row]": {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              alignSelf: "stretch",
+              // backgroundColor: "red",
+            },
             "& .MuiDataGrid-main": {
               width: "100%",
-              boxSizing: "border-box",
-              background: "blue", // Color de fondo para la barra de herramientas
+            },
+            "& .MuiDataGrid-cellCheckbox": {
+              // backgroundColor: "white",
+              display: "flex",
+              width: "50px",
+              height: "100%",
+              // marginRight: "28px",
+              justifyContent: "center",
+              alignItems: "center",
+            },
+            "& .MuiSvgIcon-root": {
+              // backgroundColor: "green",
+              position: "absolute",
+              // right: "30%",
+            },
+            "& .MuiDataGrid-columnHeader--alignCenter": {
+              // backgroundColor: "yellow",
+              display: "flex",
+              width: "20px",
+              height: "20px",
+              justifyContent: "center",
+              alignItems: "center",
             },
             "& .MuiDataGrid-virtualScroller ": {
               width: "100%",
-              background: "grey", // Color de fondo para la barra de herramientas
+            },
+            "& .MuiDataGrid-virtualScrollerContent": {
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              alignSelf: "stretch",
+              // background: "blue",
             },
             "& .MuiDataGrid-footerContainer": {
               display: "flex",
               width: "100%",
-              padding: "16px 24px",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              gap: "8px",
-              // backgroundColor: "blueviolet", // Color de fondo para el paginador
+              padding: "16px 0px 16px 0px ",
+              // borderTop: "0px solid transparent",
+              // justifyContent: "flex-end",
+              // alignItems: "center",
+              // gap: "8px",
+              // backgroundColor: "blue", // Color de fondo para el paginador
             },
           }}
         />
