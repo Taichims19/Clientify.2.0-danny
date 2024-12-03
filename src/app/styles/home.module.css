@@ -224,6 +224,8 @@
   }
 }
 
+/* className={`${summaryStyles["box-hover-popover"]} ${summaryStyles["Caption-Medium"]}`} concatenacion doble clase */
+
 /* className={`${styles["Title-regular"]} ${poppins.className}`} */
 
 /* import styles from "../home.module.css"; */
@@ -246,9 +248,12 @@
 .BoxRowPrincipalMrr-father {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  min-width: 310px;
+  width: 100%;
+  flex-grow: 1;
+  flex-shrink: 0; /* Permite que se reduzcan si es necesario */
   align-items: flex-start;
   gap: 16px;
   /* background: var(--Surface-Modal, #fff); */
-  background: orangered;
+  /* background: rgb(83, 81, 233); */
 }

@@ -1,12 +1,9 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./styles/globals.css";
-import { AppBar, Toolbar, Typography, Avatar, Box } from "@mui/material";
-import styles from "../app/styles/home.module.css";
 import { poppins } from "../app/fonts/fonts";
-import Image from "next/image";
-import Iconlogout from "./icons/Iconlogout";
-import IconNameUserDown from "./icons/IconNameUserDown";
+import ClientProvider from "./ClientProvider"; // Importar el nuevo componente
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -26,81 +23,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
-        <Box className={styles["header-layout-box"]}>
-          {/* Logo o título */}
-          <Box className={styles["layout-box-1"]}>
-            <Typography
-              className={`${styles["Header-bold"]} ${poppins.className}`}
-            >
-              Clientify
-            </Typography>
-            <Typography
-              className={`${styles["Header-Medium"]} ${poppins.className}`}
-            >
-              partner
-            </Typography>
-          </Box>
-
-          {/* lineas de espacio */}
-
-          {/* Nombre de la compañía */}
-          <Typography
-            className={`${styles["SubHeader-Regular"]} ${poppins.className}`}
-          >
-            Capacitravel S.L.
-          </Typography>
-
-          {/* lineas de espacio */}
-
-          {/* Información del usuario */}
-          <Box className={styles["layout-box-2"]}>
-            {/* Box Img User */}
-            <Box className={styles["box-2-childrenBox1"]}>
-              {/* Box of IMG */}
-              <Box className={styles["box-img-user"]}>
-                <Box className={styles["box-img-user-children1"]}>
-                  <Image
-                    className={styles["img-user"]}
-                    src="/imgLayout/Rectangle7-png.png"
-                    alt="img user"
-                    width={32}
-                    height={31}
-                    priority // Carga la imagen prioritariamente
-                    layout="fixed" // Especifica que la imagen tiene un tamaño fijo
-                  />
-                </Box>
-              </Box>
-
-              {/* Box Info Img */}
-              <Box className={styles["box-info-user"]}>
-                <Typography
-                  className={`${styles["Body-regular"]} ${poppins.className}`}
-                >
-                  Account Manager
-                </Typography>
-
-                {/* BOX Name User and Icono */}
-                <Box className={styles["box-info-user-children1"]}>
-                  <Typography
-                    className={`${styles["Title-medium-grey1"]} ${poppins.className}`}
-                  >
-                    Alice Kuvalis
-                  </Typography>
-                  <IconNameUserDown />
-                </Box>
-              </Box>
-            </Box>
-            {/* Icon Logout */}
-            <Iconlogout />
-          </Box>
-        </Box>
-        {children}
+        {/* Llamamos a ClientProvider para manejar el contenido */}
+        <ClientProvider>{children}</ClientProvider>
       </body>
     </html>
   );

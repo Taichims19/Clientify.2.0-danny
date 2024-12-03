@@ -29,6 +29,7 @@ import IconDoubleArrow from "@/app/icons/IconDoubleArrow";
 import IconVector from "@/app/icons/IconVector";
 import IconFilterFactures from "@/app/icons/IconFilterFactures";
 import IconSearchFacture from "@/app/icons/IconSearchFacture";
+import NativeSelector from "../Utilities/Selectors/NativeSelect/NativeSelector";
 
 // Filas de datos con la información para cada columna
 const rows = [
@@ -333,12 +334,13 @@ const CustomPagination = () => {
               Filas por página
             </Typography>
             <Box className={invoicesTableStyles["Box-row-footer-children1"]}>
-              <Typography
+              {/* <Typography
                 className={`${styles["Body-medium"]} ${poppins.className}`}
               >
                 04
               </Typography>
-              <IconArrowBottom />
+              <IconArrowBottom /> */}
+              <NativeSelector />
             </Box>
           </Box>
 

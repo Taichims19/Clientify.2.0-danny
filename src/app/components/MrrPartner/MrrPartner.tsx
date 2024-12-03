@@ -4,15 +4,35 @@ import { Card, CardContent, Typography, Box, Divider } from "@mui/material";
 import mrrPartnerStyles from "./MrrPartner.module.scss";
 import IconMrrPartnerDoubt from "@/app/icons/IconMrrPartnerDoubt";
 import styles from "../../styles/home.module.css";
-import { styled } from "@mui/material/styles";
 import { poppins } from "../../fonts/fonts";
+import { styled } from "@mui/material/styles";
+
+import React, { useEffect, useState } from "react";
+
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
-import React, { useEffect, useState } from "react";
+
+const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
+  height: 10,
+  borderRadius: 5,
+  [`&.${linearProgressClasses.colorPrimary}`]: {
+    backgroundColor: theme.palette.grey[200],
+    ...theme.applyStyles("dark", {
+      backgroundColor: theme.palette.grey[800],
+    }),
+  },
+  [`& .${linearProgressClasses.bar}`]: {
+    borderRadius: 5,
+    backgroundColor: "#1a90ff",
+    ...theme.applyStyles("dark", {
+      backgroundColor: "#308fe8",
+    }),
+  },
+}));
 
 export default function MRRPartner() {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(100);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -65,20 +85,16 @@ export default function MRRPartner() {
       <Box className={mrrPartnerStyles["Box-MrrPartner-child-2"]}>
         <Box className={mrrPartnerStyles["MrrPartner-child2-grandson-1"]}>
           <Box sx={{ width: "100%" }}>
-            <LinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress variant="determinate" value={progress} />
           </Box>
           <Box sx={{ width: "100%", height: "10px", background: "yellow" }}>
-            <LinearProgress
-              color="error"
-              variant="determinate"
-              value={progress}
-            />
+            <BorderLinearProgress variant="determinate" value={progress} />
           </Box>
           <Box sx={{ width: "100%" }}>
-            <LinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress variant="determinate" value={progress} />
           </Box>
           <Box sx={{ width: "100%" }}>
-            <LinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress variant="determinate" value={progress} />
           </Box>
         </Box>
 

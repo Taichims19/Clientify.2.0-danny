@@ -30,6 +30,15 @@
   gap: 8px;
   align-self: stretch;
   min-width: 276px;
+  // background: blueviolet;
+
+  .box-childrenboxes-grandson1{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    // background: yellow;
+  }
 }
 
 .Subscription-plans-boxes-children1{
@@ -37,26 +46,29 @@
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
+
+  
 }
 
 
 @media only screen and (min-width: 1400px) and (max-width: 1600px) {
   .Subscription-plans{
     min-width: 290px;
-    width: 335px;
+    width: 100%;
     flex-grow: 1;
     flex-shrink: 0; /* Permite que se reduzcan si es necesario */
    
   }
 }
 
-@media only screen and (min-width: 1200px) and (max-width: 1400px) {
+@media only screen and (min-width: 1200px) and (max-width: 1399px) {
   .Subscription-plans{
-      min-width: 280px;
-      width: 315px;
+
+      min-width: 300px;
+      width: 320px;
       gap: 16px;
       flex-grow: 1;
       flex-shrink: 0; /* Permite que se reduzcan si es necesario */
-     
+      // background: red; 
     }
 }

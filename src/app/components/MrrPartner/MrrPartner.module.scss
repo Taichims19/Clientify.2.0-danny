@@ -1,6 +1,10 @@
 .Box-MrrPartner-father{
   display: flex;
-  width: 340px;
+  // width: 340px;
+  min-width: 326px;
+  width: 100%;
+  flex-grow: 1;
+  flex-shrink: 0; /* Permite que se reduzcan si es necesario */
   padding: 32px;
   flex-direction: column;
   align-items: flex-start;
@@ -50,12 +54,15 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    width:100%;
+    
 
     // grandson 1
     .MrrPartner-child2-grandson-1{
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 8px; 
+      width:100%;
     }
     // grandson 2
     .MrrPartner-child2-grandson-2{
@@ -65,10 +72,34 @@
 
       .grandson-2-box-childrens{
         display: flex;
-        width: 64px;
+        min-width: 54px;
+        width: 100%;
         flex-direction: column;
         align-items: flex-start;
       }
     }
   }
+}
+
+
+@media only screen and (min-width: 1398px) and (max-width: 2000px) {
+  .Box-MrrPartner-father{
+    // min-width: 290px;
+    width: 100%;
+    flex-grow: 1;
+    flex-shrink: 0; /* Permite que se reduzcan si es necesario */
+    // background: yellow;
+   
+  }
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1400px) {
+  .Box-MrrPartner-father{
+      min-width: 280px;
+      width: 315px;
+      gap: 16px;
+      flex-grow: 1;
+      flex-shrink: 0; /* Permite que se reduzcan si es necesario */
+     
+    }
 }
