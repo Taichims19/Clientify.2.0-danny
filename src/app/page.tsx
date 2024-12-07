@@ -14,7 +14,7 @@ import AnchorTemporaryDrawer from "./components/Utilities/Drawers/AnchorTemporar
 export default function Home() {
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>
-      <AnchorTemporaryDrawer /> {/* Siempre montado */}
+      {/* Siempre montado */}
       {/* paneles y factura 2 cajones  */}
       <Grid item xs={12} md={9} lg={9} xl={9}>
         {/* cajon 427320182 */}
@@ -61,6 +61,10 @@ export default function Home() {
         </Grid>
       </Grid>
       {/* <AnchorTemporaryDrawer /> */}
+
+      <AnchorTemporaryDrawer title="Planes de suscripción">
+        hghghgh
+      </AnchorTemporaryDrawer>
     </Grid>
   );
 }

@@ -1,10 +1,11 @@
 .NativeSelector-box-father{
-  display: flex;
-  padding: var(--Spacing-XSmall, 4px);
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  border-radius: var(--Radius-Xsmall, 2px);
-  background: var(--searchbar-frame-default, #F4F4F4);
-  border-bottom: none;
+    display: flex;
+    height: 21px;
+    padding: var(--Spacing-XSmall, 4px);
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    border-radius: var(--Radius-Xsmall, 2px);
+    background: var(--searchbar-frame-default, #F4F4F4);
+  
 }

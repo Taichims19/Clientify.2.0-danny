@@ -333,15 +333,14 @@ const CustomPagination = () => {
             >
               Filas por página
             </Typography>
-            <Box className={invoicesTableStyles["Box-row-footer-children1"]}>
-              {/* <Typography
+
+            {/* <Typography
                 className={`${styles["Body-medium"]} ${poppins.className}`}
               >
                 04
               </Typography>
               <IconArrowBottom /> */}
-              <NativeSelector />
-            </Box>
+            <NativeSelector />
           </Box>
 
           {/* icon of arrow  */}
@@ -475,12 +474,26 @@ export default function InvoicesTable() {
             },
             "& .MuiDataGrid-virtualScroller ": {
               width: "100%",
+              // background: "yellow",
+            },
+            "& .MuiDataGrid-virtualScrollerContent .MuiDataGrid-row": {
+              // background: "blue",
+              marginTop: "8px",
+              // background: "red",
+              // height: "56px",
+            },
+            "& .MuiDataGrid-virtualScrollerRenderZone": {
+              // background: "blue",
+              height: "auto",
+              // paddingTop: "6px",
             },
             "& .MuiDataGrid-virtualScrollerContent": {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
               alignSelf: "stretch",
+              flexBasis: "125px",
+              height: "125px",
               // background: "blue",
             },
             "& .MuiDataGrid-footerContainer": {

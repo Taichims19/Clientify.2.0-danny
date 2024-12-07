@@ -54,6 +54,7 @@ const SubscriptionPanel = () => {
             className={subscriptionStyles["Subscription-plans-boxes-children1"]}
           >
             <Typography
+              component="div" // Cambia el elemento raíz de <Typography> a <div>
               className={`${styles["Title-semibold"]} ${poppins.className}`}
             >
               {plan.name}
@@ -70,7 +71,7 @@ const SubscriptionPanel = () => {
                   }}
                 >
                   <Typography
-                    component="span"
+                    component="span" // Usa <span> aquí para mantener el contenido inline
                     className={`${styles["Caption-Medium"]} ${poppins.className}`}
                   >
                     Free

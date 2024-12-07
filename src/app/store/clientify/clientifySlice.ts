@@ -5,6 +5,10 @@ interface ClientifyState {
   selectedPlan: string | null;
   totalPlans: number; // Total de planes
   plans: { name: string; count: number; isFree: boolean }[]; // Cambiado a "isFree"
+  drawerContent: {
+    title: string;
+    items: { name: string; detail?: string }[];
+  } | null; // Cambia dependiendo del contexto
 }
 
 const initialState: ClientifyState = {
@@ -17,6 +21,7 @@ const initialState: ClientifyState = {
     { name: "Enterprise 10K Inbox", count: 2, isFree: false },
     { name: "Special", count: 1, isFree: false },
   ],
+  drawerContent: null,
 };
 
 export const clientifySlice = createSlice({
