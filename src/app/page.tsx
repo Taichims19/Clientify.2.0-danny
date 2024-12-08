@@ -1,3 +1,4 @@
+"use client";
 import { Grid, Box } from "@mui/material";
 import SubscriptionPanel from "./components/SubscriptionPanel/SubscriptionPanel";
 import SummaryPanel from "./components/SummaryPanel/SummaryPanel";
@@ -9,9 +10,15 @@ import ResourcesHome from "./components/ResourcesHome/ResourcesHome";
 import RecurrenceChart from "./components/RecurrenceChart/RecurrenceChart";
 import styles from "./styles/home.module.css";
 import AnchorTemporaryDrawer from "./components/Utilities/Drawers/AnchorTemporaryDrawer/AnchorTemporaryDrawer";
+import { useSelector } from "react-redux";
+import { RootState } from "./store/store";
+import PlanSuscription from "./components/Utilities/Drawers/PlanSuscription/PlanSuscription";
+import { DrawerView } from "./store/clientify/clientifySlice";
 // import variables from "./styles/variables.module.scss";
 
 export default function Home() {
+  const drawer = useSelector((state: RootState) => state.clienty.drawer);
+
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>
       {/* Siempre montado */}
@@ -60,10 +67,12 @@ export default function Home() {
           <ResourcesHome />
         </Grid>
       </Grid>
-      {/* <AnchorTemporaryDrawer /> */}
 
-      <AnchorTemporaryDrawer title="Planes de suscripción">
-        hghghgh
+      <AnchorTemporaryDrawer title={drawer.drawerTitle}>
+        {drawer.drawerSelected === DrawerView.PLANSUSCRIPTION && (
+          <PlanSuscription />
+        )}
+        {drawer.drawerSelected === DrawerView.ACCOUNTS && <>Hola</>}
       </AnchorTemporaryDrawer>
     </Grid>
   );

@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 import { toggleAccountStatus } from "@/app/store/clientify/acountsHomeSlice";
 import IconRightArrow from "@/app/icons/IconRightArrow";
+import { DrawerView, setDrawer } from "@/app/store/clientify/clientifySlice";
 export default function AccountsHome() {
   const dispatch = useDispatch();
   const { totalAccounts, accounts } = useSelector(
@@ -23,6 +24,17 @@ export default function AccountsHome() {
 
   const visibleAccounts = accounts.slice(0, MAX_ACCOUNTS_DISPLAYED);
 
+  const handleOpenDrawer = (plan: string) => {
+    dispatch(
+      setDrawer({
+        isDrawerOpen: true,
+        drawerTitle: "Cuentas",
+        drawerSelected: DrawerView.ACCOUNTS,
+        view: "",
+      })
+    );
+  };
+
   return (
     <Box className={AccountsHomeStyles["Box-AccountsHome-father"]}>
       {/* child 1 */}
@@ -35,9 +47,11 @@ export default function AccountsHome() {
           >
             Cuentas
           </Typography>
+
           <Typography
             className={`${styles["Title-medium-blue2"]} ${poppins.className}`}
             style={{ cursor: "pointer" }}
+            onClick={() => handleOpenDrawer("Ver todo")}
           >
             Ver todo
           </Typography>

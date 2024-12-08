@@ -6,7 +6,11 @@ import subscriptionStyles from "./subscriptionPanel.module.scss";
 import { poppins } from "../../fonts/fonts";
 import { useDispatch, useSelector } from "react-redux";
 
-import { openDrawer, selectPlan } from "@/app/store/clientify/clientifySlice";
+import {
+  DrawerView,
+  selectPlan,
+  setDrawer,
+} from "@/app/store/clientify/clientifySlice";
 import { RootState } from "@/app/store/store";
 
 const SubscriptionPanel = () => {
@@ -17,7 +21,14 @@ const SubscriptionPanel = () => {
 
   const handleOpenDrawer = (plan: string) => {
     dispatch(selectPlan(plan));
-    dispatch(openDrawer());
+    dispatch(
+      setDrawer({
+        isDrawerOpen: true,
+        drawerTitle: "Planes",
+        drawerSelected: DrawerView.PLANSUSCRIPTION,
+        view: "",
+      })
+    );
   };
 
   return (

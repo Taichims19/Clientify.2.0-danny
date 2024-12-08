@@ -1,18 +1,27 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Drawer } from "@mui/material";
+
+export enum DrawerView {
+  PLANSUSCRIPTION = "PLANSUSCRIPTION",
+  ACCOUNTS = "ACCOUNTS",
+  RESOURCES = "RESOURCES",
+}
+
+interface DrawerState {
+  isDrawerOpen: boolean;
+  drawerTitle: string;
+  drawerSelected: DrawerView;
+  view: string;
+}
 
 interface ClientifyState {
-  isOpen: boolean;
   selectedPlan: string | null;
-  totalPlans: number; // Total de planes
-  plans: { name: string; count: number; isFree: boolean }[]; // Cambiado a "isFree"
-  drawerContent: {
-    title: string;
-    items: { name: string; detail?: string }[];
-  } | null; // Cambia dependiendo del contexto
+  totalPlans: number;
+  plans: { name: string; count: number; isFree: boolean }[];
+  drawer: DrawerState;
 }
 
 const initialState: ClientifyState = {
-  isOpen: false,
   selectedPlan: null,
   totalPlans: 5, // Estado inicial para el total de planes
   plans: [
@@ -21,19 +30,18 @@ const initialState: ClientifyState = {
     { name: "Enterprise 10K Inbox", count: 2, isFree: false },
     { name: "Special", count: 1, isFree: false },
   ],
-  drawerContent: null,
+  drawer: {
+    isDrawerOpen: false,
+    drawerTitle: "",
+    drawerSelected: DrawerView.PLANSUSCRIPTION,
+    view: "",
+  },
 };
 
 export const clientifySlice = createSlice({
   name: "clientify",
   initialState,
   reducers: {
-    openDrawer(state) {
-      state.isOpen = true;
-    },
-    closeDrawer(state) {
-      state.isOpen = false;
-    },
     selectPlan(state, action: PayloadAction<string>) {
       state.selectedPlan = action.payload;
     },
@@ -47,15 +55,13 @@ export const clientifySlice = createSlice({
         plan.isFree = !plan.isFree;
       }
     },
+    setDrawer(state, action: PayloadAction<DrawerState>) {
+      state.drawer = action.payload;
+    },
   },
 });
 
-export const {
-  openDrawer,
-  closeDrawer,
-  selectPlan,
-  setTotalPlans,
-  toggleFreeStatus,
-} = clientifySlice.actions;
+export const { selectPlan, setTotalPlans, toggleFreeStatus, setDrawer } =
+  clientifySlice.actions;
 
 export default clientifySlice.reducer;
