@@ -157,7 +157,8 @@
 
 .body {
   background: var(--Surface-Background, #f4f4f4);
-  height: 100vh;
+  /* background: red; */
+  height: 100%;
 }
 
 .header-layout-box {

@@ -12,8 +12,10 @@ import styles from "./styles/home.module.css";
 import AnchorTemporaryDrawer from "./components/Utilities/Drawers/AnchorTemporaryDrawer/AnchorTemporaryDrawer";
 import { useSelector } from "react-redux";
 import { RootState } from "./store/store";
-import PlanSuscription from "./components/Utilities/Drawers/PlanSuscription/PlanSuscription";
+import PlanSuscription from "./components/Utilities/Drawers/PlanSuscription/PlanSuscriptionDrawer";
 import { DrawerView } from "./store/clientify/clientifySlice";
+import PlanSuscriptionDrawer from "./components/Utilities/Drawers/PlanSuscription/PlanSuscriptionDrawer";
+import AccountsHomeDrawer from "./components/Utilities/Drawers/AccountsHome/AccountsHomeDrawer";
 // import variables from "./styles/variables.module.scss";
 
 export default function Home() {
@@ -70,9 +72,11 @@ export default function Home() {
 
       <AnchorTemporaryDrawer title={drawer.drawerTitle}>
         {drawer.drawerSelected === DrawerView.PLANSUSCRIPTION && (
-          <PlanSuscription />
+          <PlanSuscriptionDrawer />
         )}
-        {drawer.drawerSelected === DrawerView.ACCOUNTS && <>Hola</>}
+        {drawer.drawerSelected === DrawerView.ACCOUNTS && (
+          <AccountsHomeDrawer />
+        )}
       </AnchorTemporaryDrawer>
     </Grid>
   );

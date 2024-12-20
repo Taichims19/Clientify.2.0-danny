@@ -9,7 +9,7 @@ export type AppDispatch = typeof store.dispatch;
 const rootReducer = combineReducers({
   // auth: authSlice.reducer,
   clienty: clientySlice,
-  accountsHome: accountsHomeSlice, // Agregado aquí
+  // accountsHome: accountsHomeSlice, // Agregado aquí
 });
 
 const store = configureStore({

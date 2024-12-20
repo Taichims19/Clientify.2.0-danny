@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Drawer } from "@mui/material";
 
 export enum DrawerView {
   PLANSUSCRIPTION = "PLANSUSCRIPTION",
@@ -14,19 +13,33 @@ interface DrawerState {
   view: string;
 }
 
+interface Plan {
+  name: string;
+  count: number;
+  isFree: boolean;
+}
+
+interface Account {
+  name: string;
+  isActive: boolean;
+}
+
 interface ClientifyState {
   selectedPlan: string | null;
   totalPlans: number;
-  plans: { name: string; count: number; isFree: boolean }[];
+  plans: Plan[];
   drawer: DrawerState;
+  totalAccounts: number;
+  accounts: Account[];
 }
 
 const initialState: ClientifyState = {
+  // Información original de clientifySlice
   selectedPlan: null,
-  totalPlans: 5, // Estado inicial para el total de planes
+  totalPlans: 5,
   plans: [
     { name: "Business Growth", count: 1, isFree: false },
-    { name: "Demo", count: 1, isFree: true }, // Ahora es "isFree"
+    { name: "Demo", count: 1, isFree: true },
     { name: "Enterprise 10K Inbox", count: 2, isFree: false },
     { name: "Special", count: 1, isFree: false },
   ],
@@ -36,20 +49,27 @@ const initialState: ClientifyState = {
     drawerSelected: DrawerView.PLANSUSCRIPTION,
     view: "",
   },
+  // Información añadida de accountsHomeSlice
+  totalAccounts: 3,
+  accounts: [
+    { name: "EDUCATIUM", isActive: true },
+    { name: "INTEGRITYLEGAL", isActive: false },
+    { name: "Jooyly", isActive: true },
+  ],
 };
 
 export const clientifySlice = createSlice({
   name: "clientify",
   initialState,
   reducers: {
+    // Reducers originales de clientifySlice
     selectPlan(state, action: PayloadAction<string>) {
       state.selectedPlan = action.payload;
     },
     setTotalPlans(state, action: PayloadAction<number>) {
-      state.totalPlans = action.payload; // Permite actualizar el total de planes
+      state.totalPlans = action.payload;
     },
     toggleFreeStatus(state, action: PayloadAction<string>) {
-      // Cambiar el estado "isFree" de un plan específico por su nombre
       const plan = state.plans.find((p) => p.name === action.payload);
       if (plan) {
         plan.isFree = !plan.isFree;
@@ -58,10 +78,34 @@ export const clientifySlice = createSlice({
     setDrawer(state, action: PayloadAction<DrawerState>) {
       state.drawer = action.payload;
     },
+    // Reducers añadidos de accountsHomeSlice
+    toggleAccountStatus(state, action: PayloadAction<string>) {
+      const account = state.accounts.find((acc) => acc.name === action.payload);
+      if (account) {
+        account.isActive = !account.isActive;
+      }
+    },
+    addAccount(state, action: PayloadAction<Account>) {
+      state.accounts.push(action.payload);
+      state.totalAccounts += 1;
+    },
+    removeAccount(state, action: PayloadAction<string>) {
+      state.accounts = state.accounts.filter(
+        (acc) => acc.name !== action.payload
+      );
+      state.totalAccounts -= 1;
+    },
   },
 });
 
-export const { selectPlan, setTotalPlans, toggleFreeStatus, setDrawer } =
-  clientifySlice.actions;
+export const {
+  selectPlan,
+  setTotalPlans,
+  toggleFreeStatus,
+  setDrawer,
+  toggleAccountStatus,
+  addAccount,
+  removeAccount,
+} = clientifySlice.actions;
 
 export default clientifySlice.reducer;

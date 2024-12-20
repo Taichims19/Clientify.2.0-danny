@@ -19,7 +19,7 @@ import IconRightArrow from "@/app/icons/IconRightArrow";
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
 import IconVectorClear from "@/app/icons/IconVectorClear";
 
-function PlanSuscription() {
+function PlanSuscriptionDrawer() {
   const [loading, setLoading] = useState(false);
   const { plans, totalPlans } = useSelector(
     (state: RootState) => state.clienty
@@ -166,4 +166,4 @@ function PlanSuscription() {
   return <>{loading ? renderLoading() : renderPlanSuscription()}</>;
 }
 
-export default PlanSuscription;
+export default PlanSuscriptionDrawer;

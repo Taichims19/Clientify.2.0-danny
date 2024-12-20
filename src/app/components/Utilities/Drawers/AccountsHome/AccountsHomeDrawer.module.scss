@@ -1,16 +1,16 @@
 .Box-AnchorTemporaryDrawer-father{
-  display: flex;
-  min-width: 320px;
-  // width: 24vw;
-  height: 862px;
-  padding: var(--Spacing-Large, 24px);
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  flex-shrink: 0;
-  // background: yellow;
-  background: var(--Surface-Modal, #FFF);
-  box-shadow: -4px 0px 10px 0px rgba(0, 0, 0, 0.10);
+  // display: flex;
+  // min-width: 320px;
+  // // width: 24vw;
+  // height: 862px;
+  // padding: var(--Spacing-Large, 24px);
+  // flex-direction: column;
+  // align-items: center;
+  // gap: 16px;
+  // flex-shrink: 0;
+  // // background: yellow;
+  // background: var(--Surface-Modal, #FFF);
+  // box-shadow: -4px 0px 10px 0px rgba(0, 0, 0, 0.10);
 
     .Box-header-drawer{
       display: flex;
@@ -88,16 +88,16 @@
     }
 }
 
-// @media only screen and (min-width: 1440px) and (max-width: 4001px) {
-//   .Box-AnchorTemporaryDrawer-father{
-//       min-width: 280px;
-//       width: 24.5vw;
-//       // background: yellow;
-//       flex-grow: 1;
-//       flex-shrink: 0; /* Permite que se reduzcan si es necesario */
-//       // background: red;
+@media only screen and (min-width: 1440px) and (max-width: 4001px) {
+  .Box-AnchorTemporaryDrawer-father{
+      min-width: 280px;
+      width: 24.5vw;
+      // background: yellow;
+      flex-grow: 1;
+      flex-shrink: 0; /* Permite que se reduzcan si es necesario */
+      // background: red;
 
       
-//     }
-// }
+    }
+}
 

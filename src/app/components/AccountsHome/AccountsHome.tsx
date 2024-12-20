@@ -13,7 +13,7 @@ import { DrawerView, setDrawer } from "@/app/store/clientify/clientifySlice";
 export default function AccountsHome() {
   const dispatch = useDispatch();
   const { totalAccounts, accounts } = useSelector(
-    (state: RootState) => state.accountsHome
+    (state: RootState) => state.clienty
   );
 
   const handleToggleStatus = (accountName: string) => {
