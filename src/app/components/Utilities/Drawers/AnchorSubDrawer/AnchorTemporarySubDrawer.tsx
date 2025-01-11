@@ -1,34 +1,38 @@
+// Nuevo componente AnchorTemporarySubDrawer
 "use client";
 
 import React from "react";
 import { Box, Drawer, Typography, IconButton } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { DrawerView, setDrawer } from "@/app/store/clientify/clientifySlice";
+import {
+  SubDrawerView,
+  setSubDrawer,
+} from "@/app/store/clientify/clientifySlice";
 import { RootState } from "@/app/store/store";
-import AnchorTemporaryDrawerStyles from "./AnchorTemporaryDrawer.module.scss";
+import AnchorTemporarySubDrawerStyles from "./AnchorTemporarySubDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import IconRightArrow from "@/app/icons/IconRightArrow";
 
-interface AnchorTemporaryDrawerProps {
+interface AnchorTemporarySubDrawerProps {
   children: any;
   title: string;
 }
 
-const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
+const AnchorTemporarySubDrawer = (props: AnchorTemporarySubDrawerProps) => {
   const { children, title = "" } = props;
   const dispatch = useDispatch();
-  const isDrawerOpen = useSelector(
-    (state: RootState) => state.clienty.drawer.isDrawerOpen
+  const isSubDrawerOpen = useSelector(
+    (state: RootState) => state.clienty.subDrawer.isSubDrawerOpen
   );
 
   const handleClose = () => {
     dispatch(
-      setDrawer({
-        isDrawerOpen: false,
-        drawerTitle: "",
-        drawerSelected: DrawerView.PLANSUSCRIPTION,
-        view: "",
+      setSubDrawer({
+        isSubDrawerOpen: false,
+        subDrawerTitle: "",
+        subDrawerSelected: SubDrawerView.EDUCATIUM,
+        subView: "",
       })
     );
   };
@@ -36,25 +40,29 @@ const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
   return (
     <Drawer
       anchor="right"
-      open={isDrawerOpen}
+      open={isSubDrawerOpen}
       onClose={handleClose}
       sx={{ width: 500 }}
       slotProps={{
         backdrop: {
-          // Estilo para el Backdrop (fondo transparente con opacidad)
           style: {
-            backgroundColor: "rgba(0,0,0,0)", // Ajusta la opacidad según tus necesidades
+            backgroundColor: "rgba(0,0,0,0)",
           },
         },
       }}
     >
       <Box
         className={
-          AnchorTemporaryDrawerStyles["Box-AnchorTemporaryDrawer-father"]
+          AnchorTemporarySubDrawerStyles["Box-AnchorTemporarySubDrawer-father"]
         }
         role="presentation"
       >
-        <Box className={AnchorTemporaryDrawerStyles["Box-header-drawer"]}>
+        <Box
+          className={AnchorTemporarySubDrawerStyles["Box-header-drawer"]}
+          sx={{
+            background: "red",
+          }}
+        >
           <Typography
             className={`${styles["Title-regular"]} ${poppins.className}`}
           >
@@ -63,7 +71,6 @@ const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
           <IconButton
             sx={{
               padding: "0px",
-              // background: "yellow",
             }}
             onClick={handleClose}
           >
@@ -76,4 +83,4 @@ const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
   );
 };
 
-export default AnchorTemporaryDrawer;
+export default AnchorTemporarySubDrawer;

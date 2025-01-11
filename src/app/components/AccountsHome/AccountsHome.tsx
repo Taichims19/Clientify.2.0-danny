@@ -10,6 +10,7 @@ import { RootState } from "@/app/store/store";
 import { toggleAccountStatus } from "@/app/store/clientify/acountsHomeSlice";
 import IconRightArrow from "@/app/icons/IconRightArrow";
 import { DrawerView, setDrawer } from "@/app/store/clientify/clientifySlice";
+
 export default function AccountsHome() {
   const dispatch = useDispatch();
   const { totalAccounts, accounts } = useSelector(
@@ -67,6 +68,7 @@ export default function AccountsHome() {
         {visibleAccounts.map((account) => (
           <Box
             key={account.name}
+            // sx={{ background: "red" }}
             className={
               AccountsHomeStyles["Box-AccountsHome-child-2-grandson-1"]
             }

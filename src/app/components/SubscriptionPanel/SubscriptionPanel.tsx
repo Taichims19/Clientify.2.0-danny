@@ -2,8 +2,8 @@
 
 import { Box, Typography } from "@mui/material";
 import styles from "../../styles/home.module.css";
-import subscriptionStyles from "./subscriptionPanel.module.scss";
 import { poppins } from "../../fonts/fonts";
+import subscriptionStyles from "./subscriptionPanel.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 
 import {

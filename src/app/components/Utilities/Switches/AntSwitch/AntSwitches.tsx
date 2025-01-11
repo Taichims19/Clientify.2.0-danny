@@ -57,7 +57,10 @@ export default function AntSwitches() {
     <FormGroup>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         {/* <Typography>Off</Typography> */}
-        <AntSwitch defaultChecked inputProps={{ "aria-label": "ant design" }} />
+        <AntSwitch
+          // defaultChecked
+          inputProps={{ "aria-label": "ant design" }}
+        />
         {/* <Typography>On</Typography> */}
       </Stack>
     </FormGroup>

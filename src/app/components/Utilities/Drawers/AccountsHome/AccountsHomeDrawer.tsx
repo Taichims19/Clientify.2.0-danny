@@ -15,24 +15,43 @@ import { RootState } from "@/app/store/store";
 import AnchorTemporaryDrawerStyles from "./AccountsHomeDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
-import IconRightArrow from "@/app/icons/IconRightArrow";
+
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
 import IconVectorClear from "@/app/icons/IconVectorClear";
 import AccountArrowRight from "@/app/icons/AccountArrowRight";
 import AccountFilterIcon from "@/app/icons/AccountFilterIcon";
+import AccountsHomeSelect from "../../Selectors/AccountsHomeSelect/AccountsHomeSelect";
+import {
+  DrawerView,
+  openSubDrawerWithAccount,
+  selectPlan,
+  setDrawer,
+  SubDrawerView,
+  toggleAccountsSelect,
+} from "@/app/store/clientify/clientifySlice";
+import IconVector from "@/app/icons/IconVector";
+import AnchorTemporarySubDrawer from "../AnchorSubDrawer/AnchorTemporarySubDrawer";
+import { EducatiumDrawer } from "../SubDrawers/Educatium/EducatiumDrawer";
+import { IntegrityDrawer } from "../SubDrawers/IntegrityDrawer/IntegrityDrawer";
 
 function AccountsHomeDrawer() {
   const [loading, setLoading] = useState(false);
-  const { accounts, totalAccounts } = useSelector(
+  const dispatch = useDispatch();
+  const { accounts, totalAccounts, selectAccount } = useSelector(
     (state: RootState) => state.clienty
   );
+  const subdrawer = useSelector((state: RootState) => state.clienty.subDrawer);
 
   useEffect(() => {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
   }, []);
+
+  const handleAccountClick = (accountName: string) => {
+    dispatch(openSubDrawerWithAccount(accountName));
+  };
 
   const renderLoading = () => {
     return (
@@ -70,7 +89,10 @@ function AccountsHomeDrawer() {
         }
         role="presentation"
       >
-        <Box className={AnchorTemporaryDrawerStyles["box-total-plans"]}>
+        <Box
+          // sx={{ background: "red" }}
+          className={AnchorTemporaryDrawerStyles["box-total-plans"]}
+        >
           <Typography
             component="span"
             className={`${styles["H1-bold"]} ${poppins.className}`}
@@ -84,27 +106,17 @@ function AccountsHomeDrawer() {
               className={
                 AnchorTemporaryDrawerStyles["box-children-father-icon-switch"]
               }
+              onClick={() => dispatch(toggleAccountsSelect())}
             >
-              <Box
-                className={AnchorTemporaryDrawerStyles["box-icon-children1"]}
-              >
-                <Box
-                  className={
-                    AnchorTemporaryDrawerStyles["box-children1-grandson1"]
-                  }
-                >
-                  <Box
-                    className={
-                      AnchorTemporaryDrawerStyles["grandson1-children4"]
-                    }
-                  >
-                    <AccountFilterIcon />
-                  </Box>
-                </Box>
-              </Box>
+              <AccountFilterIcon />
             </Box>
           </Box>
         </Box>
+
+        {/* Renderizar condicionalmente AccountsHomeSelect */}
+        {selectAccount.isAccountsSelectOpen && <AccountsHomeSelect />}
+
+        <IconVector />
 
         <List className={AnchorTemporaryDrawerStyles["box-list-plans"]}>
           {accounts.map((account) => (
@@ -126,36 +138,23 @@ function AccountsHomeDrawer() {
                 <Typography
                   component="span"
                   className={`${styles["Title-medium-grey1"]} ${poppins.className}`}
+                  onClick={() => handleAccountClick(account.name)} // Evento onClick aquí
                 >
                   <AccountArrowRight />
                 </Typography>
-                {/* {plan.isFree && (
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: "50%",
-                      left: "50px",
-                      transform: "translateY(-50%)",
-                      backgroundColor: "#0067EE",
-                      color: "#FFF",
-                      padding: "2px 6px",
-                      borderRadius: "2px",
-                      fontSize: "10px",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    <Typography
-                      className={`${styles["Caption-Medium"]} ${poppins.className}`}
-                    >
-                      Free
-                    </Typography>
-                  </Box>
-                )} */}
               </ListItem>
               <IconVectorClear style={{ width: "100%", height: "2px" }} />
             </React.Fragment>
           ))}
         </List>
+        <AnchorTemporarySubDrawer title={subdrawer.subDrawerTitle}>
+          {subdrawer.subDrawerSelected === SubDrawerView.EDUCATIUM && (
+            <EducatiumDrawer />
+          )}
+          {subdrawer.subDrawerSelected === SubDrawerView.INTEGRITYLEGAL && (
+            <IntegrityDrawer />
+          )}
+        </AnchorTemporarySubDrawer>
       </Box>
     );
   };

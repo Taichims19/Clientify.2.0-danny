@@ -1,0 +1,75 @@
+.Box-father-AccountsHomeSelect{
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: stretch;
+  // background: rgb(0, 255, 13);
+
+  .children-one-accounts{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .Buttons-children-one{
+      display: flex;
+      padding: var(--Spacing-Small, 8px);
+      justify-content: center;
+      align-items: center;
+      gap: var(--Spacing-XSmall, 4px);
+      border-radius: var(--Radius-Small, 4px);
+      background: var(--tabs-frame-default, #F4F4F4);
+      color: var(--tabs-text-icon-default, #525252);
+      /* Body/Medium */
+      font-family: Poppins;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 17px; /* 141.667% */
+    }
+    .Buttons-children-one:hover{
+      background: var(--tabs-frame-pressed, rgba(57, 57, 57,0.5));
+      color: var(--tabs-text-icon-pressed, #FFF);
+    }
+    .Buttons-children-one:focus{
+      background: var(--tabs-frame-pressed, rgba(57, 57, 57,1));
+      color: var(--tabs-text-icon-pressed, #FFF);
+    }
+
+  }
+
+  .children-two-box{
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: end;
+    align-self: stretch;
+    // background-color: yellow;
+
+    .select-box{
+      width: 100%;
+      height: 40px;
+      // background: red;
+    }
+
+    .box-label-children-two{
+      display: flex;
+      padding: var(--Spacing-XSmall, 4px) var(--Spacing-Small, 8px);
+      align-items: center;
+      gap: 4px;
+      align-self: stretch;
+    }
+  }
+
+}
+
+
+
+.Buttom-Calendary-box{
+  border: 1px solid rgba($color: #000000, $alpha: 0.2);
+  width: 100%;
+  // background-color: rgb(69, 84, 135);
+  display: flex;
+  justify-content: end;
+  height: 40px;
+}
