@@ -20,6 +20,17 @@ export enum SubDrawerView {
   JOOYLY = "JOOYLY",
 }
 
+// Enums para las secciones de transacciones
+enum TransactionBlockTitle {
+  Transacciones = "Transacciones",
+}
+
+// Actualizar la interfaz del estado global
+interface FeatureButtonsState {
+  featureOne: boolean;
+  featureTwo: boolean;
+}
+
 // Interfaces para el contenido de bloques e información adicional
 interface InfoRow {
   label: string;
@@ -33,6 +44,22 @@ interface InfoBlock {
 
 interface InfoBlocksState {
   blocks: InfoBlock[];
+}
+
+interface TransactionRow {
+  amount: number;
+  icon: string;
+  date: string;
+  type: string;
+}
+
+interface TransactionBlock {
+  title: TransactionBlockTitle;
+  content: TransactionRow[];
+}
+
+interface TransactionBlocksState {
+  blocksTransaction: TransactionBlock[];
 }
 
 interface DrawerState {
@@ -85,6 +112,8 @@ interface ClientifyState {
   selectAccount: SelectState;
   message: MessageState; // Nuevo estado
   infoBlocks: InfoBlocksState;
+  transactionBlocks: TransactionBlocksState; // Nuevo estado para transacciones
+  featureButtons: FeatureButtonsState;
 }
 
 const initialState: ClientifyState = {
@@ -164,6 +193,37 @@ const initialState: ClientifyState = {
         ],
       },
     ],
+  },
+  transactionBlocks: {
+    blocksTransaction: [
+      {
+        title: TransactionBlockTitle.Transacciones,
+        content: [
+          {
+            amount: 50.25,
+            icon: "open",
+            date: "26, Dic, 2023",
+            type: "factura",
+          },
+          {
+            amount: 45.15,
+            icon: "open",
+            date: "14, May, 2024",
+            type: "factura",
+          },
+          {
+            amount: 45.15,
+            icon: "open",
+            date: "19, Abr, 2024",
+            type: "factura",
+          },
+        ],
+      },
+    ],
+  },
+  featureButtons: {
+    featureOne: false,
+    featureTwo: false,
   },
 };
 
@@ -254,6 +314,16 @@ export const clientifySlice = createSlice({
         );
       }
     },
+    toggleFeatureOne(state) {
+      console.log("evento disparado botton 1");
+      state.featureButtons.featureOne = true; // Activa featureOne
+      state.featureButtons.featureTwo = false; // Desactiva featureTwo
+    },
+    toggleFeatureTwo(state) {
+      console.log("evento disparado botton 2");
+      state.featureButtons.featureOne = false; // Activa featureOne
+      state.featureButtons.featureTwo = true; // Desactiva featureTwo
+    },
   },
 });
 
@@ -271,6 +341,8 @@ export const {
   toggleAccountsSelect,
   toggleMessage,
   openSubDrawerWithAccount,
+  toggleFeatureOne,
+  toggleFeatureTwo,
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

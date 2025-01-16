@@ -4,7 +4,32 @@ import { poppins } from "../../fonts/fonts";
 import ResourcesHomeStyles from "./ResourcesHome.module.scss";
 import IconVector from "@/app/icons/IconVector";
 import IconArrowRight from "@/app/icons/IconArrowRight";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/app/store/store";
+import {
+  DrawerView,
+  selectPlan,
+  setDrawer,
+} from "@/app/store/clientify/clientifySlice";
+
 export default function ResourcesHome() {
+  const dispatch = useDispatch();
+  const { totalPlans, plans } = useSelector(
+    (state: RootState) => state.clienty
+  );
+
+  const handleOpenDrawer = (plan: string) => {
+    dispatch(selectPlan(plan));
+    dispatch(
+      setDrawer({
+        isDrawerOpen: true,
+        drawerTitle: "Recursos",
+        drawerSelected: DrawerView.RESOURCES,
+        view: "",
+      })
+    );
+  };
+
   return (
     <Box className={ResourcesHomeStyles["Box-ResourcesHome-father"]}>
       {/* CHILD 1 */}
@@ -20,6 +45,8 @@ export default function ResourcesHome() {
           </Typography>
           <Typography
             className={`${styles["Title-medium-blue2"]} ${poppins.className}`}
+            style={{ cursor: "pointer" }}
+            onClick={() => handleOpenDrawer("Ver todo")}
           >
             Ver todo
           </Typography>

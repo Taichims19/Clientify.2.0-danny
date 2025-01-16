@@ -9,7 +9,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 import { toggleAccountStatus } from "@/app/store/clientify/acountsHomeSlice";
 import IconRightArrow from "@/app/icons/IconRightArrow";
-import { DrawerView, setDrawer } from "@/app/store/clientify/clientifySlice";
+import {
+  DrawerView,
+  selectPlan,
+  setDrawer,
+} from "@/app/store/clientify/clientifySlice";
 
 export default function AccountsHome() {
   const dispatch = useDispatch();
@@ -26,6 +30,7 @@ export default function AccountsHome() {
   const visibleAccounts = accounts.slice(0, MAX_ACCOUNTS_DISPLAYED);
 
   const handleOpenDrawer = (plan: string) => {
+    dispatch(selectPlan(plan));
     dispatch(
       setDrawer({
         isDrawerOpen: true,

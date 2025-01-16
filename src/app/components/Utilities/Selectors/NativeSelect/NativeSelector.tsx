@@ -54,6 +54,7 @@ const CustomMenuProps = {
       width: "53px", // Ancho del menú
       padding: "8px 10px",
       backgroundColor: "#f9f9f9",
+      // backgroundColor: "red",
       border: "1px solid #ccc",
     },
     sx: {
@@ -91,6 +92,12 @@ export default function NativeSelector() {
         onChange={handleChange}
         input={<BootstrapInput />}
         MenuProps={CustomMenuProps} // Aquí personalizas el menú
+        sx={{
+          "& .MuiSvgIcon-root": {
+            fontSize: "16px", // Tamaño del ícono
+            // color: "blue", // Color del ícono
+          },
+        }}
       >
         {[...Array(22)].map((_, index) => (
           <MenuItem

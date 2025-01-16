@@ -59,12 +59,12 @@ const AnchorTemporarySubDrawer = (props: AnchorTemporarySubDrawerProps) => {
       >
         <Box
           className={AnchorTemporarySubDrawerStyles["Box-header-drawer"]}
-          sx={{
-            background: "red",
-          }}
+          // sx={{
+          //   background: "red",
+          // }}
         >
           <Typography
-            className={`${styles["Title-regular"]} ${poppins.className}`}
+            className={`${styles["Title-semibold"]} ${poppins.className}`}
           >
             {title}
           </Typography>

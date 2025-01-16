@@ -32,6 +32,26 @@
   line-height: 22px; /* 137.5% */
 }
 
+/* Sub header/Medium */
+.SubHeader-Medium {
+  color: var(--Text-Default, #525252);
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 22px; /* 137.5% */
+}
+
+/* Sub header/Semibold */
+.SubHeader-Medium-Semibold {
+  color: var(--Text-Default, #525252);
+  font-family: Poppins;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 137.5% */
+}
+
 /* H1/Bold */
 .H1-bold {
   color: var(--Text-Title, #262626);
@@ -93,6 +113,17 @@
   font-weight: 600;
   line-height: 19px; /* 135.714% */
 }
+/* Title/Semibold */
+.Title-semibold2 {
+  overflow: hidden;
+color: var(--Text-Default, #525252);
+text-overflow: ellipsis;
+font-family: Poppins;
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: 19px; /* 135.714% */
+}
 
 /* Title/Semibold 2*/
 .Title-semibold2-right {
@@ -135,10 +166,19 @@
   font-weight: 400;
   line-height: 17px; /* 141.667% */
 }
-/* Body/Regular */
+/* Body/Regular2 */
 .Body-regular-2 {
   color: var(--Text-Inactive, #8a8a8a);
   font-family: var(--font-poppins);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px; /* 141.667% */
+}
+/* Body/Regular3 */
+.Body-regular-3 {
+  color: var(--Text-Subtitle, #8D8D8D);
+  font-family: Poppins;
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -152,6 +192,26 @@
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
+  line-height: 17px; /* 141.667% */
+}
+
+/* Body/Medium */
+.Body-medium-blue {
+  color: var(--Text-Highlighted, #0067EE);
+  font-family: var(--font-poppins);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 17px; /* 141.667% */
+}
+
+/* Body/Semibold */
+.Body-Semibold {
+  color: var(--Text-Default, #525252);
+  font-family: var(--font-poppins);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
   line-height: 17px; /* 141.667% */
 }
 

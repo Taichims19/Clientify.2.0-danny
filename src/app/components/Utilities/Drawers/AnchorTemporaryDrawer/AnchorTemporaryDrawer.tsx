@@ -56,7 +56,7 @@ const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
       >
         <Box className={AnchorTemporaryDrawerStyles["Box-header-drawer"]}>
           <Typography
-            className={`${styles["Title-regular"]} ${poppins.className}`}
+            className={`${styles["Title-semibold"]} ${poppins.className}`}
           >
             {title}
           </Typography>

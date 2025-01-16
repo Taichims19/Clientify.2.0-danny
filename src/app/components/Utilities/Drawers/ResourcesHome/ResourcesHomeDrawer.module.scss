@@ -1,0 +1,154 @@
+.Box-ResourcesHomeDrawer-father{
+  width: 308px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  // background: yellow;
+  background: var(--Surface-Modal, #FFF);
+  // box-shadow: -4px 0px 10px 0px rgba(0, 0, 0, 0.10);
+
+  .ResourcesHomeDrawer-childrens{
+    display: flex;
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    align-self: stretch;
+    border-radius: 4px;
+    background: var(--Accordeon-Surface, #F4F4F4);
+
+    .ResourcesHome-childrenBoxOne{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      justify-content: space-between;
+
+      .box-icon-arrow-botton{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    .ResourcesHome-childrenBoxTwo1{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      justify-content: space-between;
+
+      .box-icon-arrow-top{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+    .ResourcesHome-childrenBoxTwo2{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
+
+      .box-resources-info{
+        display: flex;
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        align-self: stretch;
+        border-radius: var(--Radius-Small, 4px);
+        background: var(--Surface-Modal, #FFF);
+
+        .box-resources-info-children{
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          align-self: stretch;
+          
+          .box-resources-info-grandson{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            align-self: stretch;
+            
+            .box-resources-info-grandson-child1{
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              flex: 1 0 0;
+              
+            }
+          }
+        }
+
+      }
+    }
+
+    .ResourcesHome-childrenBoxThree1{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      align-self: stretch;
+      justify-content: space-between;
+
+      .box-icon-arrow-top{
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+
+    .ResourcesHome-childrenBoxThree2{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
+      justify-content: space-between;
+
+      .box-resources-question{
+        display: flex;
+        padding: 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        align-self: stretch;
+        border-radius: var(--Radius-Small, 4px);
+        background: var(--Surface-Modal, #FFF);
+
+        .box-resources-question-children1{
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          align-self: stretch;
+
+          .box-resources-question-grandson1{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            align-self: stretch;
+
+            .box-resources-question-typography{
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              flex: 1 0 0;
+            }
+          }
+        }
+      }
+    }
+
+
+    
+
+  }
+ 
+}
+

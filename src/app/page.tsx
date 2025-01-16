@@ -16,6 +16,7 @@ import PlanSuscription from "./components/Utilities/Drawers/PlanSuscription/Plan
 import { DrawerView } from "./store/clientify/clientifySlice";
 import PlanSuscriptionDrawer from "./components/Utilities/Drawers/PlanSuscription/PlanSuscriptionDrawer";
 import AccountsHomeDrawer from "./components/Utilities/Drawers/AccountsHome/AccountsHomeDrawer";
+import ResourcesHomeDrawer from "./components/Utilities/Drawers/ResourcesHome/ResourcesHomeDrawer";
 // import variables from "./styles/variables.module.scss";
 
 export default function Home() {
@@ -76,6 +77,9 @@ export default function Home() {
         )}
         {drawer.drawerSelected === DrawerView.ACCOUNTS && (
           <AccountsHomeDrawer />
+        )}
+        {drawer.drawerSelected === DrawerView.RESOURCES && (
+          <ResourcesHomeDrawer />
         )}
       </AnchorTemporaryDrawer>
     </Grid>

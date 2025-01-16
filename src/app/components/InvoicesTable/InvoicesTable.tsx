@@ -11,15 +11,12 @@ import {
   GridRenderEditCellParams,
 } from "@mui/x-data-grid";
 
-import { Typography, Box } from "@mui/material";
+import { Typography, Box, Button, Popover } from "@mui/material";
 import invoicesTableStyles from "./InvoicesTable.module.scss";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterSvgIcom from "@/app/icons/FilterSvgIcon";
 import { esES } from "@mui/x-data-grid/locales";
-import ArrowBackIosRoundedIcon from "@mui/icons-material/ArrowBackIosRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import KeyboardDoubleArrowRightRoundedIcon from "@mui/icons-material/KeyboardDoubleArrowRightRounded";
-import ArrowDropDownRoundedIcon from "@mui/icons-material/ArrowDropDownRounded";
+
 import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import IconArrowLeft from "@/app/icons/IconArrowLeft";
@@ -30,6 +27,8 @@ import IconVector from "@/app/icons/IconVector";
 import IconFilterFactures from "@/app/icons/IconFilterFactures";
 import IconSearchFacture from "@/app/icons/IconSearchFacture";
 import NativeSelector from "../Utilities/Selectors/NativeSelect/NativeSelector";
+import AntSwitches from "../Utilities/Switches/AntSwitch/AntSwitches";
+import { PopoverInvoice } from "../Utilities/Popover/PopoverInvoice";
 
 // Filas de datos con la información para cada columna
 const rows = [
@@ -363,6 +362,21 @@ const CustomPagination = () => {
 };
 
 export default function InvoicesTable() {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
   return (
     <Box
       // sx={{ height: 400, width: "100%" }}
@@ -394,9 +408,25 @@ export default function InvoicesTable() {
             >
               {/* box icon 1 */}
               <Box className={invoicesTableStyles["boxfilter2-children-icon1"]}>
-                <Box className={invoicesTableStyles["box-icon-1"]}>
+                <Typography
+                  className={invoicesTableStyles["box-icon-1"]}
+                  onClick={handleClick}
+                >
                   <IconFilterFactures />
-                </Box>
+                </Typography>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  onClose={handleClose}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  className={invoicesTableStyles["box-popover-invoice"]}
+                >
+                  <PopoverInvoice />
+                </Popover>
               </Box>
 
               {/* box filter search */}
@@ -417,6 +447,7 @@ export default function InvoicesTable() {
           {/* icon vector */}
           <IconVector />
         </Box>
+
         {/* box datagrid */}
         <DataGrid
           className={invoicesTableStyles["DataGrid-clientify-box1"]}
