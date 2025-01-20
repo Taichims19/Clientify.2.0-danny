@@ -7,12 +7,13 @@ import IconVector from "@/app/icons/IconVector";
 import IconArrowRight from "@/app/icons/IconArrowRight";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
-import { toggleAccountStatus } from "@/app/store/clientify/acountsHomeSlice";
+
 import IconRightArrow from "@/app/icons/IconRightArrow";
 import {
   DrawerView,
   selectPlan,
   setDrawer,
+  toggleAccountStatus,
 } from "@/app/store/clientify/clientifySlice";
 
 export default function AccountsHome() {

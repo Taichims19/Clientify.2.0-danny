@@ -5,6 +5,7 @@ import PopoverInvoiceStyles from "./PopoverInvoice.module.scss";
 import VectorIconTransaction from "@/app/icons/VectorIconTransaction";
 import styles from "../../../styles/home.module.css";
 import { poppins } from "../../../fonts/fonts";
+import VectorIconPopover from "@/app/icons/VectorIconPopover";
 
 export const PopoverInvoice = () => {
   return (
@@ -55,7 +56,7 @@ export const PopoverInvoice = () => {
               </Box>
             </Box>
           </Box>
-          <VectorIconTransaction />
+          <VectorIconPopover />
           <Typography
             className={`${styles["Body-medium-blue"]} ${poppins.className}`}
           >
