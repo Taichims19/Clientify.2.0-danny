@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Dayjs } from "dayjs";
 
 // Enums para diferentes estados y vistas
 enum InfoBlockTitle {
@@ -99,6 +100,11 @@ interface MessageState {
   showMessage: boolean; // Nuevo estado
 }
 
+interface DateRangeState {
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+}
+
 interface ClientifyState {
   selectedPlan: string | null;
   totalPlans: number;
@@ -114,6 +120,7 @@ interface ClientifyState {
   infoBlocks: InfoBlocksState;
   transactionBlocks: TransactionBlocksState; // Nuevo estado para transacciones
   featureButtons: FeatureButtonsState;
+  calendaryRanger: DateRangeState;
 }
 
 const initialState: ClientifyState = {
@@ -225,6 +232,10 @@ const initialState: ClientifyState = {
     featureOne: false,
     featureTwo: false,
   },
+  calendaryRanger: {
+    startDate: null,
+    endDate: null,
+  },
 };
 
 export const clientifySlice = createSlice({
@@ -324,6 +335,18 @@ export const clientifySlice = createSlice({
       state.featureButtons.featureOne = false; // Activa featureOne
       state.featureButtons.featureTwo = true; // Desactiva featureTwo
     },
+    setDateRange: (
+      state,
+      action: PayloadAction<[Dayjs | null, Dayjs | null]>
+    ) => {
+      const [startDate, endDate] = action.payload;
+      state.calendaryRanger.startDate = startDate;
+      state.calendaryRanger.endDate = endDate;
+    },
+    resetCalendaryRanger: (state) => {
+      state.calendaryRanger.startDate = null;
+      state.calendaryRanger.endDate = null;
+    },
   },
 });
 
@@ -343,6 +366,8 @@ export const {
   openSubDrawerWithAccount,
   toggleFeatureOne,
   toggleFeatureTwo,
+  setDateRange,
+  resetCalendaryRanger,
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

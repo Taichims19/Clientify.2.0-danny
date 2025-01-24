@@ -11,8 +11,12 @@ import DataCalendarsAccountStyles from "./DataCalendarsAccounts.module.scss";
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
-import { toggleMessage } from "@/app/store/clientify/clientifySlice";
+import {
+  setDateRange,
+  toggleMessage,
+} from "@/app/store/clientify/clientifySlice";
 import InfoIconAccounts from "@/app/icons/InfoIconAccounts";
+import { useState } from "react";
 
 export default function DataCalendarsAccounts({ open, handleClose }) {
   const dispatch = useDispatch();
@@ -20,6 +24,15 @@ export default function DataCalendarsAccounts({ open, handleClose }) {
   const showMessage = useSelector(
     (state: RootState) => state.clienty.message.showMessage
   );
+
+  const [dateRange, setDateRangeState] = useState<[Dayjs | null, Dayjs | null]>(
+    [null, null]
+  );
+
+  const handleApply = () => {
+    dispatch(setDateRange(dateRange));
+    handleClose(); // Cierra el modal después de aplicar
+  };
 
   return (
     <Modal
@@ -109,7 +122,11 @@ export default function DataCalendarsAccounts({ open, handleClose }) {
             DataCalendarsAccountStyles["Box-father-DataCalendarsAccounts"]
           }
         >
-          <DateRangeCalendar calendars={1} />
+          <DateRangeCalendar
+            calendars={1}
+            value={dateRange}
+            onChange={(newValue) => setDateRangeState(newValue)}
+          />
 
           {/* <IconVectorClear /> */}
 
@@ -155,10 +172,16 @@ export default function DataCalendarsAccounts({ open, handleClose }) {
           )}
 
           <Box className={DataCalendarsAccountStyles["box-buttons-father"]}>
-            <Button className={DataCalendarsAccountStyles["button-one"]}>
+            <Button
+              className={DataCalendarsAccountStyles["button-one"]}
+              onClick={handleApply}
+            >
               Aplicar
             </Button>
-            <Button className={DataCalendarsAccountStyles["button-two"]}>
+            <Button
+              className={DataCalendarsAccountStyles["button-two"]}
+              onClick={handleClose}
+            >
               Cancelar
             </Button>
           </Box>

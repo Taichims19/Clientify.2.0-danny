@@ -5,7 +5,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Chip, Typography } from "@mui/material";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import AccountsHomeSelectorStyles from "./AccountsHomeSelect.module.scss";
@@ -13,7 +13,11 @@ import { useDispatch, useSelector } from "react-redux";
 
 import DataCalendarsAccounts from "../../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
 import NativeSelector from "../NativeSelect/NativeSelector";
-import { closeModal, openModal } from "@/app/store/clientify/clientifySlice";
+import {
+  closeModal,
+  openModal,
+  resetCalendaryRanger,
+} from "@/app/store/clientify/clientifySlice";
 import { RootState } from "@/app/store/store";
 import ArrowIconBottom from "@/app/icons/ArrowIconBottom";
 
@@ -72,10 +76,17 @@ function getStyles(name: string, personName: string[], theme: Theme) {
 
 export default function AccountsHomeSelect() {
   const theme = useTheme();
+
   const [personName, setPersonName] = React.useState<string[]>([]);
+
   const isModalOpen = useSelector(
     (state: RootState) => state.clienty.modal.isModalOpen
   );
+
+  const { startDate, endDate } = useSelector(
+    (state: RootState) => state.clienty.calendaryRanger
+  );
+
   const handleChange = (event: SelectChangeEvent<typeof personName>) => {
     const {
       target: { value },
@@ -92,6 +103,17 @@ export default function AccountsHomeSelect() {
     dispatch(openModal());
   };
   const handleClose = () => dispatch(closeModal());
+
+  const handleDelete = () => {
+    console.info("Fechas borradas.");
+    dispatch(resetCalendaryRanger()); // Resetea el rango de fechas en Redux
+  };
+
+  // Texto condicional para el botón
+  const buttonText =
+    startDate && endDate
+      ? `${startDate.format("DD/MM/YYYY")} - ${endDate.format("DD/MM/YYYY")}`
+      : "";
 
   return (
     <Box
@@ -147,7 +169,18 @@ export default function AccountsHomeSelect() {
           className={AccountsHomeSelectorStyles["Buttom-Calendary-box"]}
           onClick={handleOpen}
         >
-          <ArrowIconBottom />
+          {startDate && endDate ? (
+            <Chip
+              label={`${startDate.format("DD/MM/YYYY")} - ${endDate.format(
+                "DD/MM/YYYY"
+              )}`}
+              onClick={handleOpen}
+              onDelete={handleDelete}
+              className={AccountsHomeSelectorStyles["chip-box"]}
+            />
+          ) : (
+            <ArrowIconBottom />
+          )}
         </Button>
         <DataCalendarsAccounts open={isModalOpen} handleClose={handleClose} />
       </FormControl>

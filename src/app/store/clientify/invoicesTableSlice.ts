@@ -12,13 +12,19 @@ export interface InvoiceRow {
   producto: string;
   fechaCreacion: string;
   fechaPago: string;
-  liquidaciones: number;
+  liquidaciones: number | string;
 }
 
 // Define el estado inicial del slice
 interface DataGridState {
   rows: InvoiceRow[];
   columns: GridColDef[];
+  filteredPendingPayments: InvoiceRow[]; // Filtrado por pagos pendientes
+  filteredPendingCommissions: InvoiceRow[]; // Filtrado por comisiones pendientes
+  pendingCounts: {
+    payments: number;
+    commissions: number;
+  };
 }
 
 const initialState: DataGridState = {
@@ -28,7 +34,7 @@ const initialState: DataGridState = {
       codigo: "PROFORMA-15301",
       cuenta: "Jooyly",
       importe: 708.0,
-      moneda: "EURO",
+      moneda: "USD",
       producto: "1 × Business Growth (at $708.00 / year)",
       fechaCreacion: "Oct. 17, 2023",
       fechaPago: "--",
@@ -39,11 +45,34 @@ const initialState: DataGridState = {
       codigo: "PROFORMA-15301",
       cuenta: "Jooyly",
       importe: 708.0,
-      moneda: "Patatas",
+      moneda: "USD",
       producto: "1 × Business Growth (at $708.00 / year)",
       fechaCreacion: "Oct. 17, 2023",
       fechaPago: "--",
+      liquidaciones: "--",
+    },
+
+    {
+      id: 3,
+      codigo: "PROFORMA-15305",
+      cuenta: "Jooyly",
+      importe: 708.0,
+      moneda: "EURO",
+      producto: "1 × Business Growth (at $708.00 / year)",
+      fechaCreacion: "Oct. 17, 2023",
+      fechaPago: "Mar. 17, 2024",
       liquidaciones: 216,
+    },
+    {
+      id: 4,
+      codigo: "PROFORMA-15306",
+      cuenta: "Jooyly",
+      importe: 708.0,
+      moneda: "PATATAS",
+      producto: "1 × Business Growth (at $708.00 / year)",
+      fechaCreacion: "Oct. 17, 2023",
+      fechaPago: "--",
+      liquidaciones: "--",
     },
   ],
   columns: [
@@ -66,6 +95,12 @@ const initialState: DataGridState = {
       minWidth: 30,
     },
   ],
+  filteredPendingPayments: [],
+  filteredPendingCommissions: [],
+  pendingCounts: {
+    payments: 0,
+    commissions: 0,
+  },
 };
 
 // Crea el slice
@@ -85,9 +120,57 @@ const invoicesTableSlice = createSlice({
     deleteRow: (state, action: PayloadAction<number>) => {
       state.rows = state.rows.filter((row) => row.id !== action.payload);
     },
+    filterPendingPayments: (state) => {
+      console.log("evento pago");
+      state.filteredPendingPayments = state.filteredPendingPayments.length
+        ? []
+        : state.rows.filter((row) => row.fechaPago === "--");
+      state.rows = state.filteredPendingPayments.length
+        ? state.filteredPendingPayments
+        : initialState.rows;
+
+      // Actualizar el conteo
+      state.pendingCounts.payments = state.filteredPendingPayments.length;
+    },
+    filterPendingCommissions: (state) => {
+      console.log("evento comisiones");
+      state.filteredPendingCommissions = state.filteredPendingCommissions.length
+        ? []
+        : state.rows.filter((row) => row.liquidaciones === "--");
+      state.rows = state.filteredPendingCommissions.length
+        ? state.filteredPendingCommissions
+        : initialState.rows;
+
+      // Actualizar el conteo
+      state.pendingCounts.commissions = state.filteredPendingCommissions.length;
+    },
+    calculatePendingCounts: (state) => {
+      state.pendingCounts.payments = state.rows.filter(
+        (row) => row.fechaPago === "--"
+      ).length;
+      state.pendingCounts.commissions = state.rows.filter(
+        (row) => row.liquidaciones === "--"
+      ).length;
+    },
+    resetRows: (state) => {
+      state.rows = initialState.rows; // Restablece filas al estado inicial.
+      state.filteredPendingPayments = []; // Limpia filtros aplicados.
+      state.filteredPendingCommissions = [];
+      // Resetear conteos
+      state.pendingCounts.payments = 0;
+      state.pendingCounts.commissions = 0;
+    },
   },
 });
 
-export const { addRow, updateRow, deleteRow } = invoicesTableSlice.actions;
+export const {
+  addRow,
+  updateRow,
+  deleteRow,
+  filterPendingPayments,
+  filterPendingCommissions,
+  calculatePendingCounts,
+  resetRows,
+} = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;
