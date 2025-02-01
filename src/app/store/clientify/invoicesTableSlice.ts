@@ -61,7 +61,7 @@ const initialState: DataGridState = {
       producto: "1 × Business Growth (at $708.00 / year)",
       fechaCreacion: "Oct. 17, 2023",
       fechaPago: "Mar. 17, 2024",
-      liquidaciones: 216,
+      liquidaciones: 217,
     },
     {
       id: 4,
@@ -106,16 +106,18 @@ const initialState: DataGridState = {
 // Crea el slice
 const invoicesTableSlice = createSlice({
   name: "invoicesTable",
-  initialState,
+  initialState: {
+    ...initialState,
+    selectedInvoice: null as InvoiceRow | null, // Nuevo estado
+  },
   reducers: {
     addRow: (state, action: PayloadAction<InvoiceRow>) => {
       state.rows.push(action.payload);
     },
     updateRow: (state, action: PayloadAction<InvoiceRow>) => {
-      const index = state.rows.findIndex((row) => row.id === action.payload.id);
-      if (index !== -1) {
-        state.rows[index] = action.payload;
-      }
+      state.rows = state.rows.map((row) =>
+        row.id === action.payload.id ? action.payload : row
+      );
     },
     deleteRow: (state, action: PayloadAction<number>) => {
       state.rows = state.rows.filter((row) => row.id !== action.payload);
@@ -160,6 +162,9 @@ const invoicesTableSlice = createSlice({
       state.pendingCounts.payments = 0;
       state.pendingCounts.commissions = 0;
     },
+    setSelectedInvoice: (state, action: PayloadAction<InvoiceRow>) => {
+      state.selectedInvoice = action.payload;
+    },
   },
 });
 
@@ -171,6 +176,7 @@ export const {
   filterPendingCommissions,
   calculatePendingCounts,
   resetRows,
+  setSelectedInvoice,
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;

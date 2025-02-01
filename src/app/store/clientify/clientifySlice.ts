@@ -13,6 +13,7 @@ export enum DrawerView {
   ACCOUNTS = "ACCOUNTS",
   RESOURCES = "RESOURCES",
   ACCOUNTSCHILDREN = "ACCOUNTS-CHILDREN-ONE",
+  INVOICESTABLES = "INVOICESTABLES",
 }
 
 export enum SubDrawerView {

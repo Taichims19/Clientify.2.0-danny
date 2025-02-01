@@ -112,7 +112,7 @@ export default function AccountsHomeSelect() {
   // Texto condicional para el botón
   const buttonText =
     startDate && endDate
-      ? `${startDate.format("DD/MM/YYYY")} - ${endDate.format("DD/MM/YYYY")}`
+      ? `${startDate.format("DD,MM/.")} - ${endDate.format("DD,MM.YYYY")}`
       : "";
 
   return (
@@ -171,8 +171,8 @@ export default function AccountsHomeSelect() {
         >
           {startDate && endDate ? (
             <Chip
-              label={`${startDate.format("DD/MM/YYYY")} - ${endDate.format(
-                "DD/MM/YYYY"
+              label={`${startDate.format("DD,MM.YYYY")} - ${endDate.format(
+                "DD,MM.YYYY"
               )}`}
               onClick={handleOpen}
               onDelete={handleDelete}

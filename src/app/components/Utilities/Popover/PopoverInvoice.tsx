@@ -130,8 +130,8 @@ export const PopoverInvoice = () => {
           {/* Alternar entre Typography y Chip */}
           {startDate && endDate ? (
             <Chip
-              label={`${startDate.format("DD,MM,YYYY")} - ${endDate.format(
-                "DD/MM/YYYY"
+              label={`${startDate.format("DD,MM.YYYY")} - ${endDate.format(
+                "DD,MM.YYYY"
               )}`}
               onClick={handleOpen} // Abre el modal de selección de fecha
               onDelete={handleDelete} // Borra las fechas seleccionadas

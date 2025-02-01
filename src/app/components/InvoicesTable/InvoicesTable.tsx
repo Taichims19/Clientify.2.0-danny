@@ -29,7 +29,16 @@ import IconSearchFacture from "@/app/icons/IconSearchFacture";
 import NativeSelector from "../Utilities/Selectors/NativeSelect/NativeSelector";
 import { PopoverInvoice } from "../Utilities/Popover/PopoverInvoice";
 import { RootState } from "@/app/store/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  DrawerView,
+  selectPlan,
+  setDrawer,
+} from "@/app/store/clientify/clientifySlice";
+import {
+  InvoiceRow,
+  setSelectedInvoice,
+} from "@/app/store/clientify/invoicesTableSlice";
 
 const CustomPagination = () => {
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
@@ -75,6 +84,28 @@ const CustomPagination = () => {
 };
 
 export default function InvoicesTable() {
+  const dispatch = useDispatch();
+  const handleOpenDrawer = (
+    plan: string | null,
+    rowData: InvoiceRow | null
+  ) => {
+    if (plan) {
+      dispatch(selectPlan(plan));
+    }
+    if (rowData) {
+      dispatch(setSelectedInvoice(rowData));
+    }
+
+    dispatch(
+      setDrawer({
+        isDrawerOpen: true,
+        drawerTitle: "Resumen de liquidación",
+        drawerSelected: DrawerView.INVOICESTABLES,
+        view: "",
+      })
+    );
+  };
+
   const renderHeader = (params: GridColumnHeaderParams) => (
     <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
       <Typography
@@ -85,13 +116,28 @@ export default function InvoicesTable() {
     </Box>
   );
 
-  const renderCell = (params: GridRenderCellParams) => (
-    <Box className={invoicesTableStyles["Box-Data-grid-celdas"]}>
-      <Typography className={`${styles["Body-regular"]} ${poppins.className}`}>
-        {params.value}
-      </Typography>
-    </Box>
-  );
+  const renderCell = (params: GridRenderCellParams) => {
+    const isLiquidacionesColumn = params.field === "liquidaciones";
+
+    return (
+      <Box
+        className={invoicesTableStyles["Box-Data-grid-celdas"]}
+        onClick={
+          isLiquidacionesColumn && params.value !== "--"
+            ? () => handleOpenDrawer(null, params.row) // Pasamos null en plan y la fila en rowData
+            : undefined
+        }
+        style={{
+          cursor:
+            isLiquidacionesColumn && params.value !== "--"
+              ? "pointer"
+              : "default",
+        }}
+      >
+        <Typography>{params.value}</Typography>
+      </Box>
+    );
+  };
 
   // const rows = useSelector((state: RootState) => state.invoiceTable.rows);
   // const columns = useSelector((state: RootState) => state.invoiceTable.columns);
