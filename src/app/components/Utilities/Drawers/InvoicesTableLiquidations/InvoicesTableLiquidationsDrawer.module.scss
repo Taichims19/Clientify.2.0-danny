@@ -1,0 +1,83 @@
+.Box-InvoicesTableDrawer-father{
+ display: flex;
+ width: 308px;
+flex-direction: column;
+align-items: center;
+gap: 16px;
+align-self: stretch;
+// background: rebeccapurple;
+
+    .Box-header-drawer{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      align-self: stretch;
+
+      .Box-header-drawer-children-one{
+        display: flex;
+        height: 17px;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+      }
+      .Box-header-drawer-children-two{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+      }
+    }
+
+    .Box-content-drawer{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      align-self: stretch;
+
+      .Box-content-drawer-childrens{
+        display: flex;
+        padding: var(--Spacing-Small, 8px);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        align-self: stretch;
+        border-radius: var(--Radius-Small, 4px);
+        background: var(--Surface-Background, #F4F4F4);
+
+        .box-childrens-content{
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+          align-self: stretch;
+
+          .box-childrens-content-son-one{
+            display: flex;
+            height: 17px;
+            justify-content: space-between;
+            align-items: center;
+            align-self: stretch;
+          }
+          .box-childrens-content-son-two{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            align-self: stretch;
+          }
+          .box-childrens-content-son-three{
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            align-self: stretch;
+          }
+        }
+
+      }
+    }
+   
+}
+
+
