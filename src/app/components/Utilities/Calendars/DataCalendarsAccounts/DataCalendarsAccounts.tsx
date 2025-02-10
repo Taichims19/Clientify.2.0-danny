@@ -1,5 +1,4 @@
 import dayjs, { Dayjs } from "dayjs";
-import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateRangeCalendar } from "@mui/x-date-pickers-pro/DateRangeCalendar";
@@ -18,7 +17,7 @@ import {
 import InfoIconAccounts from "@/app/icons/InfoIconAccounts";
 import { useState } from "react";
 
-export default function DataCalendarsAccounts({ open, handleClose }) {
+export default function DataCalendarsAccounts({ open, handleClose }: any) {
   const dispatch = useDispatch();
 
   const showMessage = useSelector(

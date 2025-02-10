@@ -1,5 +1,5 @@
 import * as React from "react";
-const IconVector = (props) => (
+const IconVector = (props: any) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={"100%"}

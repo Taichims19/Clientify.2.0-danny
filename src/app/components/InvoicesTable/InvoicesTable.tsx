@@ -273,9 +273,9 @@ export default function InvoicesTable() {
             },
           }}
           pageSizeOptions={[4, 10, 20]}
-          components={{
-            Toolbar: GridToolbar, // Para mostrar el filtro de búsqueda y otras opciones de herramienta
-          }}
+          // components={{
+          //   Toolbar: GridToolbar, // Para mostrar el filtro de búsqueda y otras opciones de herramienta
+          // }}
           checkboxSelection
           disableRowSelectionOnClick
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
