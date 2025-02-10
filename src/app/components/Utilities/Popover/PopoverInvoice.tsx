@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import AntSwitches from "../Switches/AntSwitch/AntSwitches";
 import PopoverInvoiceStyles from "./PopoverInvoice.module.scss";
-import VectorIconTransaction from "@/app/icons/VectorIconTransaction";
 import styles from "../../../styles/home.module.css";
 import { poppins } from "../../../fonts/fonts";
 import VectorIconPopover from "@/app/icons/VectorIconPopover";
@@ -29,13 +28,13 @@ export const PopoverInvoice = () => {
   const isModalOpen = useSelector(
     (state: RootState) => state.clienty.modal.isModalOpen
   );
-  // Estados del store
-  const filteredPendingPayments = useSelector(
-    (state: RootState) => state.invoiceTable.filteredPendingPayments
-  );
-  const filteredPendingCommissions = useSelector(
-    (state: RootState) => state.invoiceTable.filteredPendingCommissions
-  );
+  // // Estados del store
+  // const filteredPendingPayments = useSelector(
+  //   (state: RootState) => state.invoiceTable.filteredPendingPayments
+  // );
+  // const filteredPendingCommissions = useSelector(
+  //   (state: RootState) => state.invoiceTable.filteredPendingCommissions
+  // );
 
   // Handlers para los switches
   const handlePendingPaymentsSwitch = (
@@ -63,9 +62,9 @@ export const PopoverInvoice = () => {
   };
   const handleClose = () => dispatch(closeModal());
 
-  const handleClick = () => {
-    console.info("You clicked the Chip.");
-  };
+  // const handleClick = () => {
+  //   console.info("You clicked the Chip.");
+  // };
 
   const handleDelete = () => {
     console.info("Fechas borradas.");

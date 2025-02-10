@@ -1,5 +1,5 @@
 "use client";
-import { Grid, Box } from "@mui/material";
+import { Grid } from "@mui/material";
 import SubscriptionPanel from "./components/SubscriptionPanel/SubscriptionPanel";
 import SummaryPanel from "./components/SummaryPanel/SummaryPanel";
 import InvoicesTable from "./components/InvoicesTable/InvoicesTable";

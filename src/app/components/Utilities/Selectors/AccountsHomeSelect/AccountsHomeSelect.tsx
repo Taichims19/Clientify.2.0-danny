@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InputLabel from "@mui/material/InputLabel";
+
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -12,7 +12,7 @@ import AccountsHomeSelectorStyles from "./AccountsHomeSelect.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 
 import DataCalendarsAccounts from "../../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
-import NativeSelector from "../NativeSelect/NativeSelector";
+
 import {
   closeModal,
   openModal,

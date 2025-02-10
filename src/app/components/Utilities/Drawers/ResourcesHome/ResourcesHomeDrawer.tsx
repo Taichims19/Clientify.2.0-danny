@@ -1,17 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Drawer,
-  Typography,
-  IconButton,
-  ListItem,
-  List,
-  Skeleton,
-} from "@mui/material";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/app/store/store";
+import { Box, Typography, Skeleton } from "@mui/material";
+
 import ResourcesHomeDrawerStyles from "./ResourcesHomeDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
@@ -22,9 +13,9 @@ import ArrowRightResources from "@/app/icons/ArrowRightResources";
 
 function ResourcesHomeDrawer() {
   const [loading, setLoading] = useState(false);
-  const { plans, totalPlans } = useSelector(
-    (state: RootState) => state.clienty
-  );
+  // const { plans, totalPlans } = useSelector(
+  //   (state: RootState) => state.clienty
+  // );
 
   useEffect(() => {
     setLoading(true);

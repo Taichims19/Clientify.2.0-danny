@@ -1,10 +1,8 @@
 "use client";
-import { Card, CardContent, Typography, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import AccountsHomeStyles from "./AccountsHome.module.scss";
-import IconVector from "@/app/icons/IconVector";
-import IconArrowRight from "@/app/icons/IconArrowRight";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 
