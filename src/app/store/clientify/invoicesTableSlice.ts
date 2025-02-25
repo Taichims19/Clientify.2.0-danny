@@ -25,6 +25,8 @@ interface DataGridState {
     payments: number;
     commissions: number;
   };
+  selectedInvoice: InvoiceRow | null; // Nueva propiedad
+  allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
 }
 
 const initialState: DataGridState = {
@@ -42,8 +44,8 @@ const initialState: DataGridState = {
     },
     {
       id: 2,
-      codigo: "PROFORMA-15301",
-      cuenta: "Jooyly",
+      codigo: "PROFORMA-15303",
+      cuenta: "EDUCATIUM",
       importe: 708.0,
       moneda: "USD",
       producto: "1 × Business Growth (at $708.00 / year)",
@@ -55,8 +57,8 @@ const initialState: DataGridState = {
     {
       id: 3,
       codigo: "PROFORMA-15305",
-      cuenta: "Jooyly",
-      importe: 708.0,
+      cuenta: "INTEGRITYLEGAL",
+      importe: 718.0,
       moneda: "EURO",
       producto: "1 × Business Growth (at $708.00 / year)",
       fechaCreacion: "Oct. 17, 2023",
@@ -66,6 +68,17 @@ const initialState: DataGridState = {
     {
       id: 4,
       codigo: "PROFORMA-15306",
+      cuenta: "Lorem ipsum",
+      importe: 708.0,
+      moneda: "PATATAS",
+      producto: "1 × Business Growth (at $708.00 / year)",
+      fechaCreacion: "Oct. 17, 2023",
+      fechaPago: "--",
+      liquidaciones: "--",
+    },
+    {
+      id: 5,
+      codigo: "PROFORMA-15301",
       cuenta: "Jooyly",
       importe: 708.0,
       moneda: "PATATAS",
@@ -73,6 +86,28 @@ const initialState: DataGridState = {
       fechaCreacion: "Oct. 17, 2023",
       fechaPago: "--",
       liquidaciones: "--",
+    },
+    {
+      id: 6,
+      codigo: "PROFORMA-15303",
+      cuenta: "EDUCATIUM",
+      importe: 708.0,
+      moneda: "PATATAS",
+      producto: "1 × Business Growth (at $708.00 / year)",
+      fechaCreacion: "Oct. 17, 2023",
+      fechaPago: "--",
+      liquidaciones: "219",
+    },
+    {
+      id: 7,
+      codigo: "PROFORMA-15305",
+      cuenta: "INTEGRITYLEGAL",
+      importe: 708.0,
+      moneda: "PATATAS",
+      producto: "1 × Business Growth (at $708.00 / year)",
+      fechaCreacion: "Oct. 17, 2023",
+      fechaPago: "--",
+      liquidaciones: "219",
     },
   ],
   columns: [
@@ -101,6 +136,8 @@ const initialState: DataGridState = {
     payments: 0,
     commissions: 0,
   },
+  selectedInvoice: null, // Inicialmente ninguna factura seleccionada
+  allInvoicesSelected: false, // Inicialmente no todas están seleccionadas
 };
 
 // Crea el slice
@@ -162,8 +199,14 @@ const invoicesTableSlice = createSlice({
       state.pendingCounts.payments = 0;
       state.pendingCounts.commissions = 0;
     },
-    setSelectedInvoice: (state, action: PayloadAction<InvoiceRow>) => {
+    setSelectedInvoice: (state, action: PayloadAction<InvoiceRow | null>) => {
+      console.log("1 factura seleccionada");
       state.selectedInvoice = action.payload;
+    },
+    setSelectedAllInvoices: (state, action: PayloadAction<boolean>) => {
+      console.log("Todas las facturas seleccionadas");
+      state.allInvoicesSelected = action.payload;
+      state.selectedInvoice = null;
     },
   },
 });
@@ -177,6 +220,7 @@ export const {
   calculatePendingCounts,
   resetRows,
   setSelectedInvoice,
+  setSelectedAllInvoices,
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;

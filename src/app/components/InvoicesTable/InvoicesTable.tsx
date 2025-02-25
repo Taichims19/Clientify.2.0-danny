@@ -37,6 +37,7 @@ import {
 } from "@/app/store/clientify/clientifySlice";
 import {
   InvoiceRow,
+  setSelectedAllInvoices,
   setSelectedInvoice,
 } from "@/app/store/clientify/invoicesTableSlice";
 
@@ -182,6 +183,28 @@ export default function InvoicesTable() {
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
 
+  //Logica de seleccion de filas
+
+  const { rows, selectedInvoice, allInvoicesSelected } = useSelector(
+    (state: RootState) => state.invoiceTable
+  );
+
+  const handleRowSelection = (selectionModel: any) => {
+    if (selectionModel.length === 0) {
+      dispatch(setSelectedInvoice(null)); // Si no hay selección, limpiamos
+      return;
+    }
+
+    const selectedRow = rows.find((row) => row.id === selectionModel[0]); // Tomamos solo la primera selección
+    if (selectedRow) {
+      dispatch(setSelectedInvoice(selectedRow));
+    }
+  };
+
+  const handleSelectAll = () => {
+    dispatch(setSelectedAllInvoices(true));
+  };
+
   return (
     <Box
       // sx={{ height: 400, width: "100%" }}
@@ -208,52 +231,133 @@ export default function InvoicesTable() {
               </Typography>
             </Box>
             {/* Box filter search 2*/}
-            <Box
-              className={invoicesTableStyles["BoxFilter-boxfilter2-children2"]}
-            >
-              {/* box icon 1 */}
-              <Box className={invoicesTableStyles["boxfilter2-children-icon1"]}>
-                <Typography
-                  className={invoicesTableStyles["box-icon-1"]}
-                  onClick={handleClick}
-                >
-                  <IconFilterFactures />
-                </Typography>
-                <Badge
-                  badgeContent={combinedCount}
-                  color="error"
-                  className={invoicesTableStyles["box-badge"]}
-                >
-                  <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left",
-                    }}
-                    className={invoicesTableStyles["box-popover-invoice"]}
-                  >
-                    <PopoverInvoice />
-                  </Popover>
-                </Badge>
-              </Box>
 
-              {/* box filter search */}
-              <Box className={invoicesTableStyles["boxfilter2-children-icon2"]}>
-                <Box className={invoicesTableStyles["box-icon-2"]}>
-                  <Box className={invoicesTableStyles["box-icon-2-children"]}>
-                    <Typography
-                      className={`${styles["Title-regular"]} ${poppins.className}`}
+            {!selectedInvoice && !allInvoicesSelected ? (
+              <Box
+                className={
+                  invoicesTableStyles["BoxFilter-boxfilter2-children2"]
+                }
+              >
+                {/* box icon 1 */}
+                <Box
+                  className={invoicesTableStyles["boxfilter2-children-icon1"]}
+                >
+                  <Typography
+                    className={invoicesTableStyles["box-icon-1"]}
+                    onClick={handleClick}
+                  >
+                    <IconFilterFactures />
+                  </Typography>
+                  <Badge
+                    badgeContent={combinedCount}
+                    color="error"
+                    className={invoicesTableStyles["box-badge"]}
+                  >
+                    <Popover
+                      id={id}
+                      open={open}
+                      anchorEl={anchorEl}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: "bottom",
+                        horizontal: "left",
+                      }}
+                      className={invoicesTableStyles["box-popover-invoice"]}
                     >
-                      Buscar por código o comisión
-                    </Typography>
-                    | <IconSearchFacture />
+                      <PopoverInvoice />
+                    </Popover>
+                  </Badge>
+                </Box>
+
+                {/* box filter search */}
+                <Box
+                  className={invoicesTableStyles["boxfilter2-children-icon2"]}
+                >
+                  <Box className={invoicesTableStyles["box-icon-2"]}>
+                    <Box className={invoicesTableStyles["box-icon-2-children"]}>
+                      <Typography
+                        className={`${styles["Title-regular"]} ${poppins.className}`}
+                      >
+                        Buscar por código o comisión
+                      </Typography>
+                      | <IconSearchFacture />
+                    </Box>
                   </Box>
                 </Box>
               </Box>
-            </Box>
+            ) : allInvoicesSelected ? (
+              <Typography>Todas las facturas seleccionadas</Typography>
+            ) : (
+              <Box
+                className={
+                  invoicesTableStyles["BoxFilter-boxfilter2-children3"]
+                }
+              >
+                <Typography
+                  className={`${styles["Body-medium"]} ${poppins.className}`}
+                >
+                  1 factura seleccionada
+                </Typography>
+                <Box
+                  className={invoicesTableStyles["BoxFilter-children3-content"]}
+                >
+                  {/* BOX ONE */}
+                  <Box
+                    className={
+                      invoicesTableStyles["BoxFilter-children3-content-boxes"]
+                    }
+                  >
+                    <Typography
+                      className={`${styles["Body-regular"]} ${poppins.className}`}
+                    >
+                      Importe:
+                    </Typography>
+                    <Typography
+                      className={`${styles["Body-regular-4"]} ${poppins.className}`}
+                    >
+                      {selectedInvoice?.importe}
+                      {selectedInvoice?.moneda}
+                    </Typography>
+                  </Box>
+
+                  {/* BOX TWO */}
+                  <Box
+                    className={
+                      invoicesTableStyles["BoxFilter-children3-content-boxes"]
+                    }
+                  >
+                    <Typography
+                      className={`${styles["Body-regular"]} ${poppins.className}`}
+                    >
+                      Comisión:
+                    </Typography>
+                    <Typography
+                      className={`${styles["Body-regular-4"]} ${poppins.className}`}
+                    >
+                      25%
+                    </Typography>
+                  </Box>
+
+                  {/* BOX THREE */}
+                  <Box
+                    className={
+                      invoicesTableStyles["BoxFilter-children3-content-boxes"]
+                    }
+                  >
+                    <Typography
+                      className={`${styles["Body-regular"]} ${poppins.className}`}
+                    >
+                      Pago:
+                    </Typography>
+                    <Typography
+                      className={`${styles["Body-regular-4"]} ${poppins.className}`}
+                    >
+                      177,00 USD
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            )}
           </Box>
           {/* icon vector */}
           <IconVector />
@@ -278,6 +382,7 @@ export default function InvoicesTable() {
           // }}
           checkboxSelection
           disableRowSelectionOnClick
+          onRowSelectionModelChange={handleRowSelection}
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
           slots={{
             pagination: CustomPagination,

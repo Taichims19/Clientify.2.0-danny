@@ -184,6 +184,15 @@ line-height: 19px; /* 135.714% */
   font-weight: 400;
   line-height: 17px; /* 141.667% */
 }
+/* Body/Regular3 BLUE */
+.Body-regular-4 {
+  color: var(--Text-Link, #2B8EF9);
+  font-family: Poppins;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 17px; /* 141.667% */
+}
 
 /* Body/Medium */
 .Body-medium {
