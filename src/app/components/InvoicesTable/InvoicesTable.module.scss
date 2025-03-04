@@ -112,6 +112,26 @@
               // background: yellowgreen;
             }
           }
+          .BoxFilter-children3-button{
+            // display: flex;
+            padding: var(--Spacing-Small, 0px);
+            // justify-content: center;
+            // align-items: center;
+            // gap: 8px;
+            border-radius: var(--Radius-Small, 4px);
+            background: var(--button-primary-frame-default, #0067EE);
+            height: 35px;
+            width: 60px;
+            color: var(--button-primary-text-icon-default, #FFF);
+            /* Title/Medium */
+            font-family: Poppins;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 19px; /* 135.714% */
+            text-transform: none; // Agrega esta línea
+          }
+
         }
       }
     }
@@ -220,4 +240,7 @@
 
 .box-badge{
   background: yellowgreen;
+  width: 50px;
+  height: 100;
+
 }

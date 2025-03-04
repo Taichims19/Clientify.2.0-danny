@@ -103,6 +103,15 @@
   font-weight: 500;
   line-height: 19px; /* 135.714% */
 }
+/* Title/Medium 1 grises*/
+.Title-medium-white {
+  color: var(--button-primary-text-icon-default, #FFF);
+  font-family: Poppins;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 19px; /* 135.714% */
+}
 
 /* Title/Semibold */
 .Title-semibold {

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Dayjs } from "dayjs";
+import { fetchPartnerData } from "./clientifyThunks";
 
 // Enums para diferentes estados y vistas
 enum InfoBlockTitle {
@@ -105,16 +106,54 @@ interface DateRangeState {
   startDate: Dayjs | null;
   endDate: Dayjs | null;
 }
+interface SummaryPanelState {
+  totalContacts: number;
+  activeSubscriptions: number;
+  totalCommissionsPaid: number;
+}
+interface RecurrencePercentage {
+  monthly: number;
+  yearly: number;
+}
+
+interface RecentResource {
+  name: string;
+  url: string;
+  new: boolean;
+}
+
+interface ResourcesState {
+  allowedResourcesCount: number;
+  recentResources: RecentResource[];
+}
+
+interface MrrPartnerState {
+  totalMrr: number;
+}
+
+// Nueva interfaz para el grupo Partner
+interface PartnerState {
+  nameCompany: string;
+  nameUser: string;
+  photoUrl: string; // URL de la foto, por defecto y actualizable desde la API
+}
 
 interface ClientifyState {
   selectedPlan: string | null;
-  totalPlans: number;
-  plans: Plan[];
+  subscriptionPlans: {
+    totalPlans: number;
+    plans: Plan[];
+  };
+  summaryPanel: SummaryPanelState;
+  recurrenceChart: RecurrencePercentage;
+  mrrPartner: MrrPartnerState;
+  accountsHome: {
+    totalAccounts: number;
+    accounts: Account[];
+  };
+  resourcesHome: ResourcesState;
   drawer: DrawerState;
   subDrawer: SubDrawerState; // Nuevo estado del subDrawer
-  totalAccounts: number;
-  accounts: Account[];
-  // Nuevo estado para modales
   modal: ModalState;
   selectAccount: SelectState;
   message: MessageState; // Nuevo estado
@@ -122,18 +161,76 @@ interface ClientifyState {
   transactionBlocks: TransactionBlocksState; // Nuevo estado para transacciones
   featureButtons: FeatureButtonsState;
   calendaryRanger: DateRangeState;
+  loading: boolean;
+  error: string | null;
+  currentPartnerId: number; // Para rastrear el partner actual
+  partner: PartnerState; // Nuevo grupo
 }
 
 const initialState: ClientifyState = {
   // Información original de clientifySlice
+
+  // Subscription Plans
+  subscriptionPlans: {
+    totalPlans: 5, // Asociado a subaccount_plans_count
+    plans: [
+      { name: "Business Growth", count: 1, isFree: false },
+      { name: "Demo", count: 1, isFree: true },
+      { name: "Enterprise 10K Inbox", count: 2, isFree: false },
+      { name: "Special", count: 1, isFree: false },
+    ],
+  },
+  // Summary Panel
+  summaryPanel: {
+    totalContacts: 430, // Asociado a current_contacts
+    activeSubscriptions: 3400, // Asociado a active_subscriptions (3.4k)
+    totalCommissionsPaid: 1, // Asociado a total_invoices_payed
+  },
+  // Recurrence Chart
+  recurrenceChart: {
+    monthly: 20, // Asociado a recurrence_percentage.monthly
+    yearly: 80, // Asociado a recurrence_percentage.yearly
+  },
+  // MRR Partner
+  mrrPartner: {
+    totalMrr: 108, // Asociado a total_mrr
+  },
+  // Accounts Home
+  accountsHome: {
+    totalAccounts: 3, // Asociado a subaccounts_count
+    accounts: [
+      { name: "EDUCATIUM", isActive: true },
+      { name: "INTEGRITYLEGAL", isActive: false },
+      { name: "Jooyly", isActive: true },
+    ], // Asociado a subaccounts
+  },
+  // Resources Home
+  resourcesHome: {
+    allowedResourcesCount: 13, // Asociado a allowed_resources_count
+    recentResources: [
+      {
+        name: "Actualización (mejoras)",
+        url: "https://vimeo.com/1011248999?share=copy",
+        new: true,
+      },
+      {
+        name: "Centro del conocimiento (ay...)",
+        url: "https://www.youtube.com/watch?v=A4TEo2yZyiA",
+        new: true,
+      },
+      {
+        name: "Programa de afiliados",
+        url: "https://clientify.notion.site/Lead-Generation-Agency-I-Certificaci-n-de-Outbound-Marketing-de-Clientify-FindThatLead-d727ea8cec56456bb2d26053e34899a5",
+        new: true,
+      },
+      {
+        name: "Contrato Partner",
+        url: "https://clientify.notion.site/Lead-Generation-Agency-I-Certificaci-n-de-Outbound-Marketing-de-Clientify-FindThatLead-d727ea8cec56456bb2d26053e34899a5",
+        new: true,
+      },
+    ], // Asociado a recent_resources
+  },
   selectedPlan: null,
-  totalPlans: 5,
-  plans: [
-    { name: "Business Growth", count: 1, isFree: false },
-    { name: "Demo", count: 1, isFree: true },
-    { name: "Enterprise 10K Inbox", count: 2, isFree: false },
-    { name: "Special", count: 1, isFree: false },
-  ],
   drawer: {
     isDrawerOpen: false,
     drawerTitle: "",
@@ -146,13 +243,6 @@ const initialState: ClientifyState = {
     subDrawerSelected: SubDrawerView.EDUCATIUM,
     subView: "",
   },
-  // Información añadida de accountsHomeSlice
-  totalAccounts: 3,
-  accounts: [
-    { name: "EDUCATIUM", isActive: true },
-    { name: "INTEGRITYLEGAL", isActive: false },
-    { name: "Jooyly", isActive: true },
-  ],
   modal: {
     isModalOpen: false,
   },
@@ -237,49 +327,54 @@ const initialState: ClientifyState = {
     startDate: null,
     endDate: null,
   },
+  loading: false,
+  error: null,
+  currentPartnerId: 6653, // ID inicial
+  partner: {
+    nameCompany: "Capacitravel S.L.", // Valor por defecto
+    nameUser: "Alice Kuvalis Lucy", // Valor por defecto
+    photoUrl: "/imgLayout/Rectangle7-png.png", // URL por defecto
+  },
 };
 
 export const clientifySlice = createSlice({
   name: "clientify",
   initialState,
   reducers: {
-    // Reducers originales de clientifySlice
     selectPlan(state, action: PayloadAction<string>) {
       state.selectedPlan = action.payload;
     },
     setTotalPlans(state, action: PayloadAction<number>) {
-      state.totalPlans = action.payload;
+      state.subscriptionPlans.totalPlans = action.payload;
     },
     toggleFreeStatus(state, action: PayloadAction<string>) {
-      const plan = state.plans.find((p) => p.name === action.payload);
-      if (plan) {
-        plan.isFree = !plan.isFree;
-      }
+      const plan = state.subscriptionPlans.plans.find(
+        (p) => p.name === action.payload
+      );
+      if (plan) plan.isFree = !plan.isFree;
     },
     setDrawer(state, action: PayloadAction<DrawerState>) {
       state.drawer = action.payload;
     },
-    // Nuevo reducer para manejar el subDrawer
     setSubDrawer(state, action: PayloadAction<SubDrawerState>) {
       state.subDrawer.isSubDrawerOpen = action.payload.isSubDrawerOpen;
       state.subDrawer.subDrawerTitle = action.payload.subDrawerTitle;
       state.subDrawer.subDrawerSelected = action.payload.subDrawerSelected;
       state.subDrawer.subView = action.payload.subView;
     },
-    // Reducers añadidos de accountsHomeSlice
     toggleAccountStatus(state, action: PayloadAction<string>) {
-      const account = state.accounts.find((acc) => acc.name === action.payload);
-      if (account) {
-        account.isActive = !account.isActive;
-      }
+      const account = state.accountsHome.accounts.find(
+        (acc) => acc.name === action.payload
+      );
+      if (account) account.isActive = !account.isActive;
     },
     addAccount(state, action: PayloadAction<Account>) {
-      const exists = state.accounts.some(
+      const exists = state.accountsHome.accounts.some(
         (acc) => acc.name === action.payload.name
       );
       if (!exists) {
-        state.accounts.push(action.payload);
-        state.totalAccounts += 1;
+        state.accountsHome.accounts.push(action.payload);
+        state.accountsHome.totalAccounts += 1;
       } else {
         console.warn(
           `Account with name "${action.payload.name}" already exists.`
@@ -287,12 +382,11 @@ export const clientifySlice = createSlice({
       }
     },
     removeAccount(state, action: PayloadAction<string>) {
-      state.accounts = state.accounts.filter(
+      state.accountsHome.accounts = state.accountsHome.accounts.filter(
         (acc) => acc.name !== action.payload
       );
-      state.totalAccounts -= 1;
+      state.accountsHome.totalAccounts -= 1;
     },
-    // Reducer para manejar el modal
     openModal(state) {
       state.modal.isModalOpen = true;
     },
@@ -307,9 +401,10 @@ export const clientifySlice = createSlice({
     toggleMessage(state) {
       state.message.showMessage = !state.message.showMessage;
     },
-    // Nuevo reducer para abrir el drawer con datos de una cuenta
     openSubDrawerWithAccount(state, action: PayloadAction<string>) {
-      const account = state.accounts.find((acc) => acc.name === action.payload);
+      const account = state.accountsHome.accounts.find(
+        (acc) => acc.name === action.payload
+      );
       if (account) {
         state.subDrawer.isSubDrawerOpen = true;
         state.subDrawer.subDrawerTitle = account.name;
@@ -318,23 +413,21 @@ export const clientifySlice = createSlice({
             ? SubDrawerView.EDUCATIUM
             : account.name === "INTEGRITYLEGAL"
             ? SubDrawerView.INTEGRITYLEGAL
-            : SubDrawerView.JOOYLY; // Selección dinámica del `subDrawerSelected`
-        state.subDrawer.subView = `Details for ${account.name}`; // Vista personalizada
+            : SubDrawerView.JOOYLY;
+        state.subDrawer.subView = `Details for ${account.name}`;
       } else {
-        console.warn(
-          `No account found with name "${action.payload}". Ensure the account name is correct.`
-        );
+        console.warn(`No account found with name "${action.payload}".`);
       }
     },
     toggleFeatureOne(state) {
       console.log("evento disparado botton 1");
-      state.featureButtons.featureOne = true; // Activa featureOne
-      state.featureButtons.featureTwo = false; // Desactiva featureTwo
+      state.featureButtons.featureOne = true;
+      state.featureButtons.featureTwo = false;
     },
     toggleFeatureTwo(state) {
       console.log("evento disparado botton 2");
-      state.featureButtons.featureOne = false; // Activa featureOne
-      state.featureButtons.featureTwo = true; // Desactiva featureTwo
+      state.featureButtons.featureOne = false;
+      state.featureButtons.featureTwo = true;
     },
     setDateRange: (
       state,
@@ -348,6 +441,69 @@ export const clientifySlice = createSlice({
       state.calendaryRanger.startDate = null;
       state.calendaryRanger.endDate = null;
     },
+    setCurrentPartnerId(state, action: PayloadAction<number>) {
+      state.currentPartnerId = action.payload;
+    },
+    setSummaryPanel(state, action: PayloadAction<SummaryPanelState>) {
+      state.summaryPanel = action.payload;
+    },
+    setRecurrenceChart(state, action: PayloadAction<RecurrencePercentage>) {
+      state.recurrenceChart = action.payload;
+    },
+    setMrrPartner(state, action: PayloadAction<MrrPartnerState>) {
+      state.mrrPartner = action.payload;
+    },
+    setResourcesHome(state, action: PayloadAction<ResourcesState>) {
+      state.resourcesHome = action.payload;
+    },
+    // Nuevas acciones para manejar loading y error
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
+    setError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+    },
+    // Nueva acción para AccountsHome (falta en el original)
+    setAccountsHome(
+      state,
+      action: PayloadAction<{ totalAccounts: number; accounts: Account[] }>
+    ) {
+      state.accountsHome = {
+        ...state.accountsHome,
+        totalAccounts: action.payload.totalAccounts,
+        accounts: action.payload.accounts,
+      };
+    },
+    // Nuevo reducer para subscriptionPlans
+    setSubscriptionPlans(
+      state,
+      action: PayloadAction<{ totalPlans: number; plans: Plan[] }>
+    ) {
+      state.subscriptionPlans = {
+        ...state.subscriptionPlans,
+        totalPlans: action.payload.totalPlans,
+        plans: action.payload.plans,
+      };
+    },
+    // Nuevo reducer para el grupo Partner
+    setPartner(
+      state,
+      action: PayloadAction<{
+        nameCompany: string;
+        nameUser: string;
+        photoUrl: string;
+      }>
+    ) {
+      state.partner = {
+        ...state.partner,
+        nameCompany: action.payload.nameCompany,
+        nameUser: action.payload.nameUser,
+        photoUrl: action.payload.photoUrl,
+      };
+    },
+  },
+  extraReducers: (builder) => {
+    // Eliminar los addCase ya que usamos una función manual
   },
 });
 
@@ -369,6 +525,16 @@ export const {
   toggleFeatureTwo,
   setDateRange,
   resetCalendaryRanger,
+  setCurrentPartnerId,
+  setSummaryPanel,
+  setRecurrenceChart,
+  setMrrPartner,
+  setResourcesHome,
+  setLoading,
+  setError,
+  setAccountsHome,
+  setSubscriptionPlans,
+  setPartner, // Exportar la nueva acción
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

@@ -8,7 +8,8 @@ const Header = () => {
         <Avatar alt="Alice Kuvalis" src="/profile.jpg" />
         <Box ml={2}>
           <Typography variant="subtitle1">Account Manager</Typography>
-          <Typography variant="body2">Alice Kuvalis</Typography>
+          {/* <Typography variant="body2">Alice Kuvalis</Typography> */}
+          <Typography variant="body2">Daniel Mendez</Typography>
         </Box>
       </Box>
     </Box>

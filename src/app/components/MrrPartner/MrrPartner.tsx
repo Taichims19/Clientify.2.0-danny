@@ -1,4 +1,3 @@
-// Añade "use client" al inicio del archivo para que Next.js lo renderice solo en el cliente
 "use client";
 import { Card, CardContent, Typography, Box, Divider } from "@mui/material";
 import mrrPartnerStyles from "./MrrPartner.module.scss";
@@ -6,12 +5,11 @@ import IconMrrPartnerDoubt from "@/app/icons/IconMrrPartnerDoubt";
 import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import { styled } from "@mui/material/styles";
-
-import React, { useEffect, useState } from "react";
-
 import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
+import { useSelector } from "react-redux";
+import { RootState } from "@/app/store/store";
 
 const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   height: 10,
@@ -32,24 +30,54 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
 }));
 
 export default function MRRPartner() {
-  const [progress, setProgress] = useState(100);
+  // Corrección: asumiendo que el slice se llama "clientify" y no "clienty"
+  const totalMrr = useSelector(
+    (state: RootState) => state.clienty.mrrPartner.totalMrr
+  );
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((oldProgress) => {
-        if (oldProgress === 100) {
-          return 0;
-        }
-        const diff = Math.random() * 10;
-        return Math.min(oldProgress + diff, 100);
-      });
-    }, 500);
+  const calculateProgress = (mrr: number) => {
+    let bronze = 0;
+    let silver = 0;
+    let gold = 0;
+    let diamond = 0;
 
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+    if (mrr >= 2500) {
+      // Si mrr >= 2500, todas las barras al 100%
+      bronze = 100;
+      silver = 100;
+      gold = 100;
+      diamond = 100;
+    } else if (mrr >= 1500) {
+      // Bronce y Plata al 100%, Oro proporcional, Diamante 0%
+      bronze = 100;
+      silver = 100;
+      gold = ((mrr - 1500) / (2500 - 1500)) * 100; // Rango 1500-2500
+      diamond = 0;
+    } else if (mrr >= 800) {
+      // Bronce al 100%, Plata proporcional, Oro y Diamante 0%
+      bronze = 100;
+      silver = ((mrr - 800) / (1500 - 800)) * 100; // Rango 800-1500
+      gold = 0;
+      diamond = 0;
+    } else if (mrr >= 120) {
+      // Bronce proporcional, Plata, Oro y Diamante 0%
+      bronze = ((mrr - 120) / (800 - 120)) * 100; // Rango 120-800
+      silver = 0;
+      gold = 0;
+      diamond = 0;
+    } else {
+      // Si mrr < 120, todas las barras en 0%
+      bronze = 0;
+      silver = 0;
+      gold = 0;
+      diamond = 0;
+    }
 
+    return [bronze, silver, gold, diamond];
+  };
+
+  const [bronzeProgress, silverProgress, goldProgress, diamondProgress] =
+    calculateProgress(totalMrr);
   return (
     <Box className={mrrPartnerStyles["Box-MrrPartner-father"]}>
       {/* box child 1 mrr partner */}
@@ -64,7 +92,7 @@ export default function MRRPartner() {
             </Typography>
             <IconMrrPartnerDoubt />
           </Box>
-          {/* chlid 2 */}
+          {/* child 2 */}
           <Box className={mrrPartnerStyles["grandson-1-child-2"]}>
             <Box className={mrrPartnerStyles["child-2-box1"]}>
               <Typography
@@ -76,7 +104,7 @@ export default function MRRPartner() {
           </Box>
         </Box>
         <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-          108
+          {totalMrr}
         </Typography>
       </Box>
       <Divider />
@@ -85,16 +113,25 @@ export default function MRRPartner() {
       <Box className={mrrPartnerStyles["Box-MrrPartner-child-2"]}>
         <Box className={mrrPartnerStyles["MrrPartner-child2-grandson-1"]}>
           <Box sx={{ width: "100%" }}>
-            <BorderLinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress
+              variant="determinate"
+              value={bronzeProgress}
+            />
           </Box>
           <Box sx={{ width: "100%", height: "10px", background: "yellow" }}>
-            <BorderLinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress
+              variant="determinate"
+              value={silverProgress}
+            />
           </Box>
           <Box sx={{ width: "100%" }}>
-            <BorderLinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress variant="determinate" value={goldProgress} />
           </Box>
           <Box sx={{ width: "100%" }}>
-            <BorderLinearProgress variant="determinate" value={progress} />
+            <BorderLinearProgress
+              variant="determinate"
+              value={diamondProgress}
+            />
           </Box>
         </Box>
 
@@ -109,7 +146,7 @@ export default function MRRPartner() {
             <Typography
               className={`${styles["Title-semibold"]} ${poppins.className}`}
             >
-              +100
+              +120
             </Typography>
           </Box>
 
@@ -123,7 +160,7 @@ export default function MRRPartner() {
             <Typography
               className={`${styles["Title-semibold"]} ${poppins.className}`}
             >
-              +500
+              +800
             </Typography>
           </Box>
 
@@ -137,7 +174,7 @@ export default function MRRPartner() {
             <Typography
               className={`${styles["Title-semibold"]} ${poppins.className}`}
             >
-              +1000
+              +1500
             </Typography>
           </Box>
 
@@ -151,7 +188,7 @@ export default function MRRPartner() {
             <Typography
               className={`${styles["Title-semibold"]} ${poppins.className}`}
             >
-              +2000
+              +2500
             </Typography>
           </Box>
         </Box>

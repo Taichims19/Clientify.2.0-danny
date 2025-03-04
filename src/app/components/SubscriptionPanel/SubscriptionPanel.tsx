@@ -16,7 +16,7 @@ import { RootState } from "@/app/store/store";
 const SubscriptionPanel = () => {
   const dispatch = useDispatch();
   const { totalPlans, plans } = useSelector(
-    (state: RootState) => state.clienty
+    (state: RootState) => state.clienty.subscriptionPlans
   );
 
   const handleOpenDrawer = (plan: string) => {

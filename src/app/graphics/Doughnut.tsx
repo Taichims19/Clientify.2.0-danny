@@ -8,13 +8,19 @@ import { Box } from "@mui/material";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function DoughnutGraphic() {
+export default function DoughnutGraphic({
+  monthly,
+  yearly,
+}: {
+  monthly: number;
+  yearly: number;
+}) {
   const data = {
     labels: ["Anual", "Mensual"],
     datasets: [
       {
         label: "Recurrencia",
-        data: [80, 20],
+        data: [yearly, monthly], // Usamos los props dinámicamente
         backgroundColor: ["#0067EE", "#C4E4FF"], // Colores de las secciones
         borderWidth: 0, // Sin borde para un look limpio
       },

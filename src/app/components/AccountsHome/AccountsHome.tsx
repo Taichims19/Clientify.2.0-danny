@@ -17,7 +17,7 @@ import {
 export default function AccountsHome() {
   const dispatch = useDispatch();
   const { totalAccounts, accounts } = useSelector(
-    (state: RootState) => state.clienty
+    (state: RootState) => state.clienty.accountsHome
   );
 
   const handleToggleStatus = (accountName: string) => {

@@ -6,9 +6,22 @@ import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import summaryStyles from "./summaryPanel.module.scss";
 import IconQuestionMark from "@/app/icons/IconQuestionMark";
+import { RootState } from "@/app/store/store";
+import { useSelector } from "react-redux";
+
+// Función para formatear números con "k"
+const formatNumber = (value: number) => {
+  if (value >= 1000) {
+    return (value / 1000).toFixed(1) + "k";
+  }
+  return value.toString();
+};
 
 const SummaryPanel = () => {
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+
+  const { totalContacts, activeSubscriptions, totalCommissionsPaid } =
+    useSelector((state: RootState) => state.clienty.summaryPanel);
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -34,7 +47,7 @@ const SummaryPanel = () => {
             Contactos totales
           </Typography>
           <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-            430
+            {totalContacts}
           </Typography>
         </Box>
       </Box>
@@ -48,7 +61,7 @@ const SummaryPanel = () => {
             Suscripciones activas
           </Typography>
           <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-            3.4k
+            {formatNumber(activeSubscriptions)}
           </Typography>
         </Box>
       </Box>
@@ -94,7 +107,7 @@ const SummaryPanel = () => {
             </Popover>
           </Box>
           <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-            01
+            {totalCommissionsPaid.toString().padStart(2, "0")}
           </Typography>
         </Box>
       </Box>

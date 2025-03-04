@@ -14,8 +14,8 @@ import {
 
 export default function ResourcesHome() {
   const dispatch = useDispatch();
-  const { totalPlans, plans } = useSelector(
-    (state: RootState) => state.clienty
+  const { allowedResourcesCount, recentResources } = useSelector(
+    (state: RootState) => state.clienty.resourcesHome
   );
 
   const handleOpenDrawer = (plan: string) => {
@@ -29,6 +29,9 @@ export default function ResourcesHome() {
       })
     );
   };
+
+  const MAX_RESOURCES_DISPLAYED = 4;
+  const visibleResources = recentResources.slice(0, MAX_RESOURCES_DISPLAYED);
 
   return (
     <Box className={ResourcesHomeStyles["Box-ResourcesHome-father"]}>
@@ -52,110 +55,145 @@ export default function ResourcesHome() {
           </Typography>
         </Box>
         <Typography className={`${styles["H1-bold"]} ${poppins.className}`}>
-          13
+          {allowedResourcesCount}
         </Typography>
       </Box>
 
       {/* CHILD 2 */}
       <Box className={ResourcesHomeStyles["Box-ResourcesHome-child2"]}>
         {/* CHILD 1 */}
-        <Box
-          className={ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]}
-        >
+        {visibleResources[0] && (
           <Box
-            className={ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]}
+            key={visibleResources[0].name}
+            className={
+              ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]
+            }
           >
-            <Typography
-              className={`${styles["Title-semibold"]} ${poppins.className}`}
+            <Box
+              className={
+                ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]
+              }
             >
-              Actualización (mejoras)
-            </Typography>
-            <Box className={ResourcesHomeStyles["child-box-new"]}>
               <Typography
-                className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                className={`${styles["Title-semibold"]} ${poppins.className}`}
               >
-                New
+                {visibleResources[0].name}
               </Typography>
+              {visibleResources[0].new && (
+                <Box className={ResourcesHomeStyles["child-box-new"]}>
+                  <Typography
+                    className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                  >
+                    New
+                  </Typography>
+                </Box>
+              )}
             </Box>
+            <IconArrowRight />
           </Box>
-          <IconArrowRight />
-        </Box>
+        )}
 
         <IconVector />
 
         {/* CHILD 2 */}
-        <Box
-          className={ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]}
-        >
+        {visibleResources[1] && (
           <Box
-            className={ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]}
+            key={visibleResources[1].name}
+            className={
+              ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]
+            }
           >
-            <Typography
-              className={`${styles["Title-semibold"]} ${poppins.className}`}
+            <Box
+              className={
+                ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]
+              }
             >
-              Centro del conocimiento (ay...)
-            </Typography>
-            <Box className={ResourcesHomeStyles["child-box-new"]}>
               <Typography
-                className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                className={`${styles["Title-semibold"]} ${poppins.className}`}
               >
-                New
+                {visibleResources[1].name}
               </Typography>
+              {visibleResources[1].new && (
+                <Box className={ResourcesHomeStyles["child-box-new"]}>
+                  <Typography
+                    className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                  >
+                    New
+                  </Typography>
+                </Box>
+              )}
             </Box>
+            <IconArrowRight />
           </Box>
-          <IconArrowRight />
-        </Box>
+        )}
 
         <IconVector />
 
         {/* CHILD 3 */}
-        <Box
-          className={ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]}
-        >
+        {visibleResources[2] && (
           <Box
-            className={ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]}
+            key={visibleResources[2].name}
+            className={
+              ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]
+            }
           >
-            <Typography
-              className={`${styles["Title-semibold"]} ${poppins.className}`}
+            <Box
+              className={
+                ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]
+              }
             >
-              Programa de afiliados
-            </Typography>
-            <Box className={ResourcesHomeStyles["child-box-new"]}>
               <Typography
-                className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                className={`${styles["Title-semibold"]} ${poppins.className}`}
               >
-                New
+                {visibleResources[2].name}
               </Typography>
+              {visibleResources[2].new && (
+                <Box className={ResourcesHomeStyles["child-box-new"]}>
+                  <Typography
+                    className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                  >
+                    New
+                  </Typography>
+                </Box>
+              )}
             </Box>
+            <IconArrowRight />
           </Box>
-          <IconArrowRight />
-        </Box>
+        )}
 
         <IconVector />
 
         {/* CHILD 4 */}
-
-        <Box
-          className={ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]}
-        >
+        {visibleResources[3] && (
           <Box
-            className={ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]}
+            key={visibleResources[3].name}
+            className={
+              ResourcesHomeStyles["Box-ResourcesHome-child2-childrens"]
+            }
           >
-            <Typography
-              className={`${styles["Title-semibold"]} ${poppins.className}`}
+            <Box
+              className={
+                ResourcesHomeStyles["Box-ResourcesHome-childrens-child"]
+              }
             >
-              Contrato Partner
-            </Typography>
-            <Box className={ResourcesHomeStyles["child-box-new"]}>
               <Typography
-                className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                className={`${styles["Title-semibold"]} ${poppins.className}`}
               >
-                New
+                {visibleResources[3].name}
               </Typography>
+              {visibleResources[3].new && (
+                <Box className={ResourcesHomeStyles["child-box-new"]}>
+                  <Typography
+                    className={`${styles["Caption-Medium"]} ${poppins.className}`}
+                  >
+                    New
+                  </Typography>
+                </Box>
+              )}
             </Box>
+            <IconArrowRight />
           </Box>
-          <IconArrowRight />
-        </Box>
+        )}
       </Box>
     </Box>
   );

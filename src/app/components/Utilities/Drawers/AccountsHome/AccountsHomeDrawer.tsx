@@ -37,8 +37,11 @@ import { IntegrityDrawer } from "../SubDrawers/IntegrityDrawer/IntegrityDrawer";
 function AccountsHomeDrawer() {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { accounts, totalAccounts, selectAccount } = useSelector(
-    (state: RootState) => state.clienty
+  const { accounts, totalAccounts } = useSelector(
+    (state: RootState) => state.clienty.accountsHome
+  );
+  const { selectAccount } = useSelector(
+    (state: RootState) => state.clienty.selectAccount
   );
   const subdrawer = useSelector((state: RootState) => state.clienty.subDrawer);
 

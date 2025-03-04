@@ -7,14 +7,10 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridColumnHeaderParams,
-  GridToolbar,
-  GridRenderEditCellParams,
 } from "@mui/x-data-grid";
 
 import { Typography, Box, Button, Popover, Badge } from "@mui/material";
 import invoicesTableStyles from "./InvoicesTable.module.scss";
-import SearchIcon from "@mui/icons-material/Search";
-import FilterSvgIcom from "@/app/icons/FilterSvgIcon";
 import { esES } from "@mui/x-data-grid/locales";
 
 import styles from "../../styles/home.module.css";
@@ -355,6 +351,13 @@ export default function InvoicesTable() {
                       177,00 USD
                     </Typography>
                   </Box>
+                  <Button
+                    className={
+                      invoicesTableStyles["BoxFilter-children3-button"]
+                    }
+                  >
+                    Enviar
+                  </Button>
                 </Box>
               </Box>
             )}
