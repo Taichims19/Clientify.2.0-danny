@@ -10,18 +10,24 @@ import {
   setMrrPartner,
   setAccountsHome,
   setResourcesHome,
-  setPartner, // Nueva acción
-} from "@/app/store/clientify/clientifySlice"; // Ajusta las rutas
+  setPartner,
+} from "@/app/store/clientify/clientifySlice";
+import {
+  addRow,
+  calculatePendingCounts,
+  resetRows,
+  InvoiceRow,
+} from "./invoicesTableSlice";
 
-// Nueva función asíncrona para obtener datos del partner
 export const fetchPartnerData = async (
   partnerId: number,
   dispatch: (action: any) => void
 ) => {
   try {
-    dispatch(setLoading(true)); // Iniciar carga
+    dispatch(setLoading(true));
 
-    const response = await axios.get(
+    // Primer endpoint: datos del partner
+    const partnerResponse = await axios.get(
       `https://app.clientify.com/billing-admin/api/partners/${partnerId}/`,
       {
         headers: {
@@ -29,23 +35,21 @@ export const fetchPartnerData = async (
         },
       }
     );
-    const apiData = response.data;
+    const apiData = partnerResponse.data;
 
     if (apiData && typeof apiData === "object") {
-      // Actualizar currentPartnerId
       dispatch(setCurrentPartnerId(partnerId));
 
       // Subscription Plans
       const totalPlans = apiData.subaccount_plans_count || 0;
-      const plans = apiData.subaccount_plans
-        ? apiData.subaccount_plans.map(
-            (plan: { name: string; value: number }) => ({
-              name: plan.name,
-              count: plan.value || 0,
-              isFree: plan.name.toLowerCase().includes("free trial"),
-            })
-          )
-        : [];
+      const plans =
+        apiData.subaccount_plans?.map(
+          (plan: { name: string; value: number }) => ({
+            name: plan.name || "Unknown",
+            count: plan.value || 0,
+            isFree: (plan.name || "").toLowerCase().includes("free trial"),
+          })
+        ) || [];
       dispatch(setSubscriptionPlans({ totalPlans, plans }));
 
       // Summary Panel
@@ -60,8 +64,8 @@ export const fetchPartnerData = async (
       // Recurrence Chart
       dispatch(
         setRecurrenceChart({
-          monthly: (apiData.recurrence_percentage?.monthly as number) || 0,
-          yearly: (apiData.recurrence_percentage?.yearly as number) || 0,
+          monthly: apiData.recurrence_percentage?.monthly || 0,
+          yearly: apiData.recurrence_percentage?.yearly || 0,
         })
       );
 
@@ -76,14 +80,11 @@ export const fetchPartnerData = async (
       dispatch(
         setAccountsHome({
           totalAccounts: apiData.subaccounts_count || 0,
-          accounts: apiData.subaccounts
-            ? apiData.subaccounts.map(
-                (acc: { name: string; plan: string }) => ({
-                  name: acc.name || "Unnamed",
-                  isActive: acc.plan !== "Free Trial", // Asumimos "Free Trial" como inactivo
-                })
-              )
-            : [],
+          accounts:
+            apiData.subaccounts?.map((acc: { name: string; plan: string }) => ({
+              name: acc.name || "Unnamed",
+              isActive: (acc.plan || "") !== "Free Trial",
+            })) || [],
         })
       );
 
@@ -108,11 +109,60 @@ export const fetchPartnerData = async (
         })
       );
 
-      dispatch(setLoading(false)); // Terminar carga
+      // Segundo endpoint: facturas
+      const invoicesResponse = await axios.get(
+        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?page=1&page_size=100`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+      const invoicesData = invoicesResponse.data;
+
+      // Limpiar filas existentes antes de agregar nuevas facturas
+      dispatch(resetRows());
+
+      if (
+        invoicesData &&
+        invoicesData.results &&
+        Array.isArray(invoicesData.results)
+      ) {
+        invoicesData.results.forEach((invoice: any) => {
+          const newRow: InvoiceRow = {
+            id: invoice.id,
+            codigo: invoice.invoice_number || "N/A",
+            cuenta: invoice.account || "N/A",
+            importe: invoice.subtotal || 0,
+            moneda: invoice.currency || "N/A",
+            producto: invoice.description_product || "N/A",
+            fechaCreacion: new Date(invoice.created).toLocaleDateString(
+              "es-ES",
+              {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }
+            ),
+            fechaPago: invoice.payment_date
+              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "--",
+            liquidaciones: invoice.settlement_id || "--",
+          };
+          dispatch(addRow(newRow));
+        });
+
+        dispatch(calculatePendingCounts());
+      }
     } else {
-      dispatch(setLoading(false));
       dispatch(setError("Datos de la API no válidos"));
     }
+
+    dispatch(setLoading(false));
   } catch (error) {
     const axiosError = error as AxiosError<any>;
     let errorMessage = "Error fetching partner data";

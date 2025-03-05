@@ -22,7 +22,7 @@ import IconVectorClear from "@/app/icons/IconVectorClear";
 function PlanSuscriptionDrawer() {
   const [loading, setLoading] = useState(false);
   const { plans, totalPlans } = useSelector(
-    (state: RootState) => state.clienty
+    (state: RootState) => state.clienty.subscriptionPlans
   );
 
   useEffect(() => {

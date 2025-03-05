@@ -27,6 +27,8 @@ interface DataGridState {
   };
   selectedInvoice: InvoiceRow | null; // Nueva propiedad
   allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
+  page: number; // Nueva propiedad para la página actual
+  pageSize: number; // Nueva propiedad para el tamaño de página
 }
 
 const initialState: DataGridState = {
@@ -138,6 +140,8 @@ const initialState: DataGridState = {
   },
   selectedInvoice: null, // Inicialmente ninguna factura seleccionada
   allInvoicesSelected: false, // Inicialmente no todas están seleccionadas
+  page: 0, // Página inicial
+  pageSize: 25, // Tamaño de página predeterminado
 };
 
 // Crea el slice
@@ -192,10 +196,9 @@ const invoicesTableSlice = createSlice({
       ).length;
     },
     resetRows: (state) => {
-      state.rows = initialState.rows; // Restablece filas al estado inicial.
-      state.filteredPendingPayments = []; // Limpia filtros aplicados.
+      state.rows = []; // Cambiar a un array vacío en lugar de initialState.rows
+      state.filteredPendingPayments = [];
       state.filteredPendingCommissions = [];
-      // Resetear conteos
       state.pendingCounts.payments = 0;
       state.pendingCounts.commissions = 0;
     },
@@ -207,6 +210,13 @@ const invoicesTableSlice = createSlice({
       console.log("Todas las facturas seleccionadas");
       state.allInvoicesSelected = action.payload;
       state.selectedInvoice = null;
+    },
+    setPage: (state, action: PayloadAction<number>) => {
+      state.page = action.payload;
+    },
+    setPageSize: (state, action: PayloadAction<number>) => {
+      state.pageSize = action.payload;
+      state.page = 0; // Resetea a la primera página
     },
   },
 });
@@ -221,6 +231,8 @@ export const {
   resetRows,
   setSelectedInvoice,
   setSelectedAllInvoices,
+  setPage,
+  setPageSize,
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;

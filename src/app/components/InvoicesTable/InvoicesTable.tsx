@@ -1,4 +1,3 @@
-// Añade "use client" al inicio del archivo para que Next.js lo renderice solo en el cliente
 "use client";
 
 import * as React from "react";
@@ -7,12 +6,13 @@ import {
   GridColDef,
   GridRenderCellParams,
   GridColumnHeaderParams,
+  GridPaginationModel,
+  GridRowSelectionModel, // Importado para corregir el tipo
+  GridCallbackDetails, // Importado para corregir el tipo
 } from "@mui/x-data-grid";
-
 import { Typography, Box, Button, Popover, Badge } from "@mui/material";
 import invoicesTableStyles from "./InvoicesTable.module.scss";
 import { esES } from "@mui/x-data-grid/locales";
-
 import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import IconArrowLeft from "@/app/icons/IconArrowLeft";
@@ -35,11 +35,30 @@ import {
   InvoiceRow,
   setSelectedAllInvoices,
   setSelectedInvoice,
+  setPageSize,
+  setPage, // Nueva acción (a definir en el slice)
 } from "@/app/store/clientify/invoicesTableSlice";
 
 const CustomPagination = () => {
+  const dispatch = useDispatch();
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
-  const columns = useSelector((state: RootState) => state.invoiceTable.columns);
+  const pageSize = useSelector(
+    (state: RootState) => state.invoiceTable.pageSize || 25
+  );
+  const page = useSelector((state: RootState) => state.invoiceTable.page || 0);
+
+  const totalPages = Math.ceil(rows.length / pageSize); // Usa el total de rows
+  const startRow = page * pageSize + 1;
+  const endRow = Math.min((page + 1) * pageSize, rows.length);
+
+  const handlePageChange = (newPage: number) => {
+    dispatch(setPage(newPage));
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    dispatch(setPageSize(newPageSize));
+    dispatch(setPage(0));
+  };
   return (
     <>
       <Box className={invoicesTableStyles["Footer-DataGrid-father"]}>
@@ -51,28 +70,45 @@ const CustomPagination = () => {
             >
               Filas por página
             </Typography>
-
-            {/* <Typography
-                className={`${styles["Body-medium"]} ${poppins.className}`}
-              >
-                04
-              </Typography>
-              <IconArrowBottom /> */}
-            <NativeSelector />
+            <NativeSelector
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              maxRows={rows.length}
+            />
           </Box>
 
           {/* icon of arrow  */}
-          <IconArrowLeft />
+          <IconArrowLeft
+            onClick={() => handlePageChange(page > 0 ? page - 1 : 0)}
+            style={{
+              cursor: page > 0 ? "pointer" : "default",
+              opacity: page > 0 ? 1 : 0.5,
+            }}
+          />
           {/* text of page */}
           <Typography
             className={`${styles["Body-medium"]} ${poppins.className}`}
           >
-            1 de 1
+            {startRow} de {endRow}
           </Typography>
           {/* Box 2 footer */}
           <Box className={invoicesTableStyles["Box-row-footer-2"]}>
-            <IconArrowRight />
-            <IconDoubleArrow />
+            <IconArrowRight
+              onClick={() =>
+                handlePageChange(page < totalPages - 1 ? page + 1 : page)
+              }
+              style={{
+                cursor: page < totalPages - 1 ? "pointer" : "default",
+                opacity: page < totalPages - 1 ? 1 : 0.5,
+              }}
+            />
+            <IconDoubleArrow
+              onClick={() => handlePageChange(totalPages - 1)}
+              style={{
+                cursor: page < totalPages - 1 ? "pointer" : "default",
+                opacity: page < totalPages - 1 ? 1 : 0.5,
+              }}
+            />
           </Box>
         </Box>
       </Box>
@@ -82,17 +118,79 @@ const CustomPagination = () => {
 
 export default function InvoicesTable() {
   const dispatch = useDispatch();
+
+  // Acceder al estado de Redux al inicio
+  const rows = useSelector((state: RootState) => state.invoiceTable.rows);
+  const columns = useSelector((state: RootState) =>
+    state.invoiceTable.columns.slice(0, 8).map((column) => ({
+      ...column,
+      width: column.minWidth || 57,
+      editable: true,
+      disableColumnMenu: false,
+      disableReorder: true,
+      renderHeader: (params: GridColumnHeaderParams) => (
+        <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
+          <Typography
+            className={`${styles["Caption-semibold"]} ${poppins.className}`}
+          >
+            {params.colDef.headerName}
+          </Typography>
+        </Box>
+      ),
+      renderCell: (params: GridRenderCellParams) => {
+        const isLiquidacionesColumn = params.field === "liquidaciones";
+        return (
+          <Box
+            className={invoicesTableStyles["Box-Data-grid-celdas"]}
+            onClick={
+              isLiquidacionesColumn && params.value !== "--"
+                ? () => handleOpenDrawer(null, params.row)
+                : undefined
+            }
+            style={{
+              cursor:
+                isLiquidacionesColumn && params.value !== "--"
+                  ? "pointer"
+                  : "default",
+            }}
+          >
+            <Typography>{params.value}</Typography>
+          </Box>
+        );
+      },
+    }))
+  );
+  const paymentsCount = useSelector(
+    (state: RootState) => state.invoiceTable.pendingCounts.payments
+  );
+  const commissionsCount = useSelector(
+    (state: RootState) => state.invoiceTable.pendingCounts.commissions
+  );
+  const combinedCount = paymentsCount + commissionsCount;
+  const pageSize = useSelector(
+    (state: RootState) => state.invoiceTable.pageSize || 25
+  );
+  const page = useSelector((state: RootState) => state.invoiceTable.page || 0);
+  const { selectedInvoice, allInvoicesSelected } = useSelector(
+    (state: RootState) => state.invoiceTable
+  );
+
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
+    null
+  );
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
+    setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+  const open = Boolean(anchorEl);
+  const id = open ? "simple-popover" : undefined;
+
   const handleOpenDrawer = (
     plan: string | null,
     rowData: InvoiceRow | null
   ) => {
-    if (plan) {
-      dispatch(selectPlan(plan));
-    }
-    if (rowData) {
-      dispatch(setSelectedInvoice(rowData));
-    }
-
+    if (plan) dispatch(selectPlan(plan));
+    if (rowData) dispatch(setSelectedInvoice(rowData));
     dispatch(
       setDrawer({
         isDrawerOpen: true,
@@ -103,103 +201,24 @@ export default function InvoicesTable() {
     );
   };
 
-  const renderHeader = (params: GridColumnHeaderParams) => (
-    <Box className={invoicesTableStyles["Box-Data-grid-header"]}>
-      <Typography
-        className={`${styles["Caption-semibold"]} ${poppins.className}`}
-      >
-        {params.colDef.headerName}
-      </Typography>
-    </Box>
-  );
-
-  const renderCell = (params: GridRenderCellParams) => {
-    const isLiquidacionesColumn = params.field === "liquidaciones";
-
-    return (
-      <Box
-        className={invoicesTableStyles["Box-Data-grid-celdas"]}
-        onClick={
-          isLiquidacionesColumn && params.value !== "--"
-            ? () => handleOpenDrawer(null, params.row) // Pasamos null en plan y la fila en rowData
-            : undefined
-        }
-        style={{
-          cursor:
-            isLiquidacionesColumn && params.value !== "--"
-              ? "pointer"
-              : "default",
-        }}
-      >
-        <Typography>{params.value}</Typography>
-      </Box>
-    );
-  };
-
-  // const rows = useSelector((state: RootState) => state.invoiceTable.rows);
-  // const columns = useSelector((state: RootState) => state.invoiceTable.columns);
-
-  const paymentsCount = useSelector(
-    (state: RootState) => state.invoiceTable.pendingCounts.payments
-  );
-  const commissionsCount = useSelector(
-    (state: RootState) => state.invoiceTable.pendingCounts.commissions
-  );
-
-  const combinedCount = paymentsCount + commissionsCount;
-
-  const firstTwoRows = useSelector((state: RootState) =>
-    state.invoiceTable.rows.slice(0, 4)
-  );
-
-  const columns: GridColDef[] = useSelector((state: RootState) =>
-    state.invoiceTable.columns.slice(0, 8).map((column) => ({
-      ...column,
-      width: column.minWidth || 57,
-      editable: true,
-      disableColumnMenu: false,
-      disableReorder: true,
-      renderHeader, // Pasamos la referencia, no la ejecutamos
-      renderCell, // Pasamos la referencia, no la ejecutamos
-    }))
-  );
-
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
-    null
-  );
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const id = open ? "simple-popover" : undefined;
-
-  //Logica de seleccion de filas
-
-  const { rows, selectedInvoice, allInvoicesSelected } = useSelector(
-    (state: RootState) => state.invoiceTable
-  );
-
-  const handleRowSelection = (selectionModel: any) => {
-    if (selectionModel.length === 0) {
-      dispatch(setSelectedInvoice(null)); // Si no hay selección, limpiamos
+  const handleRowSelection = (
+    rowSelectionModel: GridRowSelectionModel,
+    details: GridCallbackDetails
+  ) => {
+    if (rowSelectionModel.length === 0) {
+      dispatch(setSelectedInvoice(null));
       return;
     }
-
-    const selectedRow = rows.find((row) => row.id === selectionModel[0]); // Tomamos solo la primera selección
-    if (selectedRow) {
-      dispatch(setSelectedInvoice(selectedRow));
-    }
+    const selectedRowId = rowSelectionModel[0]; // Tomamos el primer ID seleccionado
+    const selectedRow = rows.find(
+      (row: InvoiceRow) => row.id === selectedRowId
+    );
+    if (selectedRow) dispatch(setSelectedInvoice(selectedRow));
   };
 
-  const handleSelectAll = () => {
-    dispatch(setSelectedAllInvoices(true));
-  };
+  const handleSelectAll = () => dispatch(setSelectedAllInvoices(true));
+
+  const paginatedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
 
   return (
     <Box
@@ -370,19 +389,13 @@ export default function InvoicesTable() {
         <DataGrid
           className={invoicesTableStyles["DataGrid-clientify-box1"]}
           // rows={rows}
-          rows={firstTwoRows}
+          rows={paginatedRows}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 4,
-              },
-            },
+          paginationModel={{ page, pageSize }}
+          onPaginationModelChange={(model: GridPaginationModel) => {
+            dispatch(setPage(model.page)); // Usamos setPage exportada
           }}
-          pageSizeOptions={[4, 10, 20]}
-          // components={{
-          //   Toolbar: GridToolbar, // Para mostrar el filtro de búsqueda y otras opciones de herramienta
-          // }}
+          pageSizeOptions={[25, 50, 75, 100, 125, 150]}
           checkboxSelection
           disableRowSelectionOnClick
           onRowSelectionModelChange={handleRowSelection}

@@ -40,9 +40,7 @@ function AccountsHomeDrawer() {
   const { accounts, totalAccounts } = useSelector(
     (state: RootState) => state.clienty.accountsHome
   );
-  const { selectAccount } = useSelector(
-    (state: RootState) => state.clienty.selectAccount
-  );
+  const { selectAccount } = useSelector((state: RootState) => state.clienty);
   const subdrawer = useSelector((state: RootState) => state.clienty.subDrawer);
 
   useEffect(() => {

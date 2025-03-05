@@ -332,7 +332,7 @@ const initialState: ClientifyState = {
   currentPartnerId: 6653, // ID inicial
   partner: {
     nameCompany: "Capacitravel S.L.", // Valor por defecto
-    nameUser: "Alice Kuvalis Lucy", // Valor por defecto
+    nameUser: "Alice Kuvalis", // Valor por defecto
     photoUrl: "/imgLayout/Rectangle7-png.png", // URL por defecto
   },
 };
