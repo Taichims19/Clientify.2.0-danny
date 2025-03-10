@@ -4,7 +4,9 @@ import FormGroup from "@mui/material/FormGroup";
 import Switch from "@mui/material/Switch";
 import Stack from "@mui/material/Stack";
 
-const AntSwitch = styled(Switch)(({ theme }) => ({
+const AntSwitch = styled((props: any) => (
+  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
+))(({ theme }) => ({
   width: 28,
   height: 16,
   padding: 0,
@@ -51,14 +53,26 @@ const AntSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-export default function AntSwitches() {
+interface AntSwitchProps {
+  checked: boolean;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}
+
+export default function AntSwitches({
+  checked,
+  onChange,
+  disabled,
+}: AntSwitchProps) {
   return (
     <FormGroup>
       <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
         {/* <Typography>Off</Typography> */}
         <AntSwitch
-          // defaultChecked
+          checked={checked} // Ahora es controlado
+          onChange={onChange}
           inputProps={{ "aria-label": "ant design" }}
+          disabled={disabled}
         />
         {/* <Typography>On</Typography> */}
       </Stack>

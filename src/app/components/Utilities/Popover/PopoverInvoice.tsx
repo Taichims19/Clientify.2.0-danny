@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import AntSwitches from "../Switches/AntSwitch/AntSwitches";
 import PopoverInvoiceStyles from "./PopoverInvoice.module.scss";
@@ -8,8 +8,9 @@ import VectorIconPopover from "@/app/icons/VectorIconPopover";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 import {
-  filterPendingCommissions,
-  filterPendingPayments,
+  toggleDateRange,
+  togglePendingCommissions,
+  togglePendingPayments,
 } from "@/app/store/clientify/invoicesTableSlice";
 import DataCalendarsAccounts from "../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
 import {
@@ -25,41 +26,54 @@ export const PopoverInvoice = () => {
     (state: RootState) => state.clienty.calendaryRanger
   );
 
+  const { activeFilters, activeFiltersCount } = useSelector(
+    (state: RootState) => state.invoiceTable
+  );
+
   const isModalOpen = useSelector(
     (state: RootState) => state.clienty.modal.isModalOpen
   );
-  // // Estados del store
-  // const filteredPendingPayments = useSelector(
-  //   (state: RootState) => state.invoiceTable.filteredPendingPayments
-  // );
-  // const filteredPendingCommissions = useSelector(
-  //   (state: RootState) => state.invoiceTable.filteredPendingCommissions
-  // );
+
+  // Estado local sincronizado con Redux
+  const [pendingPaymentsChecked, setPendingPaymentsChecked] = React.useState(
+    activeFilters.pendingPayments
+  );
+  const [pendingCommissionsChecked, setPendingCommissionsChecked] =
+    React.useState(activeFilters.pendingCommissions);
+  const [dateRangeChecked, setDateRangeChecked] = React.useState(
+    activeFilters.dateRange
+  );
+
+  // Sincronizar estado local con Redux al montar
+  useEffect(() => {
+    setPendingPaymentsChecked(activeFilters.pendingPayments);
+    setPendingCommissionsChecked(activeFilters.pendingCommissions);
+    setDateRangeChecked(activeFilters.dateRange);
+  }, [activeFilters]);
 
   // Handlers para los switches
   const handlePendingPaymentsSwitch = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (event.target.checked) {
-      dispatch(filterPendingPayments()); // Activa el filtro.
-    } else {
-      dispatch({ type: "invoicesTable/resetRows" }); // Restablece las filas.
-    }
+    const checked = event.target.checked;
+    setPendingPaymentsChecked(checked);
+    dispatch(togglePendingPayments(checked));
   };
 
   const handlePendingCommissionsSwitch = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (event.target.checked) {
-      dispatch(filterPendingCommissions()); // Activa el filtro.
-    } else {
-      dispatch({ type: "invoicesTable/resetRows" }); // Restablece las filas.
-    }
+    const checked = event.target.checked;
+    setPendingCommissionsChecked(checked);
+    dispatch(togglePendingCommissions(checked));
   };
 
-  const handleOpen = () => {
-    dispatch(openModal());
+  const handleDateRangeSwitch = (checked: boolean) => {
+    setDateRangeChecked(checked);
+    dispatch(toggleDateRange(checked));
   };
+
+  const handleOpen = () => dispatch(openModal());
   const handleClose = () => dispatch(closeModal());
 
   // const handleClick = () => {
@@ -70,6 +84,15 @@ export const PopoverInvoice = () => {
     console.info("Fechas borradas.");
     dispatch(resetCalendaryRanger()); // Resetea el rango de fechas en Redux
   };
+
+  // Solo actualizar dateRangeChecked cuando el usuario interactúe con el calendario
+  useEffect(() => {
+    if (startDate && endDate && !dateRangeChecked) {
+      handleDateRangeSwitch(true); // Activa solo si no estaba activado
+    } else if (!startDate && !endDate && dateRangeChecked) {
+      handleDateRangeSwitch(false); // Desactiva solo si no hay fechas
+    }
+  }, [startDate, endDate, dateRangeChecked]);
 
   return (
     <>
@@ -90,11 +113,11 @@ export const PopoverInvoice = () => {
                 <Box
                   className={PopoverInvoiceStyles["box-children1-grandson1"]}
                 >
-                  <Box
-                    className={PopoverInvoiceStyles["grandson1-children4"]}
-                    onChange={handlePendingCommissionsSwitch}
-                  >
-                    <AntSwitches />
+                  <Box className={PopoverInvoiceStyles["grandson1-children4"]}>
+                    <AntSwitches
+                      checked={pendingCommissionsChecked}
+                      onChange={handlePendingCommissionsSwitch}
+                    />
                   </Box>
                 </Box>
               </Box>
@@ -115,11 +138,11 @@ export const PopoverInvoice = () => {
                 <Box
                   className={PopoverInvoiceStyles["box-children1-grandson1"]}
                 >
-                  <Box
-                    className={PopoverInvoiceStyles["grandson1-children4"]}
-                    onChange={handlePendingPaymentsSwitch}
-                  >
-                    <AntSwitches />
+                  <Box className={PopoverInvoiceStyles["grandson1-children4"]}>
+                    <AntSwitches
+                      checked={pendingPaymentsChecked}
+                      onChange={handlePendingPaymentsSwitch}
+                    />
                   </Box>
                 </Box>
               </Box>

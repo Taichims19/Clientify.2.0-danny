@@ -1,28 +1,27 @@
 "use client";
 
-import { Box, TextField, Button } from "@mui/material";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
-import { setCurrentPartnerId } from "@/app/store/clientify/clientifySlice"; // Ajusta la ruta
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { Box, Button, TextField } from "@mui/material";
+import { setCurrentPartnerId } from "@/app/store/clientify/clientifySlice";
 import { fetchPartnerData } from "@/app/store/clientify/clientifyThunks";
 
-export default function PartnerSearch() {
+export default function PartnerSearchInput() {
   const dispatch = useDispatch();
-
-  // Estado local para el ID ingresado, vacío por defecto
+  const router = useRouter();
   const [partnerIdInput, setPartnerIdInput] = useState<string>("");
 
-  // Manejar cambio en el input
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPartnerIdInput(event.target.value);
   };
 
-  // Despachar la búsqueda con el ID ingresado
   const handleFetchData = () => {
     const id = parseInt(partnerIdInput, 10);
     if (!isNaN(id)) {
       dispatch(setCurrentPartnerId(id));
-      fetchPartnerData(id, dispatch);
+      fetchPartnerData(id, dispatch); // Llama a la función combinada
+      router.push(`/${id}`); // Navega a /id para que la URL refleje el partnerId
     } else {
       alert("Por favor, ingresa un ID válido (número entero).");
     }
@@ -31,7 +30,7 @@ export default function PartnerSearch() {
   return (
     <Box>
       <TextField
-        label="Inserte Partner ID" // Cambiado a "Inserte ID Partner"
+        label="Inserte Partner ID"
         variant="outlined"
         value={partnerIdInput}
         onChange={handleInputChange}
@@ -39,7 +38,7 @@ export default function PartnerSearch() {
         sx={{
           marginRight: "8px",
           "& .MuiInputBase-input": {
-            fontFamily: "inherit", // Usamos fontFamily heredado para consistencia
+            fontFamily: "inherit",
             padding: "4px 8px",
           },
         }}

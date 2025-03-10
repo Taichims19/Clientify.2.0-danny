@@ -121,6 +121,7 @@ export default function InvoicesTable() {
 
   // Acceder al estado de Redux al inicio
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
+
   const columns = useSelector((state: RootState) =>
     state.invoiceTable.columns.slice(0, 8).map((column) => ({
       ...column,
@@ -160,13 +161,21 @@ export default function InvoicesTable() {
       },
     }))
   );
-  const paymentsCount = useSelector(
-    (state: RootState) => state.invoiceTable.pendingCounts.payments
+
+  const filteredPendingPayments = useSelector(
+    (state: RootState) => state.invoiceTable.filteredPendingPayments
   );
-  const commissionsCount = useSelector(
-    (state: RootState) => state.invoiceTable.pendingCounts.commissions
+  const filteredPendingCommissions = useSelector(
+    (state: RootState) => state.invoiceTable.filteredPendingCommissions
   );
-  const combinedCount = paymentsCount + commissionsCount;
+  const activeFilters = useSelector(
+    (state: RootState) => state.invoiceTable.activeFilters
+  );
+
+  const activeFiltersCount = useSelector(
+    (state: RootState) => state.invoiceTable.activeFiltersCount
+  );
+
   const pageSize = useSelector(
     (state: RootState) => state.invoiceTable.pageSize || 25
   );
@@ -218,7 +227,25 @@ export default function InvoicesTable() {
 
   const handleSelectAll = () => dispatch(setSelectedAllInvoices(true));
 
-  const paginatedRows = rows.slice(page * pageSize, (page + 1) * pageSize);
+  // Determinar las filas a mostrar según los filtros activos
+  let displayedRows = rows;
+  if (activeFilters.pendingPayments && activeFilters.pendingCommissions) {
+    // Intersección de ambos filtros
+    displayedRows = filteredPendingPayments.filter((row: { id: any }) =>
+      filteredPendingCommissions.some((comm: { id: any }) => comm.id === row.id)
+    );
+  } else if (activeFilters.pendingPayments) {
+    displayedRows = filteredPendingPayments;
+  } else if (activeFilters.pendingCommissions) {
+    displayedRows = filteredPendingCommissions;
+  }
+
+  const paginatedRows = displayedRows.slice(
+    page * pageSize,
+    (page + 1) * pageSize
+  );
+
+  const loading = useSelector((state: RootState) => state.clienty.loading);
 
   return (
     <Box
@@ -256,32 +283,35 @@ export default function InvoicesTable() {
                 {/* box icon 1 */}
                 <Box
                   className={invoicesTableStyles["boxfilter2-children-icon1"]}
+                  // sx={{ background: "red" }}
                 >
                   <Typography
                     className={invoicesTableStyles["box-icon-1"]}
                     onClick={handleClick}
                   >
-                    <IconFilterFactures />
-                  </Typography>
-                  <Badge
-                    badgeContent={combinedCount}
-                    color="error"
-                    className={invoicesTableStyles["box-badge"]}
-                  >
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "bottom",
-                        horizontal: "left",
-                      }}
-                      className={invoicesTableStyles["box-popover-invoice"]}
+                    <Badge
+                      badgeContent={activeFiltersCount} // Usamos activeFiltersCount
+                      color="error"
+                      className={invoicesTableStyles["box-badge"]}
+                      // sx={{ background: "yellow" }}
                     >
-                      <PopoverInvoice />
-                    </Popover>
-                  </Badge>
+                      <IconFilterFactures />
+                    </Badge>
+                  </Typography>
+
+                  <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left",
+                    }}
+                    className={invoicesTableStyles["box-popover-invoice"]}
+                  >
+                    <PopoverInvoice />
+                  </Popover>
                 </Box>
 
                 {/* box filter search */}
@@ -400,6 +430,13 @@ export default function InvoicesTable() {
           disableRowSelectionOnClick
           onRowSelectionModelChange={handleRowSelection}
           localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+          loading={loading} // Activa el skeleton cuando loading es true
+          slotProps={{
+            loadingOverlay: {
+              variant: "skeleton", // Activa el skeleton estilizado
+              noRowsVariant: "skeleton", // Skeleton para cuando no hay filas
+            },
+          }}
           slots={{
             pagination: CustomPagination,
           }}
@@ -464,11 +501,14 @@ export default function InvoicesTable() {
               display: "flex",
               width: "100%",
               padding: "16px 0px 16px 0px ",
-              // borderTop: "0px solid transparent",
-              // justifyContent: "flex-end",
-              // alignItems: "center",
-              // gap: "8px",
-              // backgroundColor: "blue", // Color de fondo para el paginador
+            },
+            // Estilos para personalizar el skeleton (opcional)
+            "& .MuiDataGrid-loadingOverlay": {
+              backgroundColor: "rgba(255, 255, 255, 0.9)", // Fondo claro para el skeleton
+            },
+            "& .MuiDataGrid-skeleton": {
+              backgroundColor: "#e0e0e0", // Color del skeleton
+              animation: "pulse 1.5s ease-in-out infinite", // Animación tipo Material-UI
             },
           }}
         />

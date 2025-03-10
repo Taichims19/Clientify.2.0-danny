@@ -1,4 +1,3 @@
-// src/redux/clientifyThunks.ts
 import axios, { AxiosError } from "axios";
 import {
   setCurrentPartnerId,
@@ -12,21 +11,15 @@ import {
   setResourcesHome,
   setPartner,
 } from "@/app/store/clientify/clientifySlice";
-import {
-  addRow,
-  calculatePendingCounts,
-  resetRows,
-  InvoiceRow,
-} from "./invoicesTableSlice";
+import { addRow, resetRows, InvoiceRow } from "./invoicesTableSlice";
 
-export const fetchPartnerData = async (
+// Función para obtener los datos del partner
+export const fetchPartnerInfo = async (
   partnerId: number,
   dispatch: (action: any) => void
 ) => {
   try {
     dispatch(setLoading(true));
-
-    // Primer endpoint: datos del partner
     const partnerResponse = await axios.get(
       `https://app.clientify.com/billing-admin/api/partners/${partnerId}/`,
       {
@@ -108,61 +101,9 @@ export const fetchPartnerData = async (
             accountManager.profile_picture || "/imgLayout/Rectangle7-png.png",
         })
       );
-
-      // Segundo endpoint: facturas
-      const invoicesResponse = await axios.get(
-        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?page=1&page_size=100`,
-        {
-          headers: {
-            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
-          },
-        }
-      );
-      const invoicesData = invoicesResponse.data;
-
-      // Limpiar filas existentes antes de agregar nuevas facturas
-      dispatch(resetRows());
-
-      if (
-        invoicesData &&
-        invoicesData.results &&
-        Array.isArray(invoicesData.results)
-      ) {
-        invoicesData.results.forEach((invoice: any) => {
-          const newRow: InvoiceRow = {
-            id: invoice.id,
-            codigo: invoice.invoice_number || "N/A",
-            cuenta: invoice.account || "N/A",
-            importe: invoice.subtotal || 0,
-            moneda: invoice.currency || "N/A",
-            producto: invoice.description_product || "N/A",
-            fechaCreacion: new Date(invoice.created).toLocaleDateString(
-              "es-ES",
-              {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-              }
-            ),
-            fechaPago: invoice.payment_date
-              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
-                  month: "short",
-                  day: "2-digit",
-                  year: "numeric",
-                })
-              : "--",
-            liquidaciones: invoice.settlement_id || "--",
-          };
-          dispatch(addRow(newRow));
-        });
-
-        dispatch(calculatePendingCounts());
-      }
     } else {
-      dispatch(setError("Datos de la API no válidos"));
+      dispatch(setError("Datos del partner no válidos"));
     }
-
-    dispatch(setLoading(false));
   } catch (error) {
     const axiosError = error as AxiosError<any>;
     let errorMessage = "Error fetching partner data";
@@ -178,6 +119,90 @@ export const fetchPartnerData = async (
       errorMessage = axiosError.message;
     }
     dispatch(setError(errorMessage));
+  } finally {
     dispatch(setLoading(false));
   }
+};
+
+// Función para obtener las facturas
+export const fetchInvoicesData = async (
+  partnerId: number,
+  dispatch: (action: any) => void
+) => {
+  try {
+    dispatch(setLoading(true));
+    const invoicesResponse = await axios.get(
+      `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?page=1&page_size=100`,
+      {
+        headers: {
+          Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+        },
+      }
+    );
+    const invoicesData = invoicesResponse.data;
+
+    // Limpiar filas existentes antes de agregar nuevas facturas
+    dispatch(resetRows());
+
+    if (
+      invoicesData &&
+      invoicesData.results &&
+      Array.isArray(invoicesData.results)
+    ) {
+      invoicesData.results.forEach((invoice: any) => {
+        const newRow: InvoiceRow = {
+          id: invoice.id,
+          codigo: invoice.invoice_number || "N/A",
+          cuenta: invoice.account || "N/A",
+          importe: invoice.subtotal || 0,
+          moneda: invoice.currency || "N/A",
+          producto: invoice.description_product || "N/A",
+          fechaCreacion: new Date(invoice.created).toLocaleDateString("es-ES", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          }),
+          fechaPago: invoice.payment_date
+            ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              })
+            : "--",
+          liquidaciones: invoice.settlement_id || "--",
+        };
+        dispatch(addRow(newRow));
+      });
+    } else {
+      dispatch(setError("Datos de facturas no válidos"));
+    }
+  } catch (error) {
+    const axiosError = error as AxiosError<any>;
+    let errorMessage = "Error fetching invoices data";
+    if (axiosError.response?.data) {
+      errorMessage =
+        typeof axiosError.response.data === "string"
+          ? axiosError.response.data
+          : axiosError.response.data.message ||
+            axiosError.response.data.error ||
+            Object.values(axiosError.response.data)[0] ||
+            JSON.stringify(axiosError.response.data);
+    } else if (axiosError.message) {
+      errorMessage = axiosError.message;
+    }
+    dispatch(setError(errorMessage));
+  } finally {
+    dispatch(setLoading(false));
+  }
+};
+
+// Función combinada para llamar a ambas (opcional)
+export const fetchPartnerData = async (
+  partnerId: number,
+  dispatch: (action: any) => void
+) => {
+  await Promise.all([
+    fetchPartnerInfo(partnerId, dispatch),
+    fetchInvoicesData(partnerId, dispatch),
+  ]);
 };

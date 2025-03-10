@@ -19,12 +19,14 @@ export interface InvoiceRow {
 interface DataGridState {
   rows: InvoiceRow[];
   columns: GridColDef[];
-  filteredPendingPayments: InvoiceRow[]; // Filtrado por pagos pendientes
-  filteredPendingCommissions: InvoiceRow[]; // Filtrado por comisiones pendientes
-  pendingCounts: {
-    payments: number;
-    commissions: number;
+  filteredPendingPayments: InvoiceRow[]; // Mantenemos por compatibilidad, pero no lo usaremos para conteo
+  filteredPendingCommissions: InvoiceRow[]; // Mantenemos por compatibilidad, pero no lo usaremos para conteo
+  activeFilters: {
+    pendingPayments: boolean;
+    pendingCommissions: boolean;
+    dateRange: boolean;
   };
+  activeFiltersCount: number; // Nuevo contador único
   selectedInvoice: InvoiceRow | null; // Nueva propiedad
   allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
   page: number; // Nueva propiedad para la página actual
@@ -134,10 +136,12 @@ const initialState: DataGridState = {
   ],
   filteredPendingPayments: [],
   filteredPendingCommissions: [],
-  pendingCounts: {
-    payments: 0,
-    commissions: 0,
+  activeFilters: {
+    pendingPayments: false,
+    pendingCommissions: false,
+    dateRange: false,
   },
+  activeFiltersCount: 0,
   selectedInvoice: null, // Inicialmente ninguna factura seleccionada
   allInvoicesSelected: false, // Inicialmente no todas están seleccionadas
   page: 0, // Página inicial
@@ -163,44 +167,69 @@ const invoicesTableSlice = createSlice({
     deleteRow: (state, action: PayloadAction<number>) => {
       state.rows = state.rows.filter((row) => row.id !== action.payload);
     },
-    filterPendingPayments: (state) => {
-      console.log("evento pago");
-      state.filteredPendingPayments = state.filteredPendingPayments.length
-        ? []
-        : state.rows.filter((row) => row.fechaPago === "--");
-      state.rows = state.filteredPendingPayments.length
-        ? state.filteredPendingPayments
-        : initialState.rows;
-
-      // Actualizar el conteo
-      state.pendingCounts.payments = state.filteredPendingPayments.length;
+    filterPendingPayments: (state, action: PayloadAction<boolean>) => {
+      if (action.payload) {
+        state.filteredPendingPayments = state.rows.filter(
+          (row) => row.fechaPago === "--"
+        );
+      } else {
+        state.filteredPendingPayments = [];
+      }
     },
-    filterPendingCommissions: (state) => {
-      console.log("evento comisiones");
-      state.filteredPendingCommissions = state.filteredPendingCommissions.length
-        ? []
-        : state.rows.filter((row) => row.liquidaciones === "--");
-      state.rows = state.filteredPendingCommissions.length
-        ? state.filteredPendingCommissions
-        : initialState.rows;
-
-      // Actualizar el conteo
-      state.pendingCounts.commissions = state.filteredPendingCommissions.length;
+    filterPendingCommissions: (state, action: PayloadAction<boolean>) => {
+      if (action.payload) {
+        state.filteredPendingCommissions = state.rows.filter(
+          (row) => row.liquidaciones === "--"
+        );
+      } else {
+        state.filteredPendingCommissions = [];
+      }
     },
-    calculatePendingCounts: (state) => {
-      state.pendingCounts.payments = state.rows.filter(
-        (row) => row.fechaPago === "--"
-      ).length;
-      state.pendingCounts.commissions = state.rows.filter(
-        (row) => row.liquidaciones === "--"
-      ).length;
+    togglePendingPayments: (state, action: PayloadAction<boolean>) => {
+      state.activeFilters.pendingPayments = action.payload;
+      state.activeFiltersCount += action.payload ? 1 : -1;
+      if (state.activeFiltersCount < 0) state.activeFiltersCount = 0;
+      // Recalcular ambos filtros basados en el estado actual de rows
+      state.filteredPendingPayments = action.payload
+        ? state.rows.filter((row) => row.fechaPago === "--")
+        : [];
+      if (state.activeFilters.pendingCommissions) {
+        state.filteredPendingCommissions = state.rows.filter(
+          (row) => row.liquidaciones === "--" && row.fechaPago === "--"
+        );
+      } else {
+        state.filteredPendingCommissions = action.payload
+          ? []
+          : state.rows.filter((row) => row.liquidaciones === "--");
+      }
+    },
+    togglePendingCommissions: (state, action: PayloadAction<boolean>) => {
+      state.activeFilters.pendingCommissions = action.payload;
+      state.activeFiltersCount += action.payload ? 1 : -1;
+      if (state.activeFiltersCount < 0) state.activeFiltersCount = 0;
+      // Recalcular ambos filtros basados en el estado actual de rows
+      state.filteredPendingCommissions = action.payload
+        ? state.rows.filter((row) => row.liquidaciones === "--")
+        : [];
+      if (state.activeFilters.pendingPayments) {
+        state.filteredPendingPayments = state.rows.filter(
+          (row) => row.fechaPago === "--" && row.liquidaciones === "--"
+        );
+      } else {
+        state.filteredPendingPayments = action.payload
+          ? []
+          : state.rows.filter((row) => row.fechaPago === "--");
+      }
+    },
+    toggleDateRange: (state, action: PayloadAction<boolean>) => {
+      state.activeFilters.dateRange = action.payload;
+      state.activeFiltersCount += action.payload ? 1 : -1;
+      if (state.activeFiltersCount < 0) state.activeFiltersCount = 0;
     },
     resetRows: (state) => {
-      state.rows = []; // Cambiar a un array vacío en lugar de initialState.rows
+      state.rows = [];
       state.filteredPendingPayments = [];
       state.filteredPendingCommissions = [];
-      state.pendingCounts.payments = 0;
-      state.pendingCounts.commissions = 0;
     },
     setSelectedInvoice: (state, action: PayloadAction<InvoiceRow | null>) => {
       console.log("1 factura seleccionada");
@@ -225,9 +254,11 @@ export const {
   addRow,
   updateRow,
   deleteRow,
+  togglePendingPayments,
+  togglePendingCommissions,
+  toggleDateRange,
   filterPendingPayments,
   filterPendingCommissions,
-  calculatePendingCounts,
   resetRows,
   setSelectedInvoice,
   setSelectedAllInvoices,
