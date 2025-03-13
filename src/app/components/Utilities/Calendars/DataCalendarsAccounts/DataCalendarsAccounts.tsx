@@ -7,7 +7,7 @@ import { Box, Button, Modal, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store/store";
 import DataCalendarsAccountStyles from "./DataCalendarsAccounts.module.scss";
-import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
+
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/app/store/clientify/clientifySlice";
 import InfoIconAccounts from "@/app/icons/InfoIconAccounts";
 import { useState } from "react";
+import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
 
 export default function DataCalendarsAccounts({ open, handleClose }: any) {
   const dispatch = useDispatch();
@@ -31,6 +32,11 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
   const handleApply = () => {
     dispatch(setDateRange(dateRange));
     handleClose(); // Cierra el modal después de aplicar
+  };
+
+  // Manejador para el cambio del switch
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(toggleMessage()); // Cambia el estado en Redux
   };
 
   return (
@@ -152,7 +158,10 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
                     }
                     onClick={() => dispatch(toggleMessage())}
                   >
-                    <AntSwitches />
+                    <AntSwitches
+                      checked={showMessage} // Conecta el estado de Redux
+                      onChange={handleSwitchChange} // Maneja el cambio
+                    />
                   </Box>
                 </Box>
               </Box>
