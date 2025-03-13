@@ -27,10 +27,13 @@ interface DataGridState {
     dateRange: boolean;
   };
   activeFiltersCount: number; // Nuevo contador único
-  selectedInvoice: InvoiceRow | null; // Nueva propiedad
-  allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
   page: number; // Nueva propiedad para la página actual
   pageSize: number; // Nueva propiedad para el tamaño de página
+  selectedInvoice: InvoiceRow | null; // Nueva propiedad
+  allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
+  totalCount: number; // Nuevo campo para el total de facturas
+  nextPageUrl: string | null; // URL de la siguiente página
+  visibleRowsCount: number; // Nueva propiedad para controlar el renderizado
 }
 
 const initialState: DataGridState = {
@@ -145,7 +148,10 @@ const initialState: DataGridState = {
   selectedInvoice: null, // Inicialmente ninguna factura seleccionada
   allInvoicesSelected: false, // Inicialmente no todas están seleccionadas
   page: 0, // Página inicial
-  pageSize: 25, // Tamaño de página predeterminado
+  pageSize: 100, // Fijamos a 100 por página
+  totalCount: 0,
+  nextPageUrl: null,
+  visibleRowsCount: 25, // Valor por defecto para iniciar con 25
 };
 
 // Crea el slice
@@ -242,10 +248,24 @@ const invoicesTableSlice = createSlice({
     },
     setPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
+      state.visibleRowsCount = 25; // Reinicia a 25 al cambiar de página
     },
+    // setPageSize: (state, action: PayloadAction<number>) => {
+    //   state.pageSize = action.payload;
+    //   state.page = 0; // Resetea a la primera página
+    // },
     setPageSize: (state, action: PayloadAction<number>) => {
-      state.pageSize = action.payload;
+      state.pageSize = 100; // Forzamos pageSize a 100 para la API
       state.page = 0; // Resetea a la primera página
+    },
+    setTotalCount: (state, action: PayloadAction<number>) => {
+      state.totalCount = action.payload;
+    },
+    setNextPageUrl: (state, action: PayloadAction<string | null>) => {
+      state.nextPageUrl = action.payload;
+    },
+    setVisibleRowsCount: (state, action: PayloadAction<number>) => {
+      state.visibleRowsCount = action.payload; // Controla el renderizado manual
     },
   },
 });
@@ -264,6 +284,9 @@ export const {
   setSelectedAllInvoices,
   setPage,
   setPageSize,
+  setTotalCount,
+  setNextPageUrl,
+  setVisibleRowsCount, // Exportamos el nuevo reducer
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;

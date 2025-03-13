@@ -5,8 +5,9 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import InputBase from "@mui/material/InputBase";
 import nativeSelectorStyles from "../NativeSelect/NativeSelector.module.scss";
-import { useDispatch } from "react-redux";
-import { setPageSize } from "@/app/store/clientify/invoicesTableSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setVisibleRowsCount } from "@/app/store/clientify/invoicesTableSlice";
+import { RootState } from "@/app/store/store";
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
   "label + &": { marginTop: theme.spacing(3) },
@@ -69,47 +70,34 @@ export default function NativeSelector({
   maxRows,
 }: NativeSelectorProps) {
   const dispatch = useDispatch();
+  const visibleRowsCount = useSelector(
+    (state: RootState) => state.invoiceTable.visibleRowsCount
+  );
 
   const handleChange = (event: { target: { value: string } }) => {
-    const newPageSize = parseInt(event.target.value, 10);
-    onChange(newPageSize);
-    dispatch(setPageSize(newPageSize));
+    const newVisibleRowsCount = parseInt(event.target.value, 10);
+    onChange(newVisibleRowsCount);
+    dispatch(setVisibleRowsCount(newVisibleRowsCount)); // Actualiza visibleRowsCount
   };
 
-  const pageSizeOptions = [25, 50, 75, 100, 125, 150].filter(
-    (size) => size <= maxRows || maxRows === 0
-  );
+  // Mostrar siempre 25, 50, 75, 100 como opciones fijas
+  const pageSizeOptions = [25, 50, 75, 100];
 
   return (
     <FormControl className={nativeSelectorStyles["NativeSelector-box-father"]}>
       <Select
         labelId="demo-customized-select-label"
         id="demo-customized-select"
-        value={value.toString()}
+        value={visibleRowsCount.toString()} // Usamos visibleRowsCount (25 por defecto)
         onChange={handleChange}
         input={<BootstrapInput />}
         MenuProps={CustomMenuProps}
         sx={{ "& .MuiSvgIcon-root": { fontSize: "16px" } }}
       >
-        {pageSizeOptions.length > 0 ? (
-          pageSizeOptions.map((size) => (
-            <MenuItem
-              key={size}
-              value={size}
-              style={{
-                lineHeight: "19px",
-                fontStyle: "normal",
-                fontWeight: 400,
-                justifyContent: "center",
-                fontSize: "14px",
-              }}
-            >
-              {size}
-            </MenuItem>
-          ))
-        ) : (
+        {pageSizeOptions.map((size) => (
           <MenuItem
-            value={25}
+            key={size}
+            value={size}
             style={{
               lineHeight: "19px",
               fontStyle: "normal",
@@ -118,9 +106,9 @@ export default function NativeSelector({
               fontSize: "14px",
             }}
           >
-            25
+            {size}
           </MenuItem>
-        )}
+        ))}
       </Select>
     </FormControl>
   );

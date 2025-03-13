@@ -24,7 +24,7 @@ import IconFilterFactures from "@/app/icons/IconFilterFactures";
 import IconSearchFacture from "@/app/icons/IconSearchFacture";
 import NativeSelector from "../Utilities/Selectors/NativeSelect/NativeSelector";
 import { PopoverInvoice } from "../Utilities/Popover/PopoverInvoice";
-import { RootState } from "@/app/store/store";
+import { AppDispatch, RootState } from "@/app/store/store";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DrawerView,
@@ -36,34 +36,50 @@ import {
   setSelectedAllInvoices,
   setSelectedInvoice,
   setPageSize,
-  setPage, // Nueva acción (a definir en el slice)
+  setPage,
+  setVisibleRowsCount, // Nueva acción (a definir en el slice)
 } from "@/app/store/clientify/invoicesTableSlice";
+import { fetchInvoicesData } from "@/app/store/clientify/clientifyThunks";
 
 const CustomPagination = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
-  const pageSize = useSelector(
-    (state: RootState) => state.invoiceTable.pageSize || 25
-  );
+  const pageSize = 100; // Tamaño fijo de la página para la API
   const page = useSelector((state: RootState) => state.invoiceTable.page || 0);
+  const totalCount = useSelector(
+    (state: RootState) => state.invoiceTable.totalCount || 0
+  );
+  const partnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
+  );
+  const visibleRowsCount = useSelector(
+    (state: RootState) => state.invoiceTable.visibleRowsCount || 25
+  );
+  const loading = useSelector((state: RootState) => state.clienty.loading);
 
-  const totalPages = Math.ceil(rows.length / pageSize); // Usa el total de rows
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Calcular el rango visible
   const startRow = page * pageSize + 1;
-  const endRow = Math.min((page + 1) * pageSize, rows.length);
+  const endRow = Math.min(startRow + visibleRowsCount - 1, totalCount);
 
   const handlePageChange = (newPage: number) => {
-    dispatch(setPage(newPage));
+    if (partnerId && !loading && newPage >= 0 && newPage < totalPages) {
+      dispatch(setPage(newPage));
+      dispatch(fetchInvoicesData(partnerId, newPage + 1, pageSize)); // API usa paginación basada en 1
+    }
   };
 
-  const handlePageSizeChange = (newPageSize: number) => {
-    dispatch(setPageSize(newPageSize));
-    dispatch(setPage(0));
+  const handlePageSizeChange = (newVisibleRowsCount: number) => {
+    if (partnerId && !loading) {
+      dispatch(setVisibleRowsCount(newVisibleRowsCount));
+    }
   };
+
   return (
     <>
       <Box className={invoicesTableStyles["Footer-DataGrid-father"]}>
         <Box className={invoicesTableStyles["Footer-DataGrid-child"]}>
-          {/* Box 1 footer */}
           <Box className={invoicesTableStyles["Box-row-footer-1"]}>
             <Typography
               className={`${styles["Body-medium"]} ${poppins.className}`}
@@ -71,13 +87,11 @@ const CustomPagination = () => {
               Filas por página
             </Typography>
             <NativeSelector
-              value={pageSize}
+              value={visibleRowsCount}
               onChange={handlePageSizeChange}
-              maxRows={rows.length}
+              maxRows={totalCount}
             />
           </Box>
-
-          {/* icon of arrow  */}
           <IconArrowLeft
             onClick={() => handlePageChange(page > 0 ? page - 1 : 0)}
             style={{
@@ -85,13 +99,12 @@ const CustomPagination = () => {
               opacity: page > 0 ? 1 : 0.5,
             }}
           />
-          {/* text of page */}
           <Typography
             className={`${styles["Body-medium"]} ${poppins.className}`}
           >
-            {startRow} de {endRow}
+            {/* {startRow}-{visibleEndRow} de {totalCount} */}
+            {startRow}-{endRow} de {totalCount}
           </Typography>
-          {/* Box 2 footer */}
           <Box className={invoicesTableStyles["Box-row-footer-2"]}>
             <IconArrowRight
               onClick={() =>
@@ -117,7 +130,7 @@ const CustomPagination = () => {
 };
 
 export default function InvoicesTable() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // Usamos AppDispatch
 
   // Acceder al estado de Redux al inicio
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
@@ -155,7 +168,11 @@ export default function InvoicesTable() {
                   : "default",
             }}
           >
-            <Typography>{params.value}</Typography>
+            <Typography
+              className={`${styles["Body-regular"]} ${poppins.className}`} // Añadido para estilizar las celdas
+            >
+              {params.value}
+            </Typography>
           </Box>
         );
       },
@@ -176,9 +193,10 @@ export default function InvoicesTable() {
     (state: RootState) => state.invoiceTable.activeFiltersCount
   );
 
-  const pageSize = useSelector(
-    (state: RootState) => state.invoiceTable.pageSize || 25
-  );
+  // const pageSize = useSelector(
+  //   (state: RootState) => state.invoiceTable.pageSize || 25
+  // );
+  const pageSize = 100; // Fijo para la API
   const page = useSelector((state: RootState) => state.invoiceTable.page || 0);
   const { selectedInvoice, allInvoicesSelected } = useSelector(
     (state: RootState) => state.invoiceTable
@@ -186,6 +204,10 @@ export default function InvoicesTable() {
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
+  );
+
+  const partnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
   );
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
@@ -240,12 +262,14 @@ export default function InvoicesTable() {
     displayedRows = filteredPendingCommissions;
   }
 
-  const paginatedRows = displayedRows.slice(
-    page * pageSize,
-    (page + 1) * pageSize
+  const loading = useSelector((state: RootState) => state.clienty.loading);
+
+  const visibleRowsCount = useSelector(
+    (state: RootState) => state.invoiceTable.visibleRowsCount || 25 // Usa el nuevo estado
   );
 
-  const loading = useSelector((state: RootState) => state.clienty.loading);
+  // Tomar solo las primeras visibleRowsCount filas de la página actual
+  const paginatedRows = displayedRows.slice(0, visibleRowsCount);
 
   return (
     <Box
@@ -421,11 +445,11 @@ export default function InvoicesTable() {
           // rows={rows}
           rows={paginatedRows}
           columns={columns}
-          paginationModel={{ page, pageSize }}
-          onPaginationModelChange={(model: GridPaginationModel) => {
-            dispatch(setPage(model.page)); // Usamos setPage exportada
-          }}
-          pageSizeOptions={[25, 50, 75, 100, 125, 150]}
+          // paginationModel={{ page, pageSize }}
+          // onPaginationModelChange={(model: GridPaginationModel) => {
+          //   dispatch(setPage(model.page)); // Usamos setPage exportada
+          // }}
+          pageSizeOptions={[25, 50, 75, 100]} // Limitado a 100 como máximo por tu requerimiento
           checkboxSelection
           disableRowSelectionOnClick
           onRowSelectionModelChange={handleRowSelection}
@@ -509,6 +533,14 @@ export default function InvoicesTable() {
             "& .MuiDataGrid-skeleton": {
               backgroundColor: "#e0e0e0", // Color del skeleton
               animation: "pulse 1.5s ease-in-out infinite", // Animación tipo Material-UI
+            },
+            "& .MuiDataGrid-cell": {
+              // Añadido para aplicar la fuente a todas las celdas
+              fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
+              "& *": {
+                // Asegura que todos los elementos dentro de la celda hereden la fuente
+                fontFamily: poppins.style.fontFamily,
+              },
             },
           }}
         />

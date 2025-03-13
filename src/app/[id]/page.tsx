@@ -14,7 +14,7 @@ import RecurrenceChart from "@/app/components/RecurrenceChart/RecurrenceChart";
 import styles from "@/app/styles/home.module.css";
 import AnchorTemporaryDrawer from "@/app/components/Utilities/Drawers/AnchorTemporaryDrawer/AnchorTemporaryDrawer";
 import { useSelector } from "react-redux";
-import { RootState } from "@/app/store/store";
+import { AppDispatch, RootState } from "@/app/store/store";
 import PlanSuscriptionDrawer from "@/app/components/Utilities/Drawers/PlanSuscription/PlanSuscriptionDrawer";
 import AccountsHomeDrawer from "@/app/components/Utilities/Drawers/AccountsHome/AccountsHomeDrawer";
 import ResourcesHomeDrawer from "@/app/components/Utilities/Drawers/ResourcesHome/ResourcesHomeDrawer";
@@ -23,7 +23,7 @@ import { DrawerView } from "@/app/store/clientify/clientifySlice";
 import { fetchPartnerData } from "../store/clientify/clientifyThunks";
 
 export default function PartnerPage() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // Usamos AppDispatch para soportar thunks
   const params = useParams();
   const id = params.id as string;
   const drawer = useSelector((state: RootState) => state.clienty.drawer); // Corregí "clienty" a "clientify"
@@ -31,11 +31,11 @@ export default function PartnerPage() {
   useEffect(() => {
     const partnerId = parseInt(id, 10);
     if (!isNaN(partnerId)) {
-      fetchPartnerData(partnerId, dispatch); // Ejecutar directamente, no pasar a dispatch
+      dispatch(fetchPartnerData(partnerId)); // Llamamos al thunk directamente con dispatch
     } else {
       console.error("ID de partner no válido:", id);
     }
-  }, [id, dispatch]); // Se ejecuta solo cuando cambia el id
+  }, [id, dispatch]);
 
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>
