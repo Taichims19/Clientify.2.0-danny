@@ -20,7 +20,7 @@ export default function PartnerSearchInput() {
     const id = parseInt(partnerIdInput, 10);
     if (!isNaN(id)) {
       dispatch(setCurrentPartnerId(id));
-      fetchPartnerData(id, dispatch); // Llama a la función combinada
+      fetchPartnerData(id); // Llama a la función combinada
       router.push(`/${id}`); // Navega a /id para que la URL refleje el partnerId
     } else {
       alert("Por favor, ingresa un ID válido (número entero).");

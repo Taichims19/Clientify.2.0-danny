@@ -18,11 +18,18 @@ import { poppins } from "../../../../fonts/fonts";
 import IconRightArrow from "@/app/icons/IconRightArrow";
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
 import IconVectorClear from "@/app/icons/IconVectorClear";
+import { toggleMessage } from "@/app/store/clientify/clientifySlice";
 
 function PlanSuscriptionDrawer() {
   const [loading, setLoading] = useState(false);
   const { plans, totalPlans } = useSelector(
     (state: RootState) => state.clienty.subscriptionPlans
+  );
+
+  const dispatch = useDispatch();
+
+  const showMessage = useSelector(
+    (state: RootState) => state.clienty.message.showMessage
   );
 
   useEffect(() => {
@@ -31,6 +38,11 @@ function PlanSuscriptionDrawer() {
       setLoading(false);
     }, 2000);
   }, []);
+
+  // Manejador para el cambio del switch
+  const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(toggleMessage()); // Cambia el estado en Redux
+  };
 
   const renderLoading = () => {
     return (
@@ -101,7 +113,10 @@ function PlanSuscriptionDrawer() {
                       AnchorTemporaryDrawerStyles["grandson1-children4"]
                     }
                   >
-                    <AntSwitches />
+                    <AntSwitches
+                      checked={showMessage} // Conecta el estado de Redux
+                      onChange={handleSwitchChange} // Maneja el cambio
+                    />
                   </Box>
                 </Box>
               </Box>
