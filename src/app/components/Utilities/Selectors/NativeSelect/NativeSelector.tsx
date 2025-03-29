@@ -8,27 +8,32 @@ import nativeSelectorStyles from "../NativeSelect/NativeSelector.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { setVisibleRowsCount } from "@/app/store/clientify/invoicesTableSlice";
 import { RootState } from "@/app/store/store";
+import styles from "../../../../home.module.css";
+import { poppins } from "../../../../fonts/fonts";
 
 const BootstrapInput = styled(InputBase)(({ theme }) => ({
   "label + &": { marginTop: theme.spacing(3) },
   "& .MuiInputBase-input": {
     borderRadius: 4,
     position: "relative",
-    height: "21px",
+    height: "25px",
+    width: "10px",
     backgroundColor: theme.palette.background.paper,
-    fontSize: 16,
-    fontFamily: [
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(","),
+    // backgroundColor: "yellow",
+    display: "flex",
+    padding: "4px",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: "12px",
+    fontStyle: "normal",
+    fontWeight: 500,
+    lineHeight: "17px",
+    color: "#525252",
+    fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
+    "& *": {
+      // Asegura que todos los elementos dentro de la celda hereden la fuente
+      fontFamily: poppins.style.fontFamily,
+    },
     "&:focus": {
       borderRadius: 4,
       borderColor: "#80bdff",
@@ -40,11 +45,27 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
 const CustomMenuProps = {
   PaperProps: {
     style: {
-      maxHeight: 210,
-      width: "53px",
+      height: 130,
+      width: "47px",
       padding: "8px 10px",
       backgroundColor: "#f9f9f9",
       border: "1px solid #ccc",
+      display: "flex",
+      flexDirection: "column",
+      // background: "red",
+      alignItems: "center",
+      // Título del mes (e.g., "Marzo 2025")
+      fontSize: "14px",
+      fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
+      "& *": {
+        // Asegura que todos los elementos dentro de la celda hereden la fuente
+        fontFamily: poppins.style.fontFamily,
+      },
+      fontStyle: "normal",
+      fontWeight: 400,
+      lineHeight: "19px",
+      color: "#525252",
+      // color: "red",
     },
     sx: {
       "&::-webkit-scrollbar": { width: "6px", height: "78.5px" },
@@ -54,6 +75,24 @@ const CustomMenuProps = {
       },
       "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#555" },
       "&::-webkit-scrollbar-track": { backgroundColor: "#f1f1f1" },
+      // "& .MuiMenuItem-root.Mui-selected": {
+      //   // Estilo para el MenuItem seleccionado
+      //   backgroundColor: "yellow", // Color de fondo cuando está seleccionado
+      //   position: "relative",
+      //   right: "20%",
+      // },
+      "& .MuiMenuItem-root": {
+        // Estilo para el MenuItem seleccionado
+        backgroundColor: "red", // Color de fondo cuando está seleccionado
+        position: "relative",
+        right: "20%",
+      },
+      "& .MuiInputBase-input": {
+        // Estilo para el MenuItem seleccionado
+        backgroundColor: "red", // Color de fondo cuando está seleccionado
+        position: "relative",
+        right: "20%",
+      },
     },
   },
 };

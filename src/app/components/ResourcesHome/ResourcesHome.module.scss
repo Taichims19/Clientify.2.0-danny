@@ -44,11 +44,14 @@
       align-items: center;
       gap: 8px;
       align-self: stretch;
+     
 
         // grandson childrens
       .Box-ResourcesHome-childrens-child{
         display: flex;
         align-items: center;
+        // background: yellow;
+        justify-content: space-between !important;
         gap: 4px;
         flex: 1 0 0;
 

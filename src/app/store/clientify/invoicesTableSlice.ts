@@ -34,6 +34,7 @@ interface DataGridState {
   totalCount: number; // Nuevo campo para el total de facturas
   nextPageUrl: string | null; // URL de la siguiente página
   visibleRowsCount: number; // Nueva propiedad para controlar el renderizado
+  searchQuery: string; // Nuevo campo para la búsqueda
 }
 
 const initialState: DataGridState = {
@@ -152,6 +153,7 @@ const initialState: DataGridState = {
   totalCount: 0,
   nextPageUrl: null,
   visibleRowsCount: 25, // Valor por defecto para iniciar con 25
+  searchQuery: "", // Valor inicial vacío
 };
 
 // Crea el slice
@@ -267,6 +269,10 @@ const invoicesTableSlice = createSlice({
     setVisibleRowsCount: (state, action: PayloadAction<number>) => {
       state.visibleRowsCount = action.payload; // Controla el renderizado manual
     },
+    // Nuevo reducer para la búsqueda
+    setSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload;
+    },
   },
 });
 
@@ -286,7 +292,8 @@ export const {
   setPageSize,
   setTotalCount,
   setNextPageUrl,
-  setVisibleRowsCount, // Exportamos el nuevo reducer
+  setVisibleRowsCount,
+  setSearchQuery, // Exportamos el nuevo reducer
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;

@@ -10,7 +10,15 @@ import {
   GridRowSelectionModel, // Importado para corregir el tipo
   GridCallbackDetails, // Importado para corregir el tipo
 } from "@mui/x-data-grid";
-import { Typography, Box, Button, Popover, Badge } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Button,
+  Popover,
+  Badge,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
 import invoicesTableStyles from "./InvoicesTable.module.scss";
 import { esES } from "@mui/x-data-grid/locales";
 import styles from "../../styles/home.module.css";
@@ -37,7 +45,8 @@ import {
   setSelectedInvoice,
   setPageSize,
   setPage,
-  setVisibleRowsCount, // Nueva acción (a definir en el slice)
+  setVisibleRowsCount,
+  setSearchQuery, // Nueva acción (a definir en el slice)
 } from "@/app/store/clientify/invoicesTableSlice";
 import { fetchInvoicesData } from "@/app/store/clientify/clientifyThunks";
 
@@ -99,12 +108,14 @@ const CustomPagination = () => {
               opacity: page > 0 ? 1 : 0.5,
             }}
           />
-          <Typography
-            className={`${styles["Body-medium"]} ${poppins.className}`}
-          >
-            {/* {startRow}-{visibleEndRow} de {totalCount} */}
-            {startRow}-{endRow} de {totalCount}
-          </Typography>
+          <Box>
+            <Typography
+              className={`${styles["Body-medium"]} ${poppins.className}`}
+            >
+              {/* {startRow}-{visibleEndRow} de {totalCount} */}
+              {startRow}-{endRow} de {totalCount}
+            </Typography>
+          </Box>
           <Box className={invoicesTableStyles["Box-row-footer-2"]}>
             <IconArrowRight
               onClick={() =>
@@ -179,6 +190,11 @@ export default function InvoicesTable() {
     }))
   );
 
+  const searchQuery = useSelector(
+    (state: RootState) => state.invoiceTable.searchQuery
+  );
+  const [searchValue, setSearchValue] = React.useState(searchQuery); // Estado local para el input
+
   const filteredPendingPayments = useSelector(
     (state: RootState) => state.invoiceTable.filteredPendingPayments
   );
@@ -215,6 +231,27 @@ export default function InvoicesTable() {
   const handleClose = () => setAnchorEl(null);
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
+
+  // Manejador para enviar la búsqueda al hacer clic en el ícono
+  const handleSearch = () => {
+    dispatch(setSearchQuery(searchValue));
+    console.log("Valor de búsqueda guardado en Redux:", searchValue); // Para depuración
+  };
+
+  // // Validación para permitir solo códigos (e.g., "PROFORMA-123") o comisiones (e.g., "25%")
+  // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = event.target.value;
+  //   // Regex: permite "PROFORMA-" seguido de números o un número seguido opcionalmente por "%"
+  //   const validPattern = /^(PROFORMA-\d*|\d*%?)$/;
+  //   if (validPattern.test(value) || value === "") {
+  //     setSearchValue(value);
+  //   }
+  // };
+
+  // Sin validación: permitimos cualquier entrada
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(event.target.value);
+  };
 
   const handleOpenDrawer = (
     plan: string | null,
@@ -344,12 +381,60 @@ export default function InvoicesTable() {
                 >
                   <Box className={invoicesTableStyles["box-icon-2"]}>
                     <Box className={invoicesTableStyles["box-icon-2-children"]}>
+                      <TextField
+                        value={searchValue}
+                        onChange={handleInputChange}
+                        placeholder="Buscar por código o comisión"
+                        className={`${styles["Title-regular"]} ${poppins.className}`}
+                        variant="filled"
+                        sx={{
+                          "& .MuiInputBase-root": {
+                            height: "auto",
+                            width: 215,
+                            padding: 0,
+                            background: "transparent",
+                            border: "none", // Sin borde en el contenedor
+                            // background: "blue",
+                            "&:before, &:after": {
+                              display: "none", // Elimina la línea inferior por defecto
+                            },
+                            "&:hover, &:focus, &:active": {
+                              border: "none", // Sin borde al hacer hover o foco
+                              outline: "none", // Sin contorno al hacer foco
+                            },
+                          },
+                          "& .MuiInputBase-input": {
+                            fontFamily: poppins.style.fontFamily,
+                            padding: 0,
+                            fontSize: "14px",
+                            fontStyle: "normal",
+                            fontWeight: 400,
+                            lineHeight: "19px",
+                            color: "#8D8D8D",
+                            border: "none",
+                            "&:hover, &:focus, &:active": {
+                              border: "none", // Sin borde en estados
+                              outline: "none", // Sin contorno en estados
+                            },
+                          },
+                        }}
+                      />
                       <Typography
+                        style={{
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "end",
+                        }}
+                        onClick={handleSearch}
+                      >
+                        <IconSearchFacture />
+                      </Typography>
+                      {/* <Typography
                         className={`${styles["Title-regular"]} ${poppins.className}`}
                       >
                         Buscar por código o comisión
                       </Typography>
-                      | <IconSearchFacture />
+                      | <IconSearchFacture /> */}
                     </Box>
                   </Box>
                 </Box>

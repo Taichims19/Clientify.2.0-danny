@@ -84,11 +84,14 @@
               .box-icon-2-children{
                 display: flex;
                 height: 35px;
+                width: 260px !important;
                 padding: 8px 8px 8px 16px;
-                align-items: center;
+                // align-items: center;
+                justify-content: space-between;
                 gap: 8px;
                 border-radius: var(--Radius-Small, 4px);
                 background: var(--searchbar-frame-default, #F4F4F4);
+                // background: yellowgreen;
               }
             }
           }

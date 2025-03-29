@@ -1,154 +1,68 @@
-.Box-ResourcesHomeDrawer-father{
+.Box-ResourcesHomeDrawer-father {
   width: 308px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
   align-self: stretch;
-  // background: yellow;
   background: var(--Surface-Modal, #FFF);
-  // box-shadow: -4px 0px 10px 0px rgba(0, 0, 0, 0.10);
+  box-shadow: -4px 0px 10px 0px rgba(0, 0, 0, 0.10);
 
-  .ResourcesHomeDrawer-childrens{
-    display: flex;
-    padding: 16px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+  .ResourcesHomeDrawer-childrens2 {
     align-self: stretch;
     border-radius: 4px;
     background: var(--Accordeon-Surface, #F4F4F4);
+    box-shadow: none;
+    border-top: none;
+    position: unset;
+    gap: 8px;
 
-    .ResourcesHome-childrenBoxOne{
+    .Accordion-box-Header {
+      height: 22px;
       display: flex;
       align-items: center;
-      gap: 8px;
       align-self: stretch;
-      justify-content: space-between;
-
-      .box-icon-arrow-botton{
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
     }
 
-    .ResourcesHome-childrenBoxTwo1{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      align-self: stretch;
-      justify-content: space-between;
-
-      .box-icon-arrow-top{
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-    }
-    .ResourcesHome-childrenBoxTwo2{
+    .Accordion-box-content {
+      margin: 16px;
+      padding: 12px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 8px;
       align-self: stretch;
+      border-radius: var(--Radius-Small, 4px);
+      background: var(--Surface-Modal, #FFF);
 
-      .box-resources-info{
-        display: flex;
-        padding: 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-        align-self: stretch;
-        border-radius: var(--Radius-Small, 4px);
-        background: var(--Surface-Modal, #FFF);
-
-        .box-resources-info-children{
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
-          align-self: stretch;
-          
-          .box-resources-info-grandson{
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            align-self: stretch;
-            
-            .box-resources-info-grandson-child1{
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              flex: 1 0 0;
-              
-            }
-          }
-        }
-
-      }
-    }
-
-    .ResourcesHome-childrenBoxThree1{
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      align-self: stretch;
-      justify-content: space-between;
-
-      .box-icon-arrow-top{
+      .Accordion-box-content-childrens {
+        height: 19px;
         display: flex;
         align-items: center;
-        gap: 4px;
-      }
-    }
-
-    .ResourcesHome-childrenBoxThree2{
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      align-self: stretch;
-      justify-content: space-between;
-
-      .box-resources-question{
-        display: flex;
-        padding: 12px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
+        // justify-content: space-between; // Asegura que el contenido y la flecha estén en los extremos
+        gap: 8px;
         align-self: stretch;
-        border-radius: var(--Radius-Small, 4px);
-        background: var(--Surface-Modal, #FFF);
 
-        .box-resources-question-children1{
+        .Accordion-box-content-inner {
           display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
-          align-self: stretch;
-
-          .box-resources-question-grandson1{
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            align-self: stretch;
-
-            .box-resources-question-typography{
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              flex: 1 0 0;
-            }
-          }
+          align-items: center;
+          gap: 4px; // Espacio pequeño entre el texto y el "New", como en ResourcesHome
+          flex-grow: 1; // Permite que ocupe el espacio disponible antes de la flecha
+          justify-content: space-between; // Asegura que el contenido y la flecha estén en los extremos
         }
       }
     }
-
-
-    
-
   }
- 
-}
 
+  .child-box-new {
+    display: flex;
+    min-width: 18px;
+    padding: 0px var(--Spacing-XXsmall, 2px); // Padding igual que ResourcesHome
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    border-radius: var(--Radius-Xsmall, 2px); // Bordes redondeados igual que ResourcesHome
+    background: var(--Badge-New, #0067EE); // Fondo azul igual que ResourcesHome
+    color: #fff; // Texto blanco para contraste, como en ResourcesHome
+  }
+}

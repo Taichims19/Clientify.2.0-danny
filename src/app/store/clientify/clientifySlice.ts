@@ -28,6 +28,17 @@ enum TransactionBlockTitle {
   Transacciones = "Transacciones",
 }
 
+// Nueva interfaz para los ítems del drawer
+interface DrawerResource {
+  name: string;
+  new: boolean; // => Esto: Campo para controlar si muestra "New"
+}
+
+interface DrawerSection {
+  title: string;
+  items: DrawerResource[];
+}
+
 // Actualizar la interfaz del estado global
 interface FeatureButtonsState {
   featureOne: boolean;
@@ -138,6 +149,11 @@ interface PartnerState {
   photoUrl: string; // URL de la foto, por defecto y actualizable desde la API
 }
 
+// Nueva interfaz para el estado del drawer
+interface ResourcesDrawerState {
+  sections: DrawerSection[];
+}
+
 interface ClientifyState {
   selectedPlan: string | null;
   subscriptionPlans: {
@@ -152,6 +168,7 @@ interface ClientifyState {
     accounts: Account[];
   };
   resourcesHome: ResourcesState;
+  resourcesDrawer: ResourcesDrawerState; // => Esto: Nueva propiedad para el drawer
   drawer: DrawerState;
   subDrawer: SubDrawerState; // Nuevo estado del subDrawer
   modal: ModalState;
@@ -229,6 +246,32 @@ const initialState: ClientifyState = {
         new: true,
       },
     ], // Asociado a recent_resources
+  },
+  // => Esto: Nueva sección para el drawer con datos estáticos
+  resourcesDrawer: {
+    sections: [
+      {
+        title: "¿Qué hay de nuevo?",
+        items: [
+          { name: "Nueva funcionalidad", new: true },
+          { name: "Última actualización", new: false },
+        ],
+      },
+      {
+        title: "Inf. y enlaces de interés",
+        items: [
+          { name: "Actualización (mejoras)", new: true },
+          { name: "Programa de afiliados", new: true },
+        ],
+      },
+      {
+        title: "¿Quién es quién en el equipo?",
+        items: [
+          { name: "¿Quién es quién?", new: false },
+          { name: "Tienes alguna otra duda?", new: true },
+        ],
+      },
+    ],
   },
   selectedPlan: null,
   drawer: {
@@ -501,6 +544,10 @@ export const clientifySlice = createSlice({
         photoUrl: action.payload.photoUrl,
       };
     },
+    // => Esto: Nuevo reducer para el drawer
+    setResourcesDrawer(state, action: PayloadAction<ResourcesDrawerState>) {
+      state.resourcesDrawer = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // Eliminar los addCase ya que usamos una función manual
@@ -535,6 +582,7 @@ export const {
   setAccountsHome,
   setSubscriptionPlans,
   setPartner, // Exportar la nueva acción
+  setResourcesDrawer,
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

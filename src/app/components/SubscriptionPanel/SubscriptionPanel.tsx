@@ -111,7 +111,7 @@ const SubscriptionPanel = () => {
                         display: "inline-block",
                         backgroundColor: "#0067EE",
                         color: "#fff",
-                        padding: "2px 6px",
+                        padding: "0px 2px",
                         borderRadius: "2px",
                         fontSize: "12px",
                         marginLeft: "8px",

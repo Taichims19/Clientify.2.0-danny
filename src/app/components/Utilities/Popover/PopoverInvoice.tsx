@@ -160,6 +160,7 @@ export const PopoverInvoice = () => {
             />
           ) : (
             <Typography
+              sx={{ cursor: "pointer" }}
               className={`${styles["Body-medium-blue"]} ${poppins.className}`}
               onClick={handleOpen} // Abre el modal de selección de fecha
             >

@@ -112,6 +112,15 @@
   font-weight: 500;
   line-height: 19px; /* 135.714% */
 }
+/* Title/Medium 1 grises*/
+.Title-medium-blue {
+  color: var(--button-ghost-text-shape-default, #0067EE);
+font-family: Poppins;
+font-size: 14px;
+font-style: normal;
+font-weight: 500;
+line-height: 19px; /* 135.714% */
+}
 
 /* Title/Semibold */
 .Title-semibold {
@@ -335,4 +344,9 @@ line-height: 19px; /* 135.714% */
   gap: 16px;
   /* background: var(--Surface-Modal, #fff); */
   /* background: rgb(83, 81, 233); */
+}
+
+/* Quitar la marca de agua del DateRangeCalendar */
+.MuiDateRangeCalendar-root > div[style*="pointer-events: none"] {
+  display: none !important;
 }
