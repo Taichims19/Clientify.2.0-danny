@@ -2,8 +2,9 @@ import * as React from "react";
 import { styled } from "@mui/material/styles";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
+import Select, { SelectProps } from "@mui/material/Select";
 import InputBase from "@mui/material/InputBase";
+import { CSSProperties } from "react"; // Importamos CSSProperties para tipar los estilos
 import nativeSelectorStyles from "../NativeSelect/NativeSelector.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import { setVisibleRowsCount } from "@/app/store/clientify/invoicesTableSlice";
@@ -19,7 +20,6 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
     height: "25px",
     width: "10px",
     backgroundColor: theme.palette.background.paper,
-    // backgroundColor: "yellow",
     display: "flex",
     padding: "4px",
     justifyContent: "space-between",
@@ -29,9 +29,8 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
     fontWeight: 500,
     lineHeight: "17px",
     color: "#525252",
-    fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
+    fontFamily: poppins.style.fontFamily,
     "& *": {
-      // Asegura que todos los elementos dentro de la celda hereden la fuente
       fontFamily: poppins.style.fontFamily,
     },
     "&:focus": {
@@ -42,7 +41,26 @@ const BootstrapInput = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const CustomMenuProps = {
+// Definimos una interfaz para los estilos del PaperProps con tipos específicos
+interface CustomPaperStyle extends CSSProperties {
+  height: number;
+  width: string;
+  padding: string;
+  backgroundColor: string;
+  border: string;
+  display: string;
+  flexDirection: "row" | "row-reverse" | "column" | "column-reverse"; // Tipo específico de FlexDirection
+  alignItems: string;
+  fontSize: string;
+  fontFamily: string;
+  fontStyle: string;
+  fontWeight: number;
+  lineHeight: string;
+  color: string;
+}
+
+// Definimos CustomMenuProps con Partial<MenuProps> y tipamos correctamente PaperProps
+const CustomMenuProps: Partial<SelectProps["MenuProps"]> = {
   PaperProps: {
     style: {
       height: 130,
@@ -51,22 +69,15 @@ const CustomMenuProps = {
       backgroundColor: "#f9f9f9",
       border: "1px solid #ccc",
       display: "flex",
-      flexDirection: "column",
-      // background: "red",
+      flexDirection: "column", // Ahora usa un valor específico de FlexDirection
       alignItems: "center",
-      // Título del mes (e.g., "Marzo 2025")
       fontSize: "14px",
-      fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
-      "& *": {
-        // Asegura que todos los elementos dentro de la celda hereden la fuente
-        fontFamily: poppins.style.fontFamily,
-      },
+      fontFamily: poppins.style.fontFamily,
       fontStyle: "normal",
       fontWeight: 400,
       lineHeight: "19px",
       color: "#525252",
-      // color: "red",
-    },
+    } as CustomPaperStyle, // Aseguramos que el tipo sea correcto
     sx: {
       "&::-webkit-scrollbar": { width: "6px", height: "78.5px" },
       "&::-webkit-scrollbar-thumb": {
@@ -75,23 +86,18 @@ const CustomMenuProps = {
       },
       "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#555" },
       "&::-webkit-scrollbar-track": { backgroundColor: "#f1f1f1" },
-      // "& .MuiMenuItem-root.Mui-selected": {
-      //   // Estilo para el MenuItem seleccionado
-      //   backgroundColor: "yellow", // Color de fondo cuando está seleccionado
-      //   position: "relative",
-      //   right: "20%",
-      // },
       "& .MuiMenuItem-root": {
-        // Estilo para el MenuItem seleccionado
-        backgroundColor: "red", // Color de fondo cuando está seleccionado
+        backgroundColor: "transparent", // Ajustamos para que no sea rojo por defecto
         position: "relative",
-        right: "20%",
+        right: "20%", // Esto puede no funcionar como esperas, revisa el diseño
+        display: "flex",
+        justifyContent: "center", // Centramos los ítems
       },
-      "& .MuiInputBase-input": {
-        // Estilo para el MenuItem seleccionado
-        backgroundColor: "red", // Color de fondo cuando está seleccionado
-        position: "relative",
-        right: "20%",
+      "& .MuiMenuItem-root.Mui-selected": {
+        backgroundColor: "#e0e0e0", // Color de fondo cuando está seleccionado
+      },
+      "& .MuiMenuItem-root:hover": {
+        backgroundColor: "#f0f0f0", // Color al pasar el mouse
       },
     },
   },
@@ -116,10 +122,9 @@ export default function NativeSelector({
   const handleChange = (event: { target: { value: string } }) => {
     const newVisibleRowsCount = parseInt(event.target.value, 10);
     onChange(newVisibleRowsCount);
-    dispatch(setVisibleRowsCount(newVisibleRowsCount)); // Actualiza visibleRowsCount
+    dispatch(setVisibleRowsCount(newVisibleRowsCount));
   };
 
-  // Mostrar siempre 25, 50, 75, 100 como opciones fijas
   const pageSizeOptions = [25, 50, 75, 100];
 
   return (
@@ -127,10 +132,10 @@ export default function NativeSelector({
       <Select
         labelId="demo-customized-select-label"
         id="demo-customized-select"
-        value={visibleRowsCount.toString()} // Usamos visibleRowsCount (25 por defecto)
+        value={visibleRowsCount.toString()}
         onChange={handleChange}
         input={<BootstrapInput />}
-        MenuProps={CustomMenuProps}
+        MenuProps={CustomMenuProps} // Ahora es compatible con el tipo esperado
         sx={{ "& .MuiSvgIcon-root": { fontSize: "16px" } }}
       >
         {pageSizeOptions.map((size) => (
