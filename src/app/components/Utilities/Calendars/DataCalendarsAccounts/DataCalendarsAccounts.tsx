@@ -10,13 +10,11 @@ import DataCalendarsAccountStyles from "./DataCalendarsAccounts.module.scss";
 
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
-import {
-  setDateRange,
-  toggleMessage,
-} from "@/app/store/clientify/clientifySlice";
+import { toggleMessage } from "@/app/store/clientify/clientifySlice";
 import InfoIconAccounts from "@/app/icons/InfoIconAccounts";
-import { useState } from "react";
+import React, { useState } from "react";
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
+import { setDateRange } from "@/app/store/clientify/invoicesTableSlice";
 
 export default function DataCalendarsAccounts({ open, handleClose }: any) {
   const dispatch = useDispatch();
@@ -28,6 +26,17 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
   const [dateRange, setDateRangeState] = useState<[Dayjs | null, Dayjs | null]>(
     [null, null]
   );
+
+  const reduxRange = useSelector(
+    (state: RootState) => state.invoiceTable.calendaryRanger
+  );
+
+  // Sincronizar local con Redux al abrir
+  React.useEffect(() => {
+    if (open) {
+      setDateRangeState([reduxRange.startDate, reduxRange.endDate]);
+    }
+  }, [open, reduxRange.startDate, reduxRange.endDate]);
 
   const handleApply = () => {
     dispatch(setDateRange(dateRange));
@@ -225,7 +234,14 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           <DateRangeCalendar
             calendars={1}
             value={dateRange}
-            onChange={(newValue) => setDateRangeState(newValue)}
+            onChange={(newValue) => {
+              setDateRangeState(newValue);
+              const [start, end] = newValue;
+              if (start && !end) {
+                // Si solo hay una fecha, forzamos la selección completa para una sola fecha
+                setDateRangeState([start, start]); // 🔥 Esto hará que con 1 clic se tome como ambos extremos
+              }
+            }}
           />
 
           {/* <IconVectorClear /> */}
@@ -287,7 +303,10 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
             </Button>
             <Button
               className={DataCalendarsAccountStyles["button-two"]}
-              onClick={handleClose}
+              onClick={() => {
+                setDateRangeState([null, null]); // Limpia estado local
+                handleClose(); // Cierra el modal
+              }}
             >
               <Typography
                 className={`${styles["Title-medium-blue"]} ${poppins.className}`}

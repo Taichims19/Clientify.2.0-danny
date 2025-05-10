@@ -9,6 +9,12 @@ import AnchorTemporaryDrawerStyles from "./AnchorTemporaryDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import IconRightArrow from "@/app/icons/IconRightArrow";
+import {
+  clearSelectedInvoice,
+  setSelectedAllInvoices,
+  setSelectedInvoices,
+  setSettlementDetail,
+} from "@/app/store/clientify/invoicesTableSlice";
 
 interface AnchorTemporaryDrawerProps {
   children: any;
@@ -23,6 +29,10 @@ const AnchorTemporaryDrawer = (props: AnchorTemporaryDrawerProps) => {
   );
 
   const handleClose = () => {
+    dispatch(clearSelectedInvoice());
+    dispatch(setSettlementDetail(null));
+    dispatch(setSelectedInvoices([])); // ✅ esto limpia el contador de selección
+    dispatch(setSelectedAllInvoices(false)); // ✅ desactiva el "seleccionadas todas"
     dispatch(
       setDrawer({
         isDrawerOpen: false,

@@ -1,8 +1,10 @@
 // src/redux/dataGridSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GridColDef } from "@mui/x-data-grid";
-
+import { RootState } from "../store"; // Ajusta la ruta si es diferente
 // Define la interfaz para las filas y columnas
+import { Dayjs } from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 export interface InvoiceRow {
   id: number;
   codigo: string;
@@ -15,6 +17,31 @@ export interface InvoiceRow {
   liquidaciones: number | string;
 }
 
+interface DateRangeState {
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+}
+
+export interface SettlementInvoiceRow {
+  id: number;
+  invoice_number: string;
+  account: string;
+  subtotal: number;
+  currency: string;
+  description_product: string;
+  created: string;
+  payment_date: string;
+  settlement_id: number;
+}
+
+export interface SettlementDetailRow {
+  id: number;
+  created: string;
+  amount: string;
+  currency: string;
+  payment_date: string;
+  invoices: SettlementInvoiceRow[];
+}
 // Define el estado inicial del slice
 interface DataGridState {
   rows: InvoiceRow[];
@@ -29,12 +56,17 @@ interface DataGridState {
   activeFiltersCount: number; // Nuevo contador único
   page: number; // Nueva propiedad para la página actual
   pageSize: number; // Nueva propiedad para el tamaño de página
-  selectedInvoice: InvoiceRow | null; // Nueva propiedad
+  selectedInvoices: InvoiceRow[]; // Cambiado de selectedInvoice a un arreglo
   allInvoicesSelected: boolean; // Nueva propiedad para manejar selección totalselección total
   totalCount: number; // Nuevo campo para el total de facturas
   nextPageUrl: string | null; // URL de la siguiente página
   visibleRowsCount: number; // Nueva propiedad para controlar el renderizado
   searchQuery: string; // Nuevo campo para la búsqueda
+  remoteSearchRows: InvoiceRow[]; // ✅ Añadido correctamente con tipado
+  loading: boolean; // Nuevo estado
+  calendaryRanger: DateRangeState;
+  settlementDetail: SettlementDetailRow | null;
+  baseSettlementInvoices: SettlementInvoiceRow[];
 }
 
 const initialState: DataGridState = {
@@ -146,7 +178,7 @@ const initialState: DataGridState = {
     dateRange: false,
   },
   activeFiltersCount: 0,
-  selectedInvoice: null, // Inicialmente ninguna factura seleccionada
+  selectedInvoices: [], // Inicialmente vacío
   allInvoicesSelected: false, // Inicialmente no todas están seleccionadas
   page: 0, // Página inicial
   pageSize: 100, // Fijamos a 100 por página
@@ -154,6 +186,48 @@ const initialState: DataGridState = {
   nextPageUrl: null,
   visibleRowsCount: 25, // Valor por defecto para iniciar con 25
   searchQuery: "", // Valor inicial vacío
+  remoteSearchRows: [],
+  loading: false, // Inicialmente false
+  calendaryRanger: {
+    startDate: null,
+    endDate: null,
+  },
+  settlementDetail: null,
+  baseSettlementInvoices: [
+    {
+      id: 1,
+      invoice_number: "PROFORMA-18414",
+      account: "Jooyly",
+      subtotal: 1188.0,
+      currency: "USD",
+      description_product: "1 × Business Growth (at $780.00 / year)",
+      created: "2024-01-01T00:00:00Z",
+      payment_date: "2024-12-31T23:59:59Z",
+      settlement_id: 899,
+    },
+    {
+      id: 2,
+      invoice_number: "PROFORMA-18414",
+      account: "EDUCATIUM",
+      subtotal: 948.0,
+      currency: "USD",
+      description_product: "1 × Business Growth (at $780.00 / year)",
+      created: "2024-01-01T00:00:00Z",
+      payment_date: "2024-12-31T23:59:59Z",
+      settlement_id: 899,
+    },
+    {
+      id: 3,
+      invoice_number: "PROFORMA-18414",
+      account: "INTEGRITYLEGAL",
+      subtotal: 250.0,
+      currency: "USD",
+      description_product: "1 × Business Growth (at $780.00 / year)",
+      created: "2024-01-01T00:00:00Z",
+      payment_date: "2024-12-31T23:59:59Z",
+      settlement_id: 899,
+    },
+  ],
 };
 
 // Crea el slice
@@ -239,23 +313,37 @@ const invoicesTableSlice = createSlice({
       state.filteredPendingPayments = [];
       state.filteredPendingCommissions = [];
     },
-    setSelectedInvoice: (state, action: PayloadAction<InvoiceRow | null>) => {
-      console.log("1 factura seleccionada");
-      state.selectedInvoice = action.payload;
+    setSelectedInvoices: (state, action: PayloadAction<InvoiceRow[]>) => {
+      state.selectedInvoices = action.payload;
+      state.allInvoicesSelected = action.payload.length === state.rows.length;
     },
     setSelectedAllInvoices: (state, action: PayloadAction<boolean>) => {
-      console.log("Todas las facturas seleccionadas");
       state.allInvoicesSelected = action.payload;
-      state.selectedInvoice = null;
+      state.selectedInvoices = action.payload ? [...state.rows] : [];
     },
+    toggleSelectedInvoice: (state, action: PayloadAction<InvoiceRow>) => {
+      const invoice = action.payload;
+      const isSelected = state.selectedInvoices.some(
+        (i) => i.id === invoice.id
+      );
+      if (isSelected) {
+        // Si ya está seleccionada, la quitamos
+        state.selectedInvoices = state.selectedInvoices.filter(
+          (i) => i.id !== invoice.id
+        );
+      } else {
+        // Si no está seleccionada, la añadimos
+        state.selectedInvoices.push(invoice);
+      }
+      state.allInvoicesSelected = false; // Desactivamos "todas" al seleccionar manualmente
+    },
+
     setPage: (state, action: PayloadAction<number>) => {
       state.page = action.payload;
       state.visibleRowsCount = 25; // Reinicia a 25 al cambiar de página
+      state.selectedInvoices = []; // Limpiar selección al cambiar de página
+      state.allInvoicesSelected = false;
     },
-    // setPageSize: (state, action: PayloadAction<number>) => {
-    //   state.pageSize = action.payload;
-    //   state.page = 0; // Resetea a la primera página
-    // },
     setPageSize: (state, action: PayloadAction<number>) => {
       state.pageSize = 100; // Forzamos pageSize a 100 para la API
       state.page = 0; // Resetea a la primera página
@@ -273,6 +361,33 @@ const invoicesTableSlice = createSlice({
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
+    setRemoteSearchRows: (state, action: PayloadAction<InvoiceRow[]>) => {
+      state.remoteSearchRows = action.payload;
+    },
+    setInvoicesLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
+    },
+    setDateRange: (
+      state,
+      action: PayloadAction<[Dayjs | null, Dayjs | null]>
+    ) => {
+      const [startDate, endDate] = action.payload;
+      state.calendaryRanger.startDate = startDate;
+      state.calendaryRanger.endDate = endDate;
+    },
+    resetCalendaryRanger: (state) => {
+      state.calendaryRanger.startDate = null;
+      state.calendaryRanger.endDate = null;
+    },
+    setSettlementDetail: (
+      state,
+      action: PayloadAction<SettlementDetailRow | null>
+    ) => {
+      state.settlementDetail = action.payload;
+    },
+    clearSelectedInvoice: (state) => {
+      state.selectedInvoice = null;
+    },
   },
 });
 
@@ -286,7 +401,8 @@ export const {
   filterPendingPayments,
   filterPendingCommissions,
   resetRows,
-  setSelectedInvoice,
+  setSelectedInvoices,
+  toggleSelectedInvoice,
   setSelectedAllInvoices,
   setPage,
   setPageSize,
@@ -294,6 +410,42 @@ export const {
   setNextPageUrl,
   setVisibleRowsCount,
   setSearchQuery, // Exportamos el nuevo reducer
+  setRemoteSearchRows,
+  setInvoicesLoading,
+  setDateRange,
+  resetCalendaryRanger,
+  setSettlementDetail,
+  clearSelectedInvoice,
 } = invoicesTableSlice.actions;
 
 export default invoicesTableSlice.reducer;
+
+// 🔥 NUEVO selector para cálculo del campo "Pago"
+export const calculateTotalPayment = createSelector(
+  (state: RootState) => state.invoiceTable.selectedInvoices,
+  (selectedInvoices) =>
+    selectedInvoices.reduce(
+      (total, invoice) => total + invoice.importe * 0.25,
+      0
+    )
+);
+
+// Selector para filtrar facturas en base a searchQuery
+export const selectFilteredInvoices = createSelector(
+  [
+    (state: RootState) => state.invoiceTable.rows,
+    (state: RootState) => state.invoiceTable.searchQuery,
+  ],
+  (rows, searchQuery) => {
+    if (!searchQuery || searchQuery.trim() === "") return rows;
+
+    const query = searchQuery.trim().toLowerCase();
+
+    return rows.filter(
+      (invoice) =>
+        invoice.codigo.toLowerCase().includes(query) ||
+        invoice.cuenta.toLowerCase().includes(query) ||
+        invoice.producto.toLowerCase().includes(query)
+    );
+  }
+);

@@ -116,11 +116,12 @@
             }
           }
           .BoxFilter-children3-button{
-            // display: flex;
-            padding: var(--Spacing-Small, 0px);
-            // justify-content: center;
-            // align-items: center;
-            // gap: 8px;
+            // padding: var(--Spacing-Small, 0px);
+            display: flex;
+            padding: var(--Spacing-Small, 8px);
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
             border-radius: var(--Radius-Small, 4px);
             background: var(--button-primary-frame-default, #0067EE);
             height: 35px;

@@ -6,88 +6,80 @@ import {
   Typography,
   Skeleton,
   Accordion,
-  AccordionActions,
   AccordionDetails,
   AccordionSummary,
-  Button,
 } from "@mui/material";
 
 import ResourcesHomeDrawerStyles from "./ResourcesHomeDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
-import ArrowBottomResources from "@/app/icons/ArrowBottomResources";
-import ArrowTopResources from "@/app/icons/ArrowTopResources";
 import VectorIconTransaction from "@/app/icons/VectorIconTransaction";
 import ArrowRightResources from "@/app/icons/ArrowRightResources";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Padding } from "@mui/icons-material";
-import { RootState } from "@/app/store/store";
-import { useSelector } from "react-redux";
+
+import { AppDispatch, RootState } from "@/app/store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchResourcesDrawerByPartner } from "@/app/store/clientify/clientifyThunks";
 
 function ResourcesHomeDrawer() {
+  const dispatch = useDispatch<AppDispatch>();
+  const partnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
+  );
+
   const [loading, setLoading] = useState(false);
-  // const { plans, totalPlans } = useSelector(
-  //   (state: RootState) => state.clienty
-  // );
-  const [expanded, setExpanded] = useState<string | false>(false); // Controla qué acordeón está abierto
+  const [expanded, setExpanded] = useState<string | false>("panel1");
 
   const { sections } = useSelector(
     (state: RootState) => state.clienty.resourcesDrawer
   );
 
+  useEffect(() => {
+    if (partnerId) {
+      dispatch(fetchResourcesDrawerByPartner(partnerId.toString()));
+    } else {
+      setLoading(false); // ✅ usamos la data dummy por defecto
+    }
+  }, [dispatch, partnerId]);
+
   const handleChange =
-    (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
       setExpanded(isExpanded ? panel : false);
     };
 
-  useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  }, []);
-
-  const renderLoading = () => {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          width: "100%",
-        }}
-      >
+  const renderLoading = () => (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+        width: "100%",
+      }}
+    >
+      {[1, 2, 3].map((_, i) => (
         <Skeleton
+          key={i}
           variant="text"
           sx={{ fontSize: "1rem", width: "100%", height: "80px" }}
         />
+      ))}
+    </Box>
+  );
 
-        <Skeleton
-          variant="text"
-          sx={{ fontSize: "1rem", width: "100%", height: "80px" }}
-        />
-
-        <Skeleton
-          variant="text"
-          sx={{ fontSize: "1rem", width: "100%", height: "80px" }}
-        />
-      </Box>
-    );
-  };
-
-  const renderResourcesHome = () => {
-    return (
-      <Box
-        className={ResourcesHomeDrawerStyles["Box-ResourcesHomeDrawer-father"]}
-        role="presentation"
-      >
-        {/* Cajón 1 */}
+  const renderResourcesHome = () => (
+    <Box
+      className={ResourcesHomeDrawerStyles["Box-ResourcesHomeDrawer-father"]}
+      role="presentation"
+    >
+      {sections.map((section, index) => (
         <Accordion
+          key={section.id}
           className={
             ResourcesHomeDrawerStyles["ResourcesHomeDrawer-childrens2"]
           }
-          expanded={expanded === "panel1"}
-          onChange={handleChange("panel1")}
+          expanded={expanded === `panel${index}`}
+          onChange={handleChange(`panel${index}`)}
+          defaultExpanded={index === 1}
           sx={{
             "& .MuiAccordionSummary-root.Mui-expanded": {
               width: "100%",
@@ -100,160 +92,21 @@ function ResourcesHomeDrawer() {
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1-content"
-            id="panel1-header"
-          >
-            <Box className={ResourcesHomeDrawerStyles["Accordion-box-Header"]}>
-              <Typography
-                className={`${styles["SubHeader-Medium"]} ${poppins.className}`}
-              >
-                {sections[0].title}
-              </Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails
-            className={ResourcesHomeDrawerStyles["Accordion-box-content"]}
-          >
-            {sections[0].items.map((item, index) => (
-              <React.Fragment key={item.name}>
-                <Box
-                  className={
-                    ResourcesHomeDrawerStyles["Accordion-box-content-childrens"]
-                  }
-                >
-                  <Box
-                    className={
-                      ResourcesHomeDrawerStyles["Accordion-box-content-inner"]
-                    }
-                  >
-                    <Typography
-                      className={`${styles["Title-semibold2"]} ${poppins.className}`}
-                    >
-                      {item.name}
-                    </Typography>
-                    {item.new && (
-                      <Box
-                        className={ResourcesHomeDrawerStyles["child-box-new"]}
-                      >
-                        <Typography
-                          className={`${styles["Caption-Medium"]} ${poppins.className}`}
-                        >
-                          New
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                  <ArrowRightResources />
-                </Box>
-                {index < sections[0].items.length - 1 && (
-                  <VectorIconTransaction />
-                )}
-              </React.Fragment>
-            ))}
-          </AccordionDetails>
-        </Accordion>
-
-        {/* Cajón 2 */}
-        <Accordion
-          defaultExpanded
-          className={
-            ResourcesHomeDrawerStyles["ResourcesHomeDrawer-childrens2"]
-          }
-          sx={{
-            "& .MuiAccordionSummary-root.Mui-expanded": {
-              width: "100%",
-              height: "38px",
-              minHeight: "38px",
-              paddingTop: "16px",
-              marginBottom: "0px",
-            },
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2-content"
-            id="panel2-header"
+            aria-controls={`panel${index}-content`}
+            id={`panel${index}-header`}
           >
             <Typography
               className={`${styles["SubHeader-Medium"]} ${poppins.className}`}
             >
-              {sections[1].title}
+              {section.title}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails
-            className={ResourcesHomeDrawerStyles["Accordion-box-content"]}
-          >
-            {sections[1].items.map((item, index) => (
-              <React.Fragment key={item.name}>
-                <Box
-                  className={
-                    ResourcesHomeDrawerStyles["Accordion-box-content-childrens"]
-                  }
-                >
-                  <Box
-                    className={
-                      ResourcesHomeDrawerStyles["Accordion-box-content-inner"]
-                    }
-                  >
-                    <Typography
-                      className={`${styles["Title-semibold2"]} ${poppins.className}`}
-                    >
-                      {item.name}
-                    </Typography>
-                    {item.new && (
-                      <Box
-                        className={ResourcesHomeDrawerStyles["child-box-new"]}
-                      >
-                        <Typography
-                          className={`${styles["Caption-Medium"]} ${poppins.className}`}
-                        >
-                          New
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                  <ArrowRightResources />
-                </Box>
-                {index < sections[1].items.length - 1 && (
-                  <VectorIconTransaction />
-                )}
-              </React.Fragment>
-            ))}
-          </AccordionDetails>
-        </Accordion>
 
-        {/* Cajón 3 */}
-        <Accordion
-          // defaultExpanded
-          className={
-            ResourcesHomeDrawerStyles["ResourcesHomeDrawer-childrens2"]
-          }
-          sx={{
-            "& .MuiAccordionSummary-root.Mui-expanded": {
-              width: "100%",
-              height: "38px",
-              minHeight: "38px",
-              paddingTop: "16px",
-              marginBottom: "0px",
-            },
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel3-content"
-            id="panel3-header"
-          >
-            <Typography
-              className={`${styles["SubHeader-Medium"]} ${poppins.className}`}
-            >
-              {sections[2].title}
-            </Typography>
-          </AccordionSummary>
           <AccordionDetails
             className={ResourcesHomeDrawerStyles["Accordion-box-content"]}
           >
-            {sections[2].items.map((item, index) => (
-              <React.Fragment key={item.name}>
+            {section.items.map((item, i) => (
+              <React.Fragment key={item.id}>
                 <Box
                   className={
                     ResourcesHomeDrawerStyles["Accordion-box-content-childrens"]
@@ -281,18 +134,28 @@ function ResourcesHomeDrawer() {
                       </Box>
                     )}
                   </Box>
-                  <ArrowRightResources />
+                  <Box
+                    onClick={() =>
+                      window.open(item.url, "_blank", "noopener,noreferrer")
+                    }
+                    sx={{
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ArrowRightResources />
+                  </Box>
                 </Box>
-                {index < sections[2].items.length - 1 && (
-                  <VectorIconTransaction />
-                )}
+                {i < section.items.length - 1 && <VectorIconTransaction />}
               </React.Fragment>
             ))}
           </AccordionDetails>
         </Accordion>
-      </Box>
-    );
-  };
+      ))}
+    </Box>
+  );
+
   return <>{loading ? renderLoading() : renderResourcesHome()}</>;
 }
 

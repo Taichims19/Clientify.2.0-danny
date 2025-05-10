@@ -6,24 +6,27 @@ import styles from "../../../styles/home.module.css";
 import { poppins } from "../../../fonts/fonts";
 import VectorIconPopover from "@/app/icons/VectorIconPopover";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/store/store";
+import store, { AppDispatch, RootState } from "@/app/store/store";
 import {
+  resetCalendaryRanger,
+  setRemoteSearchRows,
   toggleDateRange,
   togglePendingCommissions,
   togglePendingPayments,
 } from "@/app/store/clientify/invoicesTableSlice";
 import DataCalendarsAccounts from "../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
+import { closeModal, openModal } from "@/app/store/clientify/clientifySlice";
 import {
-  closeModal,
-  openModal,
-  resetCalendaryRanger,
-} from "@/app/store/clientify/clientifySlice";
+  fetchInvoicesByDateRange,
+  fetchPendingCommissions,
+  fetchPendingPayments,
+} from "@/app/store/clientify/clientifyThunks";
 
 export const PopoverInvoice = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const { startDate, endDate } = useSelector(
-    (state: RootState) => state.clienty.calendaryRanger
+    (state: RootState) => state.invoiceTable.calendaryRanger
   );
 
   const { activeFilters, activeFiltersCount } = useSelector(
@@ -58,6 +61,13 @@ export const PopoverInvoice = () => {
     const checked = event.target.checked;
     setPendingPaymentsChecked(checked);
     dispatch(togglePendingPayments(checked));
+
+    const partnerId = store.getState().clienty.currentPartnerId;
+    if (partnerId && checked) {
+      dispatch(fetchPendingPayments(partnerId.toString()));
+    } else {
+      dispatch(setRemoteSearchRows([]));
+    }
   };
 
   const handlePendingCommissionsSwitch = (
@@ -66,13 +76,22 @@ export const PopoverInvoice = () => {
     const checked = event.target.checked;
     setPendingCommissionsChecked(checked);
     dispatch(togglePendingCommissions(checked));
+
+    const partnerId = store.getState().clienty.currentPartnerId;
+    if (partnerId && checked) {
+      dispatch(fetchPendingCommissions(partnerId.toString()));
+    } else {
+      dispatch(setRemoteSearchRows([]));
+    }
   };
 
   const handleDateRangeSwitch = (checked: boolean) => {
-    setDateRangeChecked(checked);
-    dispatch(toggleDateRange(checked));
+    // Solo despachar si hay un cambio real
+    if (checked !== dateRangeChecked) {
+      setDateRangeChecked(checked);
+      dispatch(toggleDateRange(checked));
+    }
   };
-
   const handleOpen = () => dispatch(openModal());
   const handleClose = () => dispatch(closeModal());
 
@@ -82,17 +101,30 @@ export const PopoverInvoice = () => {
 
   const handleDelete = () => {
     console.info("Fechas borradas.");
-    dispatch(resetCalendaryRanger()); // Resetea el rango de fechas en Redux
+    dispatch(resetCalendaryRanger()); // Limpia Redux
+    dispatch(openModal()); // Forzar sincronización con calendario
   };
 
-  // Solo actualizar dateRangeChecked cuando el usuario interactúe con el calendario
   useEffect(() => {
-    if (startDate && endDate && !dateRangeChecked) {
-      handleDateRangeSwitch(true); // Activa solo si no estaba activado
+    const partnerId = store.getState().clienty.currentPartnerId;
+
+    if (startDate && !endDate) {
+      handleDateRangeSwitch(true);
+      if (partnerId) {
+        dispatch(fetchInvoicesByDateRange(partnerId.toString(), startDate));
+      }
+    } else if (startDate && endDate) {
+      handleDateRangeSwitch(true);
+      if (partnerId) {
+        dispatch(
+          fetchInvoicesByDateRange(partnerId.toString(), startDate, endDate)
+        );
+      }
     } else if (!startDate && !endDate && dateRangeChecked) {
-      handleDateRangeSwitch(false); // Desactiva solo si no hay fechas
+      handleDateRangeSwitch(false);
+      dispatch(setRemoteSearchRows([])); // Limpiar si se borra todo
     }
-  }, [startDate, endDate, dateRangeChecked]);
+  }, [startDate, endDate, dateRangeChecked, dispatch]);
 
   return (
     <>
@@ -152,9 +184,13 @@ export const PopoverInvoice = () => {
           {/* Alternar entre Typography y Chip */}
           {startDate && endDate ? (
             <Chip
-              label={`${startDate.format("DD,MM.YYYY")} - ${endDate.format(
-                "DD,MM.YYYY"
-              )}`}
+              label={
+                startDate.isSame(endDate, "day")
+                  ? startDate.format("DD [de] MMMM YYYY")
+                  : `${startDate.format("DD  MMMM YYYY")} - ${endDate.format(
+                      "DD  MMMM YYYY"
+                    )}`
+              }
               onClick={handleOpen} // Abre el modal de selección de fecha
               onDelete={handleDelete} // Borra las fechas seleccionadas
             />

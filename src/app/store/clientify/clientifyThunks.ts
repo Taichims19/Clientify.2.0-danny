@@ -10,6 +10,7 @@ import {
   setAccountsHome,
   setResourcesHome,
   setPartner,
+  setResourcesDrawerSections,
 } from "@/app/store/clientify/clientifySlice";
 import {
   addRow,
@@ -18,8 +19,13 @@ import {
   setPage,
   setTotalCount,
   setNextPageUrl,
+  setRemoteSearchRows,
+  setInvoicesLoading,
+  toggleSelectedInvoice,
+  setSettlementDetail,
 } from "./invoicesTableSlice";
-import { RootState } from "../store";
+import { AppDispatch, RootState } from "../store";
+import { Dayjs } from "dayjs";
 
 // Función para obtener los datos del partner
 export const fetchPartnerInfo = async (
@@ -27,6 +33,7 @@ export const fetchPartnerInfo = async (
   dispatch: (action: any) => void
 ) => {
   try {
+    console.log("fetchPartnerInfo called with partnerId:", partnerId);
     dispatch(setLoading(true));
     const partnerResponse = await axios.get(
       `https://app.clientify.com/billing-admin/api/partners/${partnerId}/`,
@@ -140,7 +147,7 @@ export const fetchInvoicesData =
       console.log(
         `Fetching invoices for partnerId: ${partnerId}, page: ${page}, pageSize: ${pageSize}`
       );
-      dispatch(setLoading(true));
+      dispatch(setInvoicesLoading(true));
 
       const response = await axios.get(
         `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?page=${page}&page_size=${pageSize}`,
@@ -211,7 +218,303 @@ export const fetchInvoicesData =
       }
       dispatch(setError(errorMessage));
     } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
+
+export const fetchInvoicesBySearch =
+  (partnerId: string, search: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setInvoicesLoading(true));
+
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?search=${encodeURIComponent(
+          search
+        )}`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+
+      const invoicesData = response.data;
+
+      if (invoicesData && Array.isArray(invoicesData.results)) {
+        const mappedRows: InvoiceRow[] = invoicesData.results.map(
+          (invoice: any) => ({
+            id: invoice.id,
+            codigo: invoice.invoice_number || "N/A",
+            cuenta: invoice.account || "N/A",
+            importe: invoice.subtotal || 0,
+            moneda: invoice.currency || "N/A",
+            producto: invoice.description_product || "N/A",
+            fechaCreacion: new Date(invoice.created).toLocaleDateString(
+              "es-ES",
+              {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }
+            ),
+            fechaPago: invoice.payment_date
+              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "--",
+            liquidaciones: invoice.settlement_id || "--",
+          })
+        );
+        dispatch(setRemoteSearchRows(mappedRows));
+      } else {
+        dispatch(setRemoteSearchRows([]));
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<any>;
+      let errorMessage = "Error fetching search invoices";
+      if (axiosError.response?.data) {
+        errorMessage =
+          typeof axiosError.response.data === "string"
+            ? axiosError.response.data
+            : axiosError.response.data.message ||
+              axiosError.response.data.error ||
+              Object.values(axiosError.response.data)[0] ||
+              JSON.stringify(axiosError.response.data);
+      } else if (axiosError.message) {
+        errorMessage = axiosError.message;
+      }
+      console.error("Error buscando facturas:", errorMessage);
+      dispatch(setError(errorMessage));
+      dispatch(setRemoteSearchRows([]));
+    } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
+
+export const fetchPendingPayments =
+  (partnerId: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setInvoicesLoading(true));
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?pending_payment=true`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+      const invoicesData = response.data;
+
+      if (invoicesData && Array.isArray(invoicesData.results)) {
+        const mappedRows: InvoiceRow[] = invoicesData.results.map(
+          (invoice: any) => ({
+            id: invoice.id,
+            codigo: invoice.invoice_number || "N/A",
+            cuenta: invoice.account || "N/A",
+            importe: invoice.subtotal || 0,
+            moneda: invoice.currency || "N/A",
+            producto: invoice.description_product || "N/A",
+            fechaCreacion: new Date(invoice.created).toLocaleDateString(
+              "es-ES",
+              {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }
+            ),
+            fechaPago: invoice.payment_date
+              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "--",
+            liquidaciones: invoice.settlement_id || "--",
+          })
+        );
+        dispatch(setRemoteSearchRows(mappedRows));
+      } else {
+        dispatch(setRemoteSearchRows([]));
+      }
+    } catch (error) {
+      console.error("Error fetching pending payments:", error);
+      dispatch(setRemoteSearchRows([]));
+    } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
+
+export const fetchPendingCommissions =
+  (partnerId: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setInvoicesLoading(true));
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?pending_commission=true`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+      const invoicesData = response.data;
+
+      if (invoicesData && Array.isArray(invoicesData.results)) {
+        const mappedRows: InvoiceRow[] = invoicesData.results.map(
+          (invoice: any) => ({
+            id: invoice.id,
+            codigo: invoice.invoice_number || "N/A",
+            cuenta: invoice.account || "N/A",
+            importe: invoice.subtotal || 0,
+            moneda: invoice.currency || "N/A",
+            producto: invoice.description_product || "N/A",
+            fechaCreacion: new Date(invoice.created).toLocaleDateString(
+              "es-ES",
+              {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }
+            ),
+            fechaPago: invoice.payment_date
+              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "--",
+            liquidaciones: invoice.settlement_id || "--",
+          })
+        );
+        dispatch(setRemoteSearchRows(mappedRows));
+      } else {
+        dispatch(setRemoteSearchRows([]));
+      }
+    } catch (error) {
+      console.error("Error fetching pending commissions:", error);
+      dispatch(setRemoteSearchRows([]));
+    } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
+
+// Función para obtener las facturas por rango de fechas
+
+export const fetchInvoicesByDateRange =
+  (partnerId: string, startDate: Dayjs, endDate?: Dayjs) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setInvoicesLoading(true));
+
+      const params = new URLSearchParams();
+      params.append("page", "1");
+      params.append("page_size", "25");
+      params.append("date_start", startDate.format("D/M/YYYY")); // Formato exacto
+
+      if (endDate) {
+        params.append("date_end", endDate.format("D/M/YYYY"));
+      }
+
+      const url = `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?${params.toString()}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+        },
+      });
+
+      const data = response.data?.results || [];
+
+      const mappedRows: InvoiceRow[] = data.map((invoice: any) => ({
+        id: invoice.id,
+        codigo: invoice.invoice_number || "N/A",
+        cuenta: invoice.account || "N/A",
+        importe: invoice.subtotal || 0,
+        moneda: invoice.currency || "N/A",
+        producto: invoice.description_product || "N/A",
+        fechaCreacion: new Date(invoice.created).toLocaleDateString("es-ES", {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+        }),
+        fechaPago: invoice.payment_date
+          ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            })
+          : "--",
+        liquidaciones: invoice.settlement_id || "--",
+      }));
+
+      dispatch(setRemoteSearchRows(mappedRows));
+    } catch (error) {
+      console.error("❌ Error al buscar facturas por fecha:", error);
+      dispatch(setRemoteSearchRows([]));
+    } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
+
+// Función para obtener los detalles de la liquidación por ID
+
+export const fetchSettlementDetailById =
+  (settlementId: string) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
+
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/settlements-detail/${settlementId}`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+
+      if (response.data) {
+        dispatch(setSettlementDetail(response.data));
+      }
+    } catch (error) {
+      console.error("❌ Error al obtener liquidación:", error);
+      dispatch(setSettlementDetail(null));
+    } finally {
       dispatch(setLoading(false));
+    }
+  };
+
+// 🔥 THUNK para traer recursos del drawer
+export const fetchResourcesDrawerByPartner =
+  (partnerId: string) => async (dispatch: AppDispatch) => {
+    try {
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/resources/${partnerId}/`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data && Array.isArray(data)) {
+        const mappedSections = data.map((section: any) => ({
+          id: section.id,
+          title: section.name,
+          items: section.resources.map((res: any) => ({
+            id: res.id,
+            name: res.name,
+            url: res.url,
+            new: res.new,
+          })),
+        }));
+
+        dispatch(setResourcesDrawerSections(mappedSections));
+      }
+    } catch (error) {
+      console.error("❌ Error cargando recursos del drawer:", error);
     }
   };
 
@@ -219,6 +522,7 @@ export const fetchInvoicesData =
 export const fetchPartnerData =
   (partnerId: number, page?: number, pageSize?: number) =>
   async (dispatch: (action: any) => void, getState: () => RootState) => {
+    console.log("fetchPartnerData called with partnerId:", partnerId);
     await Promise.all([
       fetchPartnerInfo(partnerId, dispatch),
       fetchInvoicesData(partnerId, page, pageSize)(dispatch, getState),

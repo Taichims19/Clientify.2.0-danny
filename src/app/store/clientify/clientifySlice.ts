@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Dayjs } from "dayjs";
+
 import { fetchPartnerData } from "./clientifyThunks";
 
 // Enums para diferentes estados y vistas
@@ -113,10 +113,6 @@ interface MessageState {
   showMessage: boolean; // Nuevo estado
 }
 
-interface DateRangeState {
-  startDate: Dayjs | null;
-  endDate: Dayjs | null;
-}
 interface SummaryPanelState {
   totalContacts: number;
   activeSubscriptions: number;
@@ -149,6 +145,19 @@ interface PartnerState {
   photoUrl: string; // URL de la foto, por defecto y actualizable desde la API
 }
 
+interface DrawerResource {
+  id: number;
+  name: string;
+  url: string;
+  new: boolean;
+}
+
+interface DrawerSection {
+  id: number;
+  title: string;
+  items: DrawerResource[];
+}
+
 // Nueva interfaz para el estado del drawer
 interface ResourcesDrawerState {
   sections: DrawerSection[];
@@ -177,7 +186,6 @@ interface ClientifyState {
   infoBlocks: InfoBlocksState;
   transactionBlocks: TransactionBlocksState; // Nuevo estado para transacciones
   featureButtons: FeatureButtonsState;
-  calendaryRanger: DateRangeState;
   loading: boolean;
   error: string | null;
   currentPartnerId: number; // Para rastrear el partner actual
@@ -260,7 +268,7 @@ const initialState: ClientifyState = {
       {
         title: "Inf. y enlaces de interés",
         items: [
-          { name: "Actualización (mejoras)", new: true },
+          { name: "Actualización (mejoras)", new: false },
           { name: "Programa de afiliados", new: true },
         ],
       },
@@ -366,13 +374,9 @@ const initialState: ClientifyState = {
     featureOne: false,
     featureTwo: false,
   },
-  calendaryRanger: {
-    startDate: null,
-    endDate: null,
-  },
   loading: false,
   error: null,
-  currentPartnerId: 6653, // ID inicial
+  currentPartnerId: 1111, // ID inicial
   partner: {
     nameCompany: "Capacitravel S.L.", // Valor por defecto
     nameUser: "Alice Kuvalis", // Valor por defecto
@@ -472,18 +476,6 @@ export const clientifySlice = createSlice({
       state.featureButtons.featureOne = false;
       state.featureButtons.featureTwo = true;
     },
-    setDateRange: (
-      state,
-      action: PayloadAction<[Dayjs | null, Dayjs | null]>
-    ) => {
-      const [startDate, endDate] = action.payload;
-      state.calendaryRanger.startDate = startDate;
-      state.calendaryRanger.endDate = endDate;
-    },
-    resetCalendaryRanger: (state) => {
-      state.calendaryRanger.startDate = null;
-      state.calendaryRanger.endDate = null;
-    },
     setCurrentPartnerId(state, action: PayloadAction<number>) {
       state.currentPartnerId = action.payload;
     },
@@ -548,6 +540,12 @@ export const clientifySlice = createSlice({
     setResourcesDrawer(state, action: PayloadAction<ResourcesDrawerState>) {
       state.resourcesDrawer = action.payload;
     },
+    setResourcesDrawerSections: (
+      state,
+      action: PayloadAction<DrawerSection[]>
+    ) => {
+      state.resourcesDrawer.sections = action.payload;
+    },
   },
   extraReducers: (builder) => {
     // Eliminar los addCase ya que usamos una función manual
@@ -570,8 +568,6 @@ export const {
   openSubDrawerWithAccount,
   toggleFeatureOne,
   toggleFeatureTwo,
-  setDateRange,
-  resetCalendaryRanger,
   setCurrentPartnerId,
   setSummaryPanel,
   setRecurrenceChart,
@@ -583,6 +579,7 @@ export const {
   setSubscriptionPlans,
   setPartner, // Exportar la nueva acción
   setResourcesDrawer,
+  setResourcesDrawerSections,
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

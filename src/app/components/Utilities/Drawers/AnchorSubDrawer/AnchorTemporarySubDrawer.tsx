@@ -13,6 +13,10 @@ import AnchorTemporarySubDrawerStyles from "./AnchorTemporarySubDrawer.module.sc
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import IconRightArrow from "@/app/icons/IconRightArrow";
+import {
+  clearSelectedInvoice,
+  setSettlementDetail,
+} from "@/app/store/clientify/invoicesTableSlice";
 
 interface AnchorTemporarySubDrawerProps {
   children: any;
@@ -27,6 +31,8 @@ const AnchorTemporarySubDrawer = (props: AnchorTemporarySubDrawerProps) => {
   );
 
   const handleClose = () => {
+    dispatch(clearSelectedInvoice());
+    dispatch(setSettlementDetail(null));
     dispatch(
       setSubDrawer({
         isSubDrawerOpen: false,

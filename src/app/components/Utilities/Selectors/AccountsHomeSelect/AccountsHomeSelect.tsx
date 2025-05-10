@@ -13,13 +13,10 @@ import { useDispatch, useSelector } from "react-redux";
 
 import DataCalendarsAccounts from "../../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
 
-import {
-  closeModal,
-  openModal,
-  resetCalendaryRanger,
-} from "@/app/store/clientify/clientifySlice";
+import { closeModal, openModal } from "@/app/store/clientify/clientifySlice";
 import { RootState } from "@/app/store/store";
 import ArrowIconBottom from "@/app/icons/ArrowIconBottom";
+import { resetCalendaryRanger } from "@/app/store/clientify/invoicesTableSlice";
 
 const ITEM_HEIGHT = 25.113;
 const ITEM_PADDING_TOP = 8;
@@ -84,7 +81,7 @@ export default function AccountsHomeSelect() {
   );
 
   const { startDate, endDate } = useSelector(
-    (state: RootState) => state.clienty.calendaryRanger
+    (state: RootState) => state.invoiceTable.calendaryRanger
   );
 
   const handleChange = (event: SelectChangeEvent<typeof personName>) => {

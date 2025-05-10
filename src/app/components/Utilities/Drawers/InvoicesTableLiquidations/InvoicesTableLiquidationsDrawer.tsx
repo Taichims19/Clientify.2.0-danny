@@ -1,45 +1,31 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
-import { RootState } from "@/app/store/store";
-import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/app/store/store";
+import { useDispatch, useSelector } from "react-redux";
 import InvoicesTableLiquidationsDrawerStyles from "./InvoicesTableLiquidationsDrawer.module.scss";
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
+import { setSettlementDetail } from "@/app/store/clientify/invoicesTableSlice";
 
 const InvoicesTableLiquidationsDrawer: React.FC = () => {
-  const selectedInvoice = useSelector(
-    (state: RootState) => state.invoiceTable.selectedInvoice
+  const dispatch = useDispatch<AppDispatch>();
+
+  const settlementDetail = useSelector(
+    (state: RootState) => state.invoiceTable.settlementDetail
+  );
+  const fallbackInvoices = useSelector(
+    (state: RootState) => state.invoiceTable.baseSettlementInvoices
   );
 
-  // Simulación de facturas relacionadas con la liquidación
-  const invoices = [
-    {
-      codigo: "PROFORMA-18414",
-      cuenta: "Jooyly",
-      comision: "USD 150,00",
-      producto: "1 × Business Growth (at $780.00 / year)",
-    },
-    {
-      codigo: "PROFORMA-18414",
-      cuenta: "EDUCATIUM",
-      comision: "USD 150,00",
-      producto: "1 × Business Growth (at $780.00 / year)",
-    },
-    {
-      codigo: "PROFORMA-18414",
-      cuenta: "INTEGRITYLEGAL",
-      comision: "USD 150,00",
-      producto: "1 × Business Growth (at $780.00 / year)",
-    },
-  ];
+  const invoices = settlementDetail?.invoices || fallbackInvoices;
+  const header = settlementDetail;
 
-  if (!selectedInvoice) {
-    return (
-      <Box p={3} width="350px">
-        <Typography variant="h6">No hay factura seleccionada</Typography>
-      </Box>
-    );
-  }
+  React.useEffect(() => {
+    // Limpia el detalle si el componente se desmonta
+    return () => {
+      dispatch(setSettlementDetail(null));
+    };
+  }, [dispatch]);
 
   return (
     <Box
@@ -67,7 +53,7 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
           <Typography
             className={`${styles["Body-regular"]} ${poppins.className}`}
           >
-            {selectedInvoice.liquidaciones}
+            {header ? `Liquidación #${header.id}` : "Base de prueba"}
           </Typography>
         </Box>
 
@@ -87,7 +73,7 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
           <Typography
             className={`${styles["Body-regular"]} ${poppins.className}`}
           >
-            {selectedInvoice.moneda} 472,80
+            {header ? `${header.currency} ${header.amount}` : "USD 0.00"}
           </Typography>
         </Box>
         {/* BOX Three */}
@@ -106,7 +92,9 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
           <Typography
             className={`${styles["Body-regular"]} ${poppins.className}`}
           >
-            22, Dic, 2023 - 5:45pm
+            {header
+              ? new Date(header.payment_date).toLocaleString("es-ES")
+              : "--"}
           </Typography>
         </Box>
       </Box>
@@ -133,7 +121,7 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
             <Typography
               className={`${styles["Body-regular"]} ${poppins.className}`}
             >
-              {invoice.codigo}
+              {invoice.invoice_number}
             </Typography>
             <Box
               className={
@@ -155,7 +143,7 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
                 <Typography
                   className={`${styles["Body-regular"]} ${poppins.className}`}
                 >
-                  {invoice.cuenta}
+                  {invoice.account}
                 </Typography>
               </Box>
               <Box
@@ -173,7 +161,8 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
                 <Typography
                   className={`${styles["Body-regular"]} ${poppins.className}`}
                 >
-                  {invoice.comision}
+                  {invoice.subtotal}
+                  {/* Aguacate */}
                 </Typography>
               </Box>
               <Box
@@ -191,7 +180,7 @@ const InvoicesTableLiquidationsDrawer: React.FC = () => {
                 <Typography
                   className={`${styles["Body-regular"]} ${poppins.className}`}
                 >
-                  {invoice.producto}
+                  {invoice.description_product}
                 </Typography>
               </Box>
             </Box>

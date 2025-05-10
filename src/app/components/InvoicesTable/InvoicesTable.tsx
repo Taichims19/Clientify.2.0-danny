@@ -42,13 +42,24 @@ import {
 import {
   InvoiceRow,
   setSelectedAllInvoices,
-  setSelectedInvoice,
+  setSelectedInvoices,
   setPageSize,
   setPage,
   setVisibleRowsCount,
-  setSearchQuery, // Nueva acción (a definir en el slice)
+  setSearchQuery,
+  toggleSelectedInvoice, // Nueva acción (a definir en el slice)
+  calculateTotalPayment, // 🔥 NUEVO selector
+  selectFilteredInvoices,
+  setRemoteSearchRows,
+  setSettlementDetail,
 } from "@/app/store/clientify/invoicesTableSlice";
-import { fetchInvoicesData } from "@/app/store/clientify/clientifyThunks";
+import {
+  fetchInvoicesData,
+  fetchInvoicesBySearch,
+  fetchSettlementDetailById,
+} from "@/app/store/clientify/clientifyThunks";
+import CommissionModal from "../Utilities/Modals/InvoicesTableModal/CommissionModal";
+import { useDebounce } from "../../hooks/useDebounce/useDebounce";
 
 const CustomPagination = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -64,7 +75,7 @@ const CustomPagination = () => {
   const visibleRowsCount = useSelector(
     (state: RootState) => state.invoiceTable.visibleRowsCount || 25
   );
-  const loading = useSelector((state: RootState) => state.clienty.loading);
+  const loading = useSelector((state: RootState) => state.invoiceTable.loading);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -146,6 +157,8 @@ export default function InvoicesTable() {
   // Acceder al estado de Redux al inicio
   const rows = useSelector((state: RootState) => state.invoiceTable.rows);
 
+  const filteredRows = useSelector(selectFilteredInvoices);
+
   const columns = useSelector((state: RootState) =>
     state.invoiceTable.columns.slice(0, 8).map((column) => ({
       ...column,
@@ -193,7 +206,43 @@ export default function InvoicesTable() {
   const searchQuery = useSelector(
     (state: RootState) => state.invoiceTable.searchQuery
   );
+
+  const partnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
+  );
+
+  const remoteSearchRows = useSelector(
+    (state: RootState) => state.invoiceTable.remoteSearchRows
+  );
+
   const [searchValue, setSearchValue] = React.useState(searchQuery); // Estado local para el input
+  const debouncedSearch = useDebounce(searchValue, 500);
+
+  // ⏱️ Debounce para aplicar el filtro después de 500ms
+  // React.useEffect(() => {
+  //   const delayDebounce = setTimeout(() => {
+  //     dispatch(setSearchQuery(searchValue));
+  //   }, 500); // Puedes ajustar este valor a 1000ms si deseas más delay
+
+  //   return () => clearTimeout(delayDebounce);
+  // }, [searchValue, dispatch]);
+
+  React.useEffect(() => {
+    const trimmed = debouncedSearch.trim();
+
+    dispatch(setSearchQuery(trimmed));
+
+    if (trimmed === "") {
+      dispatch(setRemoteSearchRows([]));
+      return;
+    }
+
+    if (trimmed.length >= 3 && partnerId) {
+      dispatch(fetchInvoicesBySearch(partnerId.toString(), trimmed));
+    } else {
+      dispatch(setRemoteSearchRows([]));
+    }
+  }, [debouncedSearch, dispatch, partnerId]);
 
   const filteredPendingPayments = useSelector(
     (state: RootState) => state.invoiceTable.filteredPendingPayments
@@ -209,12 +258,10 @@ export default function InvoicesTable() {
     (state: RootState) => state.invoiceTable.activeFiltersCount
   );
 
-  // const pageSize = useSelector(
-  //   (state: RootState) => state.invoiceTable.pageSize || 25
-  // );
   const pageSize = 100; // Fijo para la API
   const page = useSelector((state: RootState) => state.invoiceTable.page || 0);
-  const { selectedInvoice, allInvoicesSelected } = useSelector(
+
+  const { selectedInvoices, allInvoicesSelected } = useSelector(
     (state: RootState) => state.invoiceTable
   );
 
@@ -222,31 +269,22 @@ export default function InvoicesTable() {
     null
   );
 
-  const partnerId = useSelector(
-    (state: RootState) => state.clienty.currentPartnerId
-  );
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalData, setModalData] = React.useState<{
+    cuenta: string;
+    producto: string;
+    importe: number;
+    comision: number;
+  } | null>(null);
+  const totalPayment = useSelector(calculateTotalPayment); // NUEVO
+
+  const loading = useSelector((state: RootState) => state.invoiceTable.loading);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) =>
     setAnchorEl(event.currentTarget);
   const handleClose = () => setAnchorEl(null);
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-
-  // Manejador para enviar la búsqueda al hacer clic en el ícono
-  const handleSearch = () => {
-    dispatch(setSearchQuery(searchValue));
-    console.log("Valor de búsqueda guardado en Redux:", searchValue); // Para depuración
-  };
-
-  // // Validación para permitir solo códigos (e.g., "PROFORMA-123") o comisiones (e.g., "25%")
-  // const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = event.target.value;
-  //   // Regex: permite "PROFORMA-" seguido de números o un número seguido opcionalmente por "%"
-  //   const validPattern = /^(PROFORMA-\d*|\d*%?)$/;
-  //   if (validPattern.test(value) || value === "") {
-  //     setSearchValue(value);
-  //   }
-  // };
 
   // Sin validación: permitimos cualquier entrada
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -258,48 +296,158 @@ export default function InvoicesTable() {
     rowData: InvoiceRow | null
   ) => {
     if (plan) dispatch(selectPlan(plan));
-    if (rowData) dispatch(setSelectedInvoice(rowData));
-    dispatch(
-      setDrawer({
-        isDrawerOpen: true,
-        drawerTitle: "Resumen de liquidación",
-        drawerSelected: DrawerView.INVOICESTABLES,
-        view: "",
-      })
-    );
-  };
+    if (rowData) {
+      dispatch(toggleSelectedInvoice(rowData)); // Marca factura seleccionada
 
-  const handleRowSelection = (
-    rowSelectionModel: GridRowSelectionModel,
-    details: GridCallbackDetails
-  ) => {
-    if (rowSelectionModel.length === 0) {
-      dispatch(setSelectedInvoice(null));
-      return;
+      // Si tiene liquidación válida, llama al endpoint
+      if (rowData.liquidaciones && rowData.liquidaciones !== "--") {
+        dispatch(fetchSettlementDetailById(rowData.liquidaciones.toString()));
+      } else {
+        dispatch(setSettlementDetail(null)); // Limpia si no tiene
+      }
+
+      dispatch(
+        setDrawer({
+          isDrawerOpen: true,
+          drawerTitle: "Resumen de liquidación",
+          drawerSelected: DrawerView.INVOICESTABLES,
+          view: "",
+        })
+      );
     }
-    const selectedRowId = rowSelectionModel[0]; // Tomamos el primer ID seleccionado
-    const selectedRow = rows.find(
-      (row: InvoiceRow) => row.id === selectedRowId
-    );
-    if (selectedRow) dispatch(setSelectedInvoice(selectedRow));
   };
 
-  const handleSelectAll = () => dispatch(setSelectedAllInvoices(true));
+  const handleSendClick = () => {
+    if (selectedInvoices.length === 1) {
+      const invoice = selectedInvoices[0];
+      setModalData({
+        cuenta: invoice.cuenta,
+        producto: invoice.producto,
+        importe: invoice.importe,
+        comision: invoice.importe * 0.25,
+      });
+      setModalOpen(true);
+    } else if (selectedInvoices.length > 1) {
+      const [first] = selectedInvoices;
 
-  // Determinar las filas a mostrar según los filtros activos
-  let displayedRows = rows;
-  if (activeFilters.pendingPayments && activeFilters.pendingCommissions) {
-    // Intersección de ambos filtros
-    displayedRows = filteredPendingPayments.filter((row: { id: any }) =>
-      filteredPendingCommissions.some((comm: { id: any }) => comm.id === row.id)
-    );
-  } else if (activeFilters.pendingPayments) {
-    displayedRows = filteredPendingPayments;
-  } else if (activeFilters.pendingCommissions) {
-    displayedRows = filteredPendingCommissions;
+      const sameCuenta = selectedInvoices.every(
+        (inv) => inv.cuenta === first.cuenta
+      );
+      const sameProducto = selectedInvoices.every(
+        (inv) => inv.producto === first.producto
+      );
+
+      const totalImporte = selectedInvoices.reduce(
+        (sum, inv) => sum + inv.importe,
+        0
+      );
+      const totalComision = totalImporte * 0.25;
+
+      if (sameCuenta && sameProducto) {
+        const cantidad = selectedInvoices.length;
+        const productoResumen = `${first.producto} x${cantidad}`;
+        setModalData({
+          cuenta: first.cuenta,
+          producto: productoResumen,
+          importe: totalImporte,
+          comision: totalComision,
+        });
+        setModalOpen(true);
+      } else if (!sameCuenta || !sameProducto) {
+        // 🔵 Nuevo: crear mapa de cuentas y productos
+        const cuentasMap = new Map<string, number>();
+        const productosMap = new Map<string, number>();
+
+        selectedInvoices.forEach((inv) => {
+          cuentasMap.set(inv.cuenta, (cuentasMap.get(inv.cuenta) || 0) + 1);
+          productosMap.set(
+            inv.producto,
+            (productosMap.get(inv.producto) || 0) + 1
+          );
+        });
+
+        // 🔵 Guardar resumen en localStorage para usarlo en el modal
+        localStorage.setItem(
+          "cuentasResumen",
+          JSON.stringify(Array.from(cuentasMap.entries()))
+        );
+        localStorage.setItem(
+          "productosResumen",
+          JSON.stringify(Array.from(productosMap.entries()))
+        );
+
+        setModalData({
+          cuenta: `Ver +${cuentasMap.size}`,
+          producto: `Ver +${productosMap.size}`,
+          importe: totalImporte,
+          comision: totalComision,
+        });
+        setModalOpen(true);
+      }
+    }
+  };
+
+  // Manejar la selección de filas
+  const handleRowSelection = (rowSelectionModel: GridRowSelectionModel) => {
+    if (rowSelectionModel.length === 0) {
+      // Si no hay nada seleccionado, limpiar todo
+      dispatch(setSelectedAllInvoices(false));
+    } else {
+      const selectedRows = rows.filter((row) =>
+        rowSelectionModel.includes(row.id)
+      );
+      // Si todas las filas visibles están seleccionadas, seleccionar todas las del endpoint
+      if (
+        rowSelectionModel.length === paginatedRows.length &&
+        paginatedRows.length > 0
+      ) {
+        dispatch(setSelectedAllInvoices(true));
+      } else {
+        // Selección parcial
+        dispatch(setSelectedInvoices(selectedRows));
+      }
+    }
+  };
+
+  const handleSelectAllChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch(setSelectedAllInvoices(event.target.checked));
+  };
+
+  const { startDate, endDate } = useSelector(
+    (state: RootState) => state.invoiceTable.calendaryRanger
+  );
+
+  let displayedRows =
+    remoteSearchRows.length > 0 ? remoteSearchRows : filteredRows;
+
+  // Filtrar por rango de fechas si el switch está activo y hay fechas válidas
+  if (
+    activeFilters.dateRange &&
+    !remoteSearchRows.length &&
+    startDate &&
+    endDate
+  ) {
+    const start = startDate.toDate();
+    const end = endDate.toDate();
+
+    displayedRows = displayedRows.filter((row) => {
+      const rowDate = new Date(row.fechaCreacion);
+      return rowDate >= start && rowDate <= end;
+    });
   }
 
-  const loading = useSelector((state: RootState) => state.clienty.loading);
+  // Aplicar filtros de pendingPayments y pendingCommissions
+  if (activeFilters.pendingPayments && activeFilters.pendingCommissions) {
+    displayedRows = displayedRows.filter(
+      (row) => row.fechaPago === "--" && row.liquidaciones === "--"
+    );
+  } else if (activeFilters.pendingPayments) {
+    displayedRows = displayedRows.filter((row) => row.fechaPago === "--");
+  } else if (activeFilters.pendingCommissions) {
+    displayedRows = displayedRows.filter((row) => row.liquidaciones === "--");
+  }
 
   const visibleRowsCount = useSelector(
     (state: RootState) => state.invoiceTable.visibleRowsCount || 25 // Usa el nuevo estado
@@ -307,6 +455,13 @@ export default function InvoicesTable() {
 
   // Tomar solo las primeras visibleRowsCount filas de la página actual
   const paginatedRows = displayedRows.slice(0, visibleRowsCount);
+
+  // Calcular la suma de los importes seleccionados
+  const totalImporte = selectedInvoices.reduce(
+    (sum, invoice) => sum + invoice.importe,
+    0
+  );
+  const selectedCount = selectedInvoices.length;
 
   return (
     <Box
@@ -335,7 +490,7 @@ export default function InvoicesTable() {
             </Box>
             {/* Box filter search 2*/}
 
-            {!selectedInvoice && !allInvoicesSelected ? (
+            {selectedCount === 0 && !allInvoicesSelected ? (
               <Box
                 className={
                   invoicesTableStyles["BoxFilter-boxfilter2-children2"]
@@ -425,22 +580,14 @@ export default function InvoicesTable() {
                           display: "flex",
                           alignItems: "end",
                         }}
-                        onClick={handleSearch}
+                        // onClick={handleSearch}
                       >
                         <IconSearchFacture />
                       </Typography>
-                      {/* <Typography
-                        className={`${styles["Title-regular"]} ${poppins.className}`}
-                      >
-                        Buscar por código o comisión
-                      </Typography>
-                      | <IconSearchFacture /> */}
                     </Box>
                   </Box>
                 </Box>
               </Box>
-            ) : allInvoicesSelected ? (
-              <Typography>Todas las facturas seleccionadas</Typography>
             ) : (
               <Box
                 className={
@@ -450,12 +597,15 @@ export default function InvoicesTable() {
                 <Typography
                   className={`${styles["Body-medium"]} ${poppins.className}`}
                 >
-                  1 factura seleccionada
+                  {allInvoicesSelected
+                    ? "Todas las facturas seleccionadas"
+                    : `${selectedCount} factura${
+                        selectedCount > 1 ? "s" : ""
+                      } seleccionada${selectedCount > 1 ? "s" : ""}`}
                 </Typography>
                 <Box
                   className={invoicesTableStyles["BoxFilter-children3-content"]}
                 >
-                  {/* BOX ONE */}
                   <Box
                     className={
                       invoicesTableStyles["BoxFilter-children3-content-boxes"]
@@ -469,12 +619,10 @@ export default function InvoicesTable() {
                     <Typography
                       className={`${styles["Body-regular-4"]} ${poppins.className}`}
                     >
-                      {selectedInvoice?.importe}
-                      {selectedInvoice?.moneda}
+                      {totalImporte.toFixed(2)}{" "}
+                      {(selectedInvoices[0]?.moneda || "USD").toUpperCase()}
                     </Typography>
                   </Box>
-
-                  {/* BOX TWO */}
                   <Box
                     className={
                       invoicesTableStyles["BoxFilter-children3-content-boxes"]
@@ -491,8 +639,6 @@ export default function InvoicesTable() {
                       25%
                     </Typography>
                   </Box>
-
-                  {/* BOX THREE */}
                   <Box
                     className={
                       invoicesTableStyles["BoxFilter-children3-content-boxes"]
@@ -506,34 +652,51 @@ export default function InvoicesTable() {
                     <Typography
                       className={`${styles["Body-regular-4"]} ${poppins.className}`}
                     >
-                      177,00 USD
+                      {/* 177,00 USD */}
+                      {totalPayment.toFixed(2)}{" "}
+                      {(selectedInvoices[0]?.moneda || "USD").toUpperCase()}
                     </Typography>
                   </Box>
-                  <Button
-                    className={
-                      invoicesTableStyles["BoxFilter-children3-button"]
-                    }
+                </Box>
+                <Button
+                  className={invoicesTableStyles["BoxFilter-children3-button"]}
+                  onClick={handleSendClick}
+                >
+                  <Typography
+                    className={`${styles["Title-medium-white"]} ${poppins.className}`}
                   >
                     Enviar
-                  </Button>
-                </Box>
+                  </Typography>
+                </Button>
               </Box>
             )}
           </Box>
-          {/* icon vector */}
           <IconVector />
         </Box>
-
+        {paginatedRows.length === 0 && !loading && (
+          <Box
+            sx={{
+              width: "100%",
+              padding: "32px 0",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Typography
+              className={`${styles["Body-medium"]} ${poppins.className}`}
+              sx={{ color: "#8D8D8D" }}
+            >
+              No se encontraron facturas que coincidan con tu búsqueda.
+            </Typography>
+          </Box>
+        )}
         {/* box datagrid */}
         <DataGrid
           className={invoicesTableStyles["DataGrid-clientify-box1"]}
-          // rows={rows}
           rows={paginatedRows}
           columns={columns}
-          // paginationModel={{ page, pageSize }}
-          // onPaginationModelChange={(model: GridPaginationModel) => {
-          //   dispatch(setPage(model.page)); // Usamos setPage exportada
-          // }}
           pageSizeOptions={[25, 50, 75, 100]} // Limitado a 100 como máximo por tu requerimiento
           checkboxSelection
           disableRowSelectionOnClick
@@ -630,6 +793,23 @@ export default function InvoicesTable() {
           }}
         />
       </Box>
+
+      {/* MODAL insertado al final del return */}
+      {modalData && (
+        <CommissionModal
+          open={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setModalData(null);
+          }}
+          onSubmit={() => {
+            console.log("Enviar comisión");
+            setModalOpen(false);
+            setModalData(null);
+          }}
+          data={modalData}
+        />
+      )}
     </Box>
   );
 }
