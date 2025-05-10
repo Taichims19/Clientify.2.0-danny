@@ -259,24 +259,57 @@ const initialState: ClientifyState = {
   resourcesDrawer: {
     sections: [
       {
+        id: 1,
         title: "¿Qué hay de nuevo?",
         items: [
-          { name: "Nueva funcionalidad", new: true },
-          { name: "Última actualización", new: false },
+          {
+            id: 1,
+            name: "Nueva funcionalidad",
+            url: "https://vimeo.com/1011248999?share=copy",
+            new: true,
+          },
+          {
+            id: 2,
+            name: "Última actualización",
+            url: "https://www.youtube.com/watch?v=A4TEo2yZyiA",
+            new: false,
+          },
         ],
       },
       {
+        id: 2,
         title: "Inf. y enlaces de interés",
         items: [
-          { name: "Actualización (mejoras)", new: false },
-          { name: "Programa de afiliados", new: true },
+          {
+            id: 3,
+            name: "Actualización (mejoras)",
+            url: "https://vimeo.com/1011248999?share=copy",
+            new: false,
+          },
+          {
+            id: 4,
+            name: "Programa de afiliados",
+            url: "https://vimeo.com/1011248999?share=copy",
+            new: true,
+          },
         ],
       },
       {
+        id: 3,
         title: "¿Quién es quién en el equipo?",
         items: [
-          { name: "¿Quién es quién?", new: false },
-          { name: "Tienes alguna otra duda?", new: true },
+          {
+            id: 5,
+            name: "¿Quién es quién?",
+            url: "https://www.youtube.com/watch?v=A4TEo2yZyiA",
+            new: false,
+          },
+          {
+            id: 6,
+            name: "Tienes alguna otra duda?",
+            url: "https://vimeo.com/1011248999?share=copy",
+            new: true,
+          },
         ],
       },
     ],
