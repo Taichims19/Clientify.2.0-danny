@@ -5,47 +5,91 @@ import { DateRangeCalendar } from "@mui/x-date-pickers-pro/DateRangeCalendar";
 import { DateRange } from "@mui/x-date-pickers-pro/models";
 import { Box, Button, Modal, Typography } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/store/store";
+import { AppDispatch, RootState } from "@/app/store/store";
 import DataCalendarsAccountStyles from "./DataCalendarsAccounts.module.scss";
-
 import styles from "../../../../styles/home.module.css";
 import { poppins } from "../../../../fonts/fonts";
 import { toggleMessage } from "@/app/store/clientify/clientifySlice";
 import InfoIconAccounts from "@/app/icons/InfoIconAccounts";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AntSwitches from "../../Switches/AntSwitch/AntSwitches";
-import { setDateRange } from "@/app/store/clientify/invoicesTableSlice";
+import {
+  resetCalendaryRanger,
+  setDateRange,
+} from "@/app/store/clientify/invoicesTableSlice";
+import { fetchFilteredAccounts } from "@/app/store/clientify/clientifyThunks";
 
 export default function DataCalendarsAccounts({ open, handleClose }: any) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { startDate, endDate } = useSelector(
+    (state: RootState) => state.invoiceTable.calendaryRanger
+  );
 
   const showMessage = useSelector(
     (state: RootState) => state.clienty.message.showMessage
   );
 
+  const activeRecurrence = useSelector(
+    (state: RootState) => state.clienty.activeRecurrence
+  );
+  const currentPartnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
+  );
+
   const [dateRange, setDateRangeState] = useState<[Dayjs | null, Dayjs | null]>(
-    [null, null]
+    [startDate ? dayjs(startDate) : null, endDate ? dayjs(endDate) : null]
   );
 
-  const reduxRange = useSelector(
-    (state: RootState) => state.invoiceTable.calendaryRanger
-  );
-
-  // Sincronizar local con Redux al abrir
-  React.useEffect(() => {
+  useEffect(() => {
     if (open) {
-      setDateRangeState([reduxRange.startDate, reduxRange.endDate]);
+      setDateRangeState([
+        startDate ? dayjs(startDate) : null,
+        endDate ? dayjs(endDate) : null,
+      ]);
     }
-  }, [open, reduxRange.startDate, reduxRange.endDate]);
+  }, [open, startDate, endDate]);
 
   const handleApply = () => {
-    dispatch(setDateRange(dateRange));
-    handleClose(); // Cierra el modal después de aplicar
+    const [start, end] = dateRange;
+    const formattedRange: [string | null, string | null] = [
+      start ? start.format("YYYY-MM-DD") : null,
+      end ? end.format("YYYY-MM-DD") : null,
+    ];
+    dispatch(setDateRange(formattedRange));
+    if (currentPartnerId) {
+      const recurrenceFilter =
+        activeRecurrence === null ? undefined : activeRecurrence;
+      const startDateFilter = formattedRange[0] || undefined;
+      const endDateFilter = formattedRange[1] || undefined;
+      dispatch(
+        fetchFilteredAccounts(currentPartnerId, {
+          recurrence: recurrenceFilter,
+          startDate: startDateFilter,
+          endDate: endDateFilter,
+        })
+      );
+    }
+    handleClose();
+  };
+
+  const handleCancel = () => {
+    dispatch(resetCalendaryRanger()); // Reinicia el estado global
+    if (currentPartnerId) {
+      const recurrenceFilter =
+        activeRecurrence === null ? undefined : activeRecurrence;
+      dispatch(
+        fetchFilteredAccounts(currentPartnerId, {
+          recurrence: recurrenceFilter,
+        })
+      );
+    }
+    handleClose();
   };
 
   // Manejador para el cambio del switch
   const handleSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch(toggleMessage()); // Cambia el estado en Redux
+    dispatch(toggleMessage());
   };
 
   return (
@@ -57,30 +101,23 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
       closeAfterTransition
       sx={{
         "& .MuiPickersCalendarHeader-labelContainer": {
-          // background: "red",
           zIndex: 300,
           position: "absolute",
           left: "37%",
           bottom: "90%",
         },
-        //Ajustes de Tipografia
         "& .MuiPickersCalendarHeader-label": {
-          // Título del mes (e.g., "Marzo 2025")
           fontSize: "14px",
-          fontFamily: poppins.style.fontFamily, // Aplica la fuente poppins
+          fontFamily: poppins.style.fontFamily,
           "& *": {
-            // Asegura que todos los elementos dentro de la celda hereden la fuente
             fontFamily: poppins.style.fontFamily,
           },
           fontStyle: "normal",
           fontWeight: 500,
           lineHeight: "19px",
           color: "#262626",
-          // color: "red",
         },
-
         "& .MuiDateRangePickerDay-day:checked": {
-          // Números de los días (1 a 30)
           fontSize: "10px",
           fontFamily: "Poppins",
           fontStyle: "normal",
@@ -89,19 +126,14 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           color: "#FFF",
         },
         "& .MuiDateRangePickerDay-day:focus": {
-          // Números de los días (1 a 30)
           fontSize: "10px",
           fontFamily: "Poppins",
           fontStyle: "normal",
           fontWeight: 500,
           lineHeight: "14px",
           color: "#FFF",
-          // background: "yellow",
         },
-
-        //Cajon Padre Titulo Mes
         "& .MuiPickersArrowSwitcher-root": {
-          // background: "yellow",
           justifyContent: "space-between",
           position: "absolute",
           right: "7%",
@@ -111,9 +143,7 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           maxHeight: 20,
           minHeight: 20,
         },
-        //Cajon Padre total
         "& .MuiDayCalendar-root": {
-          // background: "aqua",
           display: "flex",
           flexDirection: "column",
           gap: "0px",
@@ -123,19 +153,14 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           position: "relative",
           top: "32px",
         },
-        //Header  Padre Semanas
         "& .MuiDayCalendar-header": {
-          // background: "red",
           width: "280px",
           display: "flex",
           justifyContent: "space-between",
         },
-        //Cajon Header Semanas
         "& .MuiDayCalendar-weekDayLabel": {
-          // Días de la semana (Lunes a Domingo)
           height: "14px",
           width: "24px",
-          // background: "brown",
           fontSize: "10px",
           fontFamily: "Poppins",
           fontStyle: "normal",
@@ -143,79 +168,53 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           lineHeight: "14px",
           color: "#525252",
         },
-        //Cajon semanal padre
         "& .MuiDayCalendar-slideTransition ": {
-          // background: "chocolate",
           minWidth: "280px",
-          // height: "24px",
         },
-        //Cajon semanal de contenedor de dias
         "& .MuiDayCalendar-weekContainer": {
-          // background: "chocolate",
           width: "280px",
           height: "24px",
           display: "flex",
           justifyContent: "space-between",
-          // alignItems: "flex-start",
           margin: "0px",
         },
-        //Cajon Padre dias
         "& .MuiDateRangePickerDay-rangeIntervalPreview": {
-          // background: "violet",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           flexShrink: 0,
-          // width: "24px",
           height: "24px",
         },
-
-        //Cajon individual de los dias
         "& .MuiDateRangePickerDay-day": {
-          // Números de los días (1 a 30)
           fontSize: "10px",
           fontFamily: "Poppins",
           fontStyle: "normal",
           fontWeight: 500,
           lineHeight: "14px",
           color: "#6F6F6F",
-          // background: "yellow",
           height: "21px",
           width: "24px",
         },
         "& .MuiPickersCalendarHeader-root": {
-          // background: "violet",
           maxHeight: 0,
           minHeight: 0,
-          // marginTop: "0px",
         },
-
         "& .MuiDateRangePickerDay-root": {
-          // background: "red",
           height: "28px",
           width: "100%",
           gap: "0px",
         },
-
         "& .MuiDayCalendar-slideTransition": {
-          // background: "blue",
           display: "flex",
           flexDirection: "column",
-          // justifyContent:
-          // minHeight: "194px",
-          // maxHeight: "194px",
-          // gap: "2px",
         },
-        //Cajon Padre secundario total de los dias
         "& .MuiDayCalendar-monthContainer": {
-          // background: "blue",
           display: "flex",
           flexDirection: "column",
           gap: "12px",
           height: "100%",
         },
         "& .MuiDateRangePickerDay-day.Mui-selected": {
-          // background: "yellow",
           height: "24px",
           width: "24px",
           marginTop: "6px",
@@ -234,23 +233,19 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
           <DateRangeCalendar
             calendars={1}
             value={dateRange}
-            onChange={(newValue) => {
-              setDateRangeState(newValue);
+            onChange={(newValue: DateRange<Dayjs>) => {
               const [start, end] = newValue;
-              if (start && !end) {
-                // Si solo hay una fecha, forzamos la selección completa para una sola fecha
-                setDateRangeState([start, start]); // 🔥 Esto hará que con 1 clic se tome como ambos extremos
-              }
+              const adjustedValue: [Dayjs | null, Dayjs | null] =
+                start && !end ? [start, start] : newValue;
+              setDateRangeState(adjustedValue);
             }}
           />
-
-          {/* <IconVectorClear /> */}
 
           <Box className={DataCalendarsAccountStyles["box-Antswitches"]}>
             <Typography
               className={`${styles["Body-regular"]} ${poppins.className}`}
             >
-              Seleccionar rango de fecha{" "}
+              Seleccionar rango de fecha
             </Typography>
             <Box
               className={
@@ -267,11 +262,10 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
                     className={
                       DataCalendarsAccountStyles["grandson1-children4"]
                     }
-                    // onClick={() => dispatch(toggleMessage())}
                   >
                     <AntSwitches
-                      checked={showMessage} // Conecta el estado de Redux
-                      onChange={handleSwitchChange} // Maneja el cambio
+                      checked={showMessage}
+                      onChange={handleSwitchChange}
                     />
                   </Box>
                 </Box>
@@ -303,10 +297,7 @@ export default function DataCalendarsAccounts({ open, handleClose }: any) {
             </Button>
             <Button
               className={DataCalendarsAccountStyles["button-two"]}
-              onClick={() => {
-                setDateRangeState([null, null]); // Limpia estado local
-                handleClose(); // Cierra el modal
-              }}
+              onClick={handleCancel}
             >
               <Typography
                 className={`${styles["Title-medium-blue"]} ${poppins.className}`}

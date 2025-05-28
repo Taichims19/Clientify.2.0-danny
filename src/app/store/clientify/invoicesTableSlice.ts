@@ -3,7 +3,7 @@ import { createSelector, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GridColDef } from "@mui/x-data-grid";
 import { RootState } from "../store"; // Ajusta la ruta si es diferente
 // Define la interfaz para las filas y columnas
-import { Dayjs } from "dayjs";
+// import { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 export interface InvoiceRow {
   id: number;
@@ -18,8 +18,8 @@ export interface InvoiceRow {
 }
 
 interface DateRangeState {
-  startDate: Dayjs | null;
-  endDate: Dayjs | null;
+  startDate: string | null; // Cambiado de Dayjs a string
+  endDate: string | null; // Cambiado de Dayjs a string
 }
 
 export interface SettlementInvoiceRow {
@@ -369,12 +369,13 @@ const invoicesTableSlice = createSlice({
     },
     setDateRange: (
       state,
-      action: PayloadAction<[Dayjs | null, Dayjs | null]>
+      action: PayloadAction<[string | null, string | null]>
     ) => {
-      const [startDate, endDate] = action.payload;
-      state.calendaryRanger.startDate = startDate;
-      state.calendaryRanger.endDate = endDate;
+      const [start, end] = action.payload;
+      state.calendaryRanger.startDate = start;
+      state.calendaryRanger.endDate = end;
     },
+
     resetCalendaryRanger: (state) => {
       state.calendaryRanger.startDate = null;
       state.calendaryRanger.endDate = null;

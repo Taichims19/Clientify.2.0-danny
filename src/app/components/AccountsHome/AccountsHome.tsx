@@ -4,7 +4,7 @@ import styles from "../../styles/home.module.css";
 import { poppins } from "../../fonts/fonts";
 import AccountsHomeStyles from "./AccountsHome.module.scss";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/app/store/store";
+import { AppDispatch, RootState } from "@/app/store/store";
 
 import IconRightArrow from "@/app/icons/IconRightArrow";
 import {
@@ -13,21 +13,35 @@ import {
   setDrawer,
   toggleAccountStatus,
 } from "@/app/store/clientify/clientifySlice";
+import {
+  fetchAccountsHomeList,
+  fetchAccountsPlansSelect,
+  fetchFilteredAccounts,
+} from "@/app/store/clientify/clientifyThunks";
+import { useEffect, useRef } from "react";
 
 export default function AccountsHome() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { totalAccounts, accounts } = useSelector(
     (state: RootState) => state.clienty.accountsHome
   );
   const loading = useSelector((state: RootState) => state.clienty.loading); // Añadimos el estado de carga
 
-  const handleToggleStatus = (accountName: string) => {
-    dispatch(toggleAccountStatus(accountName));
-  };
+  const partnerId = useSelector(
+    (state: RootState) => state.clienty.currentPartnerId
+  );
 
   const MAX_ACCOUNTS_DISPLAYED = 2;
 
   const visibleAccounts = accounts.slice(0, MAX_ACCOUNTS_DISPLAYED);
+
+  // Refs para evitar múltiples invocaciones
+  const hasFetchedRef = useRef(false); //evita que el thunk se ejecute más de una vez por sesión.
+  const prevPartnerIdRef = useRef<number | null>(null); //
+
+  const handleToggleStatus = (accountName: string) => {
+    dispatch(toggleAccountStatus(accountName));
+  };
 
   const handleOpenDrawer = (plan: string) => {
     dispatch(selectPlan(plan));
@@ -39,7 +53,25 @@ export default function AccountsHome() {
         view: "",
       })
     );
+
+    // Verifica si el partnerId cambió o si no se ha fetchado aún
+    if (
+      partnerId &&
+      (!hasFetchedRef.current || partnerId !== prevPartnerIdRef.current)
+    ) {
+      dispatch(fetchFilteredAccounts(partnerId, {})); // Sin filtros por ahora
+      hasFetchedRef.current = true; // Marca como fetchado
+      prevPartnerIdRef.current = partnerId; // Actualiza el partnerId previo
+    }
   };
+
+  // Efecto para reiniciar hasFetchedRef si cambia el partnerId (opcional, según tu lógica)
+  useEffect(() => {
+    if (partnerId !== prevPartnerIdRef.current) {
+      hasFetchedRef.current = false; // Reinicia si el partnerId cambia
+      prevPartnerIdRef.current = partnerId;
+    }
+  }, [partnerId]);
 
   return (
     <Box className={AccountsHomeStyles["Box-AccountsHome-father"]}>

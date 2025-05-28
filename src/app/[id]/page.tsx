@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "next/navigation";
 import { Grid } from "@mui/material";
@@ -28,14 +28,18 @@ export default function PartnerPage() {
   const id = params.id as string;
   const drawer = useSelector((state: RootState) => state.clienty.drawer); // Corregí "clienty" a "clientify"
 
+  // Usar useRef para rastrear si los datos ya se fetch
+  const hasFetchedData = useRef(false);
+
   useEffect(() => {
     const partnerId = parseInt(id, 10);
-    if (!isNaN(partnerId)) {
-      dispatch(fetchPartnerData(partnerId)); // Llamamos al thunk directamente con dispatch
+    if (!isNaN(partnerId) && !hasFetchedData.current) {
+      hasFetchedData.current = true; // Marcar como fetch
+      dispatch(fetchPartnerData(partnerId));
     } else {
       console.error("ID de partner no válido:", id);
     }
-  }, [id, dispatch]);
+  }, [id, dispatch]); // Dependencia en id para detectar cambios
 
   return (
     <Grid className={styles["body"]} container sx={{ padding: "20px" }}>

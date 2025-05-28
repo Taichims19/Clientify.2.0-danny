@@ -26,6 +26,7 @@
       font-style: normal;
       font-weight: 500;
       line-height: 17px; /* 141.667% */
+      transition: background-color 0.3s, color 0.3s;
     }
     .Buttons-children-one:hover{
       background: var(--tabs-frame-pressed, rgba(57, 57, 57,0.5));
@@ -35,7 +36,16 @@
       background: var(--tabs-frame-pressed, rgba(57, 57, 57,1));
       color: var(--tabs-text-icon-pressed, #FFF);
     }
+    .Buttons-children-one.active {
+      background-color: #1976d2; /* Color azul para activo */
+      color: white;
+      border: 1px solid #1976d2;
+    }
 
+    .Buttons-children-one.active:hover {
+      background-color: #155a9e; /* Tono más oscuro al pasar el mouse */
+      color: white;
+    }
   }
 
   .children-two-box{
@@ -72,4 +82,9 @@
   display: flex;
   justify-content: end;
   height: 40px;
+}
+
+.active {
+  background-color: #1976d2; /* Color azul, por ejemplo */
+  color: white;
 }

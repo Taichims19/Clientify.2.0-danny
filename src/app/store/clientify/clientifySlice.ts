@@ -103,10 +103,20 @@ interface Plan {
 interface Account {
   name: string;
   isActive: boolean;
+  url: string;
 }
 
 interface SelectState {
-  isAccountsSelectOpen: boolean; // Nuevo estado
+  names: string[];
+  isAccountsSelectOpen: boolean;
+  selectedPlans: string[]; // Para reemplazar personName
+  lastClickTime: number | null; // Para reemplazar lastClickTime
+  lastFilters: {
+    // Para reemplazar lastFilters
+    recurrence?: "monthly" | "yearly";
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
 interface MessageState {
@@ -161,6 +171,19 @@ interface DrawerSection {
 // Nueva interfaz para el estado del drawer
 interface ResourcesDrawerState {
   sections: DrawerSection[];
+  hasFetchedResources: boolean; // Nuevo estado
+  resourcesLoading: boolean; // Nuevo estado
+}
+
+interface AccountsHomeState {
+  totalAccounts: number;
+  accounts: Account[];
+  accountsHomeLoading: boolean; // Nuevo estado de carga global
+}
+
+interface SubscriptionPlansState {
+  totalPlans: number;
+  plans: Plan[];
 }
 
 interface ClientifyState {
@@ -172,10 +195,7 @@ interface ClientifyState {
   summaryPanel: SummaryPanelState;
   recurrenceChart: RecurrencePercentage;
   mrrPartner: MrrPartnerState;
-  accountsHome: {
-    totalAccounts: number;
-    accounts: Account[];
-  };
+  accountsHome: AccountsHomeState; // Actualizamos la interfaz
   resourcesHome: ResourcesState;
   resourcesDrawer: ResourcesDrawerState; // => Esto: Nueva propiedad para el drawer
   drawer: DrawerState;
@@ -190,6 +210,11 @@ interface ClientifyState {
   error: string | null;
   currentPartnerId: number; // Para rastrear el partner actual
   partner: PartnerState; // Nuevo grupo
+  activePlans: {
+    totalPlans: number;
+    plans: Plan[];
+  };
+  activeRecurrence: "monthly" | "yearly" | null; // Nueva propiedad para la recurrencia
 }
 
 const initialState: ClientifyState = {
@@ -224,11 +249,25 @@ const initialState: ClientifyState = {
   accountsHome: {
     totalAccounts: 3, // Asociado a subaccounts_count
     accounts: [
-      { name: "EDUCATIUM", isActive: true },
-      { name: "INTEGRITYLEGAL", isActive: false },
-      { name: "Jooyly", isActive: true },
+      {
+        name: "EDUCATIUM",
+        isActive: true,
+        url: "https://vimeo.com/1011248999?share=copy",
+      },
+      {
+        name: "INTEGRITYLEGAL",
+        isActive: false,
+        url: "https://vimeo.com/1011248999?share=copy",
+      },
+      {
+        name: "Jooyly",
+        isActive: true,
+        url: "https://vimeo.com/1011248999?share=copy",
+      },
     ], // Asociado a subaccounts
+    accountsHomeLoading: false, // Estado inicial de carga
   },
+
   // Resources Home
   resourcesHome: {
     allowedResourcesCount: 13, // Asociado a allowed_resources_count
@@ -313,6 +352,8 @@ const initialState: ClientifyState = {
         ],
       },
     ],
+    hasFetchedResources: false, // Inicialmente false
+    resourcesLoading: false, // Inicialmente false
   },
   selectedPlan: null,
   drawer: {
@@ -332,6 +373,18 @@ const initialState: ClientifyState = {
   },
   selectAccount: {
     isAccountsSelectOpen: false,
+    names: [
+      "Enterprise 10K",
+      "Enterprise 50K Inbox",
+      "Standby",
+      "Demo",
+      "Enterprise 10K Inbox",
+      "Enterprise 15K Inbox",
+      "Business Start Inbox",
+    ],
+    selectedPlans: [], // Inicialmente vacío (reemplaza personName)
+    lastClickTime: null, // Inicialmente null (reemplaza lastClickTime)
+    lastFilters: {}, // Inicialmente vacío (reemplaza lastFilters)
   },
   message: {
     showMessage: false, // Estado inicial del mensaje
@@ -415,6 +468,11 @@ const initialState: ClientifyState = {
     nameUser: "Alice Kuvalis", // Valor por defecto
     photoUrl: "/imgLayout/Rectangle7-png.png", // URL por defecto
   },
+  activePlans: {
+    totalPlans: 0,
+    plans: [],
+  },
+  activeRecurrence: null, // Inicializamos como null
 };
 
 export const clientifySlice = createSlice({
@@ -442,6 +500,7 @@ export const clientifySlice = createSlice({
       state.subDrawer.subDrawerSelected = action.payload.subDrawerSelected;
       state.subDrawer.subView = action.payload.subView;
     },
+
     toggleAccountStatus(state, action: PayloadAction<string>) {
       const account = state.accountsHome.accounts.find(
         (acc) => acc.name === action.payload
@@ -472,11 +531,6 @@ export const clientifySlice = createSlice({
     },
     closeModal(state) {
       state.modal.isModalOpen = false;
-    },
-    toggleAccountsSelect(state) {
-      state.selectAccount.isAccountsSelectOpen =
-        !state.selectAccount.isAccountsSelectOpen;
-      console.log("evento disparado");
     },
     toggleMessage(state) {
       state.message.showMessage = !state.message.showMessage;
@@ -573,11 +627,54 @@ export const clientifySlice = createSlice({
     setResourcesDrawer(state, action: PayloadAction<ResourcesDrawerState>) {
       state.resourcesDrawer = action.payload;
     },
-    setResourcesDrawerSections: (
-      state,
-      action: PayloadAction<DrawerSection[]>
-    ) => {
+    setResourcesDrawerSections(state, action: PayloadAction<DrawerSection[]>) {
       state.resourcesDrawer.sections = action.payload;
+    },
+    setHasFetchedResources(state, action: PayloadAction<boolean>) {
+      state.resourcesDrawer.hasFetchedResources = action.payload;
+    },
+    setResourcesLoading(state, action: PayloadAction<boolean>) {
+      state.resourcesDrawer.resourcesLoading = action.payload;
+    },
+    setActivePlans(state, action: PayloadAction<SubscriptionPlansState>) {
+      state.activePlans = action.payload;
+    },
+    setAccountPlansSelect(state, action: PayloadAction<string[]>) {
+      state.selectAccount.names = action.payload;
+    },
+    toggleAccountsSelect(state) {
+      state.selectAccount.isAccountsSelectOpen =
+        !state.selectAccount.isAccountsSelectOpen;
+    },
+    setActiveRecurrence: (
+      state,
+      action: PayloadAction<"monthly" | "yearly" | null>
+    ) => {
+      state.activeRecurrence = action.payload;
+    },
+    resetActiveRecurrence: (state) => {
+      state.activeRecurrence = null;
+    },
+    // Nueva acción para manejar la carga de accountsHome
+    setAccountsHomeLoading(state, action: PayloadAction<boolean>) {
+      state.accountsHome.accountsHomeLoading = action.payload;
+    },
+    // Nuevos reducers para manejar los estados movidos
+    setSelectedPlans(state, action: PayloadAction<string[]>) {
+      state.selectAccount.selectedPlans = action.payload;
+    },
+    setLastClickTime(state, action: PayloadAction<number | null>) {
+      state.selectAccount.lastClickTime = action.payload;
+    },
+    setLastFilters(
+      state,
+      action: PayloadAction<{
+        recurrence?: "monthly" | "yearly";
+        startDate?: string;
+        endDate?: string;
+      }>
+    ) {
+      state.selectAccount.lastFilters = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -596,7 +693,6 @@ export const {
   removeAccount,
   openModal,
   closeModal,
-  toggleAccountsSelect,
   toggleMessage,
   openSubDrawerWithAccount,
   toggleFeatureOne,
@@ -613,6 +709,17 @@ export const {
   setPartner, // Exportar la nueva acción
   setResourcesDrawer,
   setResourcesDrawerSections,
+  setHasFetchedResources,
+  setResourcesLoading,
+  setActivePlans,
+  toggleAccountsSelect,
+  setAccountPlansSelect,
+  setActiveRecurrence,
+  resetActiveRecurrence,
+  setAccountsHomeLoading, // Nueva acción exportada
+  setSelectedPlans,
+  setLastClickTime,
+  setLastFilters,
 } = clientifySlice.actions;
 
 export default clientifySlice.reducer;

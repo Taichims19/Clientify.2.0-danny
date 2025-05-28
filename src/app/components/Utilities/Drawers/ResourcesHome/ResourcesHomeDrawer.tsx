@@ -27,20 +27,37 @@ function ResourcesHomeDrawer() {
     (state: RootState) => state.clienty.currentPartnerId
   );
 
-  const [loading, setLoading] = useState(false);
-  const [expanded, setExpanded] = useState<string | false>("panel1");
-
+  const loading = useSelector(
+    (state: RootState) => state.clienty.resourcesDrawer.resourcesLoading
+  );
+  const hasFetchedResources = useSelector(
+    (state: RootState) => state.clienty.resourcesDrawer.hasFetchedResources
+  );
   const { sections } = useSelector(
     (state: RootState) => state.clienty.resourcesDrawer
   );
 
+  const [expanded, setExpanded] = useState<string | false>("panel1");
+
   useEffect(() => {
-    if (partnerId) {
-      dispatch(fetchResourcesDrawerByPartner(partnerId.toString()));
-    } else {
-      setLoading(false); // ✅ usamos la data dummy por defecto
+    let cleanupFunction: (() => void) | undefined;
+
+    if (partnerId && !hasFetchedResources) {
+      // Despachamos el thunk y obtenemos la función de limpieza
+      dispatch(fetchResourcesDrawerByPartner(partnerId.toString())).then(
+        (cleanup) => {
+          cleanupFunction = cleanup;
+        }
+      );
     }
-  }, [dispatch, partnerId]);
+
+    // Devolvemos la función de limpieza
+    return () => {
+      if (cleanupFunction) {
+        cleanupFunction();
+      }
+    };
+  }, [dispatch, partnerId, hasFetchedResources]);
 
   const handleChange =
     (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {

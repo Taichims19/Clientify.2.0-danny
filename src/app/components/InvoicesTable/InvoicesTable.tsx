@@ -60,6 +60,7 @@ import {
 } from "@/app/store/clientify/clientifyThunks";
 import CommissionModal from "../Utilities/Modals/InvoicesTableModal/CommissionModal";
 import { useDebounce } from "../../hooks/useDebounce/useDebounce";
+import dayjs, { Dayjs } from "dayjs"; // Importamos Dayjs para las conversiones
 
 const CustomPagination = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -217,15 +218,6 @@ export default function InvoicesTable() {
 
   const [searchValue, setSearchValue] = React.useState(searchQuery); // Estado local para el input
   const debouncedSearch = useDebounce(searchValue, 500);
-
-  // ⏱️ Debounce para aplicar el filtro después de 500ms
-  // React.useEffect(() => {
-  //   const delayDebounce = setTimeout(() => {
-  //     dispatch(setSearchQuery(searchValue));
-  //   }, 500); // Puedes ajustar este valor a 1000ms si deseas más delay
-
-  //   return () => clearTimeout(delayDebounce);
-  // }, [searchValue, dispatch]);
 
   React.useEffect(() => {
     const trimmed = debouncedSearch.trim();
@@ -418,6 +410,9 @@ export default function InvoicesTable() {
   const { startDate, endDate } = useSelector(
     (state: RootState) => state.invoiceTable.calendaryRanger
   );
+  // Convertimos las fechas de strings a Dayjs para usar métodos como .toDate()
+  const startDateDayjs: Dayjs | null = startDate ? dayjs(startDate) : null;
+  const endDateDayjs: Dayjs | null = endDate ? dayjs(endDate) : null;
 
   let displayedRows =
     remoteSearchRows.length > 0 ? remoteSearchRows : filteredRows;
@@ -426,11 +421,11 @@ export default function InvoicesTable() {
   if (
     activeFilters.dateRange &&
     !remoteSearchRows.length &&
-    startDate &&
-    endDate
+    startDateDayjs &&
+    endDateDayjs
   ) {
-    const start = startDate.toDate();
-    const end = endDate.toDate();
+    const start = startDateDayjs.toDate();
+    const end = endDateDayjs.toDate();
 
     displayedRows = displayedRows.filter((row) => {
       const rowDate = new Date(row.fechaCreacion);
@@ -524,6 +519,7 @@ export default function InvoicesTable() {
                       vertical: "bottom",
                       horizontal: "left",
                     }}
+                    style={{ cursor: "pointer" }}
                     className={invoicesTableStyles["box-popover-invoice"]}
                   >
                     <PopoverInvoice />

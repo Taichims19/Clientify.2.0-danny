@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, CancelTokenSource } from "axios";
 import {
   setCurrentPartnerId,
   setLoading,
@@ -11,6 +11,11 @@ import {
   setResourcesHome,
   setPartner,
   setResourcesDrawerSections,
+  setActivePlans,
+  setAccountPlansSelect,
+  setHasFetchedResources,
+  setResourcesLoading,
+  setAccountsHomeLoading,
 } from "@/app/store/clientify/clientifySlice";
 import {
   addRow,
@@ -26,6 +31,23 @@ import {
 } from "./invoicesTableSlice";
 import { AppDispatch, RootState } from "../store";
 import { Dayjs } from "dayjs";
+
+// Definir el tipo de retorno del thunk
+type CleanupFunction = () => void;
+
+interface InvoiceFilters {
+  pending_payment?: boolean;
+  pending_commission?: boolean;
+  date_start?: string; // Cambiado de Dayjs a string
+  date_end?: string; // Cambiado de Dayjs a string
+  search?: string;
+}
+
+interface AccountFilters {
+  recurrence?: "monthly" | "yearly";
+  startDate?: string; // Formato: YYYY-MM-DD
+  endDate?: string; // Formato: YYYY-MM-DD
+}
 
 // Función para obtener los datos del partner
 export const fetchPartnerInfo = async (
@@ -149,8 +171,12 @@ export const fetchInvoicesData =
       );
       dispatch(setInvoicesLoading(true));
 
+      const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("page_size", pageSize.toString());
+
       const response = await axios.get(
-        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?page=${page}&page_size=${pageSize}`,
+        `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?${params.toString()}`,
         {
           headers: {
             Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
@@ -457,6 +483,105 @@ export const fetchInvoicesByDateRange =
     }
   };
 
+//multu-thunk para popoverinvoices
+export const fetchInvoicesWithFilters =
+  (partnerId: string, filters: InvoiceFilters) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setInvoicesLoading(true));
+
+      const params = new URLSearchParams();
+
+      if (filters.pending_payment) {
+        params.append("pending_payment", "true");
+      }
+      if (filters.pending_commission) {
+        params.append("pending_commission", "true");
+      }
+      if (filters.date_start) {
+        // Convertimos de YYYY-MM-DD a D/M/YYYY para la API
+        const [year, month, day] = filters.date_start.split("-");
+        params.append(
+          "date_start",
+          `${parseInt(day)}/${parseInt(month)}/${year}`
+        );
+      }
+      if (filters.date_end) {
+        // Convertimos de YYYY-MM-DD a D/M/YYYY para la API
+        const [year, month, day] = filters.date_end.split("-");
+        params.append(
+          "date_end",
+          `${parseInt(day)}/${parseInt(month)}/${year}`
+        );
+      }
+      if (filters.search) {
+        params.append("search", encodeURIComponent(filters.search));
+      }
+
+      const url = `https://app.clientify.com/billing-admin/api/invoices/${partnerId}/?${params.toString()}`;
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+        },
+      });
+
+      const invoicesData = response.data;
+
+      if (invoicesData && Array.isArray(invoicesData.results)) {
+        const mappedRows: InvoiceRow[] = invoicesData.results.map(
+          (invoice: any) => ({
+            id: invoice.id,
+            codigo: invoice.invoice_number || "N/A",
+            cuenta: invoice.account || "N/A",
+            importe: invoice.subtotal || 0,
+            moneda: invoice.currency || "N/A",
+            producto: invoice.description_product || "N/A",
+            fechaCreacion: new Date(invoice.created).toLocaleDateString(
+              "es-ES",
+              {
+                month: "short",
+                day: "2-digit",
+                year: "numeric",
+              }
+            ),
+            fechaPago: invoice.payment_date
+              ? new Date(invoice.payment_date).toLocaleDateString("es-ES", {
+                  month: "short",
+                  day: "2-digit",
+                  year: "numeric",
+                })
+              : "--",
+            liquidaciones: invoice.settlement_id || "--",
+          })
+        );
+
+        dispatch(setRemoteSearchRows(mappedRows));
+        dispatch(setTotalCount(invoicesData.count || 0));
+        dispatch(setNextPageUrl(invoicesData.next || null));
+      } else {
+        dispatch(setRemoteSearchRows([]));
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<any>;
+      let errorMessage = "Error fetching invoices with filters";
+      if (axiosError.response?.data) {
+        errorMessage =
+          typeof axiosError.response.data === "string"
+            ? axiosError.response.data
+            : axiosError.response.data.message ||
+              axiosError.response.data.error ||
+              Object.values(axiosError.response.data)[0] ||
+              JSON.stringify(axiosError.response.data);
+      } else if (axiosError.message) {
+        errorMessage = axiosError.message;
+      }
+      console.error("Error fetching invoices:", errorMessage);
+      dispatch(setRemoteSearchRows([]));
+    } finally {
+      dispatch(setInvoicesLoading(false));
+    }
+  };
 // Función para obtener los detalles de la liquidación por ID
 
 export const fetchSettlementDetailById =
@@ -484,12 +609,93 @@ export const fetchSettlementDetailById =
     }
   };
 
+// Mapa para rastrear solicitudes en curso por partnerId
+const activeRequests: Map<string, Promise<void>> = new Map();
+
 // 🔥 THUNK para traer recursos del drawer
 export const fetchResourcesDrawerByPartner =
-  (partnerId: string) => async (dispatch: AppDispatch) => {
+  (partnerId: string) =>
+  async (
+    dispatch: AppDispatch,
+    getState: () => RootState
+  ): Promise<CleanupFunction> => {
+    const source: CancelTokenSource = axios.CancelToken.source();
+
     try {
+      // Verificar si ya hay una solicitud en curso para este partnerId
+      if (activeRequests.has(partnerId)) {
+        await activeRequests.get(partnerId);
+        return () => {};
+      }
+
+      const { resourcesDrawer } = getState().clienty;
+      if (resourcesDrawer.hasFetchedResources) {
+        return () => {};
+      }
+
+      const requestPromise = (async () => {
+        try {
+          dispatch(setResourcesLoading(true));
+
+          const response = await axios.get(
+            `https://app.clientify.com/billing-admin/api/resources/${partnerId}/`,
+            {
+              headers: {
+                Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+              },
+              cancelToken: source.token,
+            }
+          );
+
+          const data = response.data;
+
+          if (data && Array.isArray(data)) {
+            const mappedSections = data.map((section: any) => ({
+              id: section.id,
+              title: section.name,
+              items: section.resources.map((res: any) => ({
+                id: res.id,
+                name: res.name,
+                url: res.url,
+                new: res.new,
+              })),
+            }));
+
+            dispatch(setResourcesDrawerSections(mappedSections));
+            dispatch(setHasFetchedResources(true));
+          }
+        } finally {
+          dispatch(setResourcesLoading(false));
+          activeRequests.delete(partnerId);
+        }
+      })();
+
+      activeRequests.set(partnerId, requestPromise);
+      await requestPromise;
+    } catch (error) {
+      if (axios.isCancel(error)) {
+        console.log("Solicitud cancelada:", error.message);
+      } else {
+        console.error("❌ Error cargando recursos del drawer:", error);
+      }
+      activeRequests.delete(partnerId);
+    }
+
+    return () => {
+      source.cancel("Solicitud cancelada por desmontaje del componente");
+    };
+  };
+
+// 🔥 THUNK para traer planes activos SIN modificar los datos base
+export const fetchActiveSubscriptionPlans =
+  (partnerId: string, active: boolean) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
+
+      const queryParam = active ? "true" : ""; // 👈 se construye el valor según estado del switch
+
       const response = await axios.get(
-        `https://app.clientify.com/billing-admin/api/resources/${partnerId}/`,
+        `https://app.clientify.com/billing-admin/api/subscription-plans/${partnerId}/?active_plans=${queryParam}`,
         {
           headers: {
             Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
@@ -499,32 +705,191 @@ export const fetchResourcesDrawerByPartner =
 
       const data = response.data;
 
-      if (data && Array.isArray(data)) {
-        const mappedSections = data.map((section: any) => ({
-          id: section.id,
-          title: section.name,
-          items: section.resources.map((res: any) => ({
-            id: res.id,
-            name: res.name,
-            url: res.url,
-            new: res.new,
-          })),
+      if (data?.subscription_plans) {
+        const activePlans = data.subscription_plans.map((plan: any) => ({
+          name: plan.name,
+          count: plan.value,
+          isFree: (plan.name || "").toLowerCase().includes("free trial"),
         }));
 
-        dispatch(setResourcesDrawerSections(mappedSections));
+        dispatch(
+          setActivePlans({ totalPlans: data.total_plans, plans: activePlans })
+        );
       }
     } catch (error) {
-      console.error("❌ Error cargando recursos del drawer:", error);
+      console.error("❌ Error obteniendo planes activos:", error);
+      dispatch(setActivePlans({ totalPlans: 0, plans: [] }));
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+// ✅ THUNK 1: Obtener lista de cuentas para AccountsHomeDrawer
+export const fetchAccountsHomeList =
+  (partnerId: number) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setAccountsHomeLoading(true));
+
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/subaccounts/${partnerId}/?page=1`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (Array.isArray(data?.results)) {
+        const mappedAccounts = data.results.map((acc: any) => ({
+          name: acc.name || "Unnamed",
+          isActive: true, // Asumimos activo por defecto
+          url: acc.url_billing_admin || "", // Mapear url_billing_admin a url
+        }));
+
+        dispatch(
+          setAccountsHome({
+            totalAccounts: data.count || 0,
+            accounts: mappedAccounts,
+          })
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error al obtener subcuentas:", error);
+      dispatch(setError("Error al obtener cuentas del drawer"));
+    } finally {
+      dispatch(setAccountsHomeLoading(false));
+    }
+  };
+
+// ✅ THUNK 2: Obtener lista de planes para el filtro en AccountsHomeSelect
+export const fetchAccountsPlansSelect =
+  (partnerId: number) => async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setLoading(true));
+
+      const response = await axios.get(
+        `https://app.clientify.com/billing-admin/api/plans/${partnerId}/`,
+        {
+          headers: {
+            Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+          },
+        }
+      );
+
+      const plansRaw = response.data?.plans_select || [];
+      const filtered = plansRaw.filter((p: string | null) => p !== null);
+
+      dispatch(setAccountPlansSelect(filtered));
+    } catch (error) {
+      console.error("❌ Error al obtener planes del filtro:", error);
+      dispatch(setError("Error al obtener planes de selección"));
+    } finally {
+      dispatch(setAccountsHomeLoading(false));
+    }
+  };
+
+export const fetchFilteredAccounts =
+  (
+    partnerId: number,
+    filters: AccountFilters = {} // Parámetro por defecto para evitar errores si no se pasan filtros
+  ) =>
+  async (dispatch: AppDispatch) => {
+    try {
+      dispatch(setAccountsHomeLoading(true));
+
+      // Lógica combinada para cuentas (fetchAccountsHomeList)
+      const accountsParams = new URLSearchParams();
+      accountsParams.append("page", "1");
+
+      if (filters.recurrence) {
+        accountsParams.append("recurrence", filters.recurrence);
+      }
+      if (filters.startDate) {
+        // Convertimos de YYYY-MM-DD a D/M/YYYY para la API
+        const [year, month, day] = filters.startDate.split("-");
+        accountsParams.append(
+          "date_start",
+          `${parseInt(day)}/${parseInt(month)}/${year}`
+        );
+      }
+      if (filters.endDate) {
+        // Convertimos de YYYY-MM-DD a D/M/YYYY para la API
+        const [year, month, day] = filters.endDate.split("-");
+        accountsParams.append(
+          "date_end",
+          `${parseInt(day)}/${parseInt(month)}/${year}`
+        );
+      }
+
+      const accountsUrl = `https://app.clientify.com/billing-admin/api/subaccounts/${partnerId}/?${accountsParams.toString()}`;
+      const accountsResponse = await axios.get(accountsUrl, {
+        headers: {
+          Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+        },
+      });
+
+      const accountsData = accountsResponse.data;
+      if (Array.isArray(accountsData?.results)) {
+        const mappedAccounts = accountsData.results.map((acc: any) => ({
+          name: acc.name || "Unnamed",
+          isActive: true,
+          url: acc.url_billing_admin || "",
+        }));
+        dispatch(
+          setAccountsHome({
+            totalAccounts: accountsData.count || 0,
+            accounts: mappedAccounts,
+          })
+        );
+      }
+
+      // Lógica para planes (fetchAccountsPlansSelect)
+      const plansUrl = `https://app.clientify.com/billing-admin/api/plans/${partnerId}/`;
+      const plansResponse = await axios.get(plansUrl, {
+        headers: {
+          Authorization: "token 3a127c84b7a9740cb6b0f4c65d9557c962027a96",
+        },
+      });
+
+      const plansRaw = plansResponse.data?.plans_select || [];
+      const filteredPlans = plansRaw.filter((p: string | null) => p !== null);
+      dispatch(setAccountPlansSelect(filteredPlans));
+    } catch (error) {
+      console.error("❌ Error al obtener datos filtrados:", error);
+      dispatch(setError("Error al obtener datos filtrados"));
+    } finally {
+      dispatch(setAccountsHomeLoading(false));
     }
   };
 
 // Función combinada para llamar a ambas
+
 export const fetchPartnerData =
   (partnerId: number, page?: number, pageSize?: number) =>
   async (dispatch: (action: any) => void, getState: () => RootState) => {
-    console.log("fetchPartnerData called with partnerId:", partnerId);
-    await Promise.all([
-      fetchPartnerInfo(partnerId, dispatch),
-      fetchInvoicesData(partnerId, page, pageSize)(dispatch, getState),
-    ]);
+    const partnerIdStr = partnerId.toString(); // Usar string como clave
+    try {
+      // Verificar si ya hay una solicitud en curso para este partnerId
+      if (activeRequests.has(partnerIdStr)) {
+        await activeRequests.get(partnerIdStr);
+        return;
+      }
+
+      const requestPromise = (async () => {
+        console.log("fetchPartnerData called with partnerId:", partnerId);
+        await Promise.all([
+          fetchPartnerInfo(partnerId, dispatch),
+          fetchInvoicesData(partnerId, page, pageSize)(dispatch, getState),
+        ]);
+      })();
+
+      activeRequests.set(partnerIdStr, requestPromise);
+      await requestPromise;
+    } catch (error) {
+      console.error("Error en fetchPartnerData:", error);
+    } finally {
+      activeRequests.delete(partnerIdStr);
+    }
   };

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import AntSwitches from "../Switches/AntSwitch/AntSwitches";
 import PopoverInvoiceStyles from "./PopoverInvoice.module.scss";
@@ -9,27 +9,39 @@ import { useDispatch, useSelector } from "react-redux";
 import store, { AppDispatch, RootState } from "@/app/store/store";
 import {
   resetCalendaryRanger,
+  setPage,
   setRemoteSearchRows,
   toggleDateRange,
   togglePendingCommissions,
   togglePendingPayments,
 } from "@/app/store/clientify/invoicesTableSlice";
-import DataCalendarsAccounts from "../Calendars/DataCalendarsAccounts/DataCalendarsAccounts";
 import { closeModal, openModal } from "@/app/store/clientify/clientifySlice";
 import {
-  fetchInvoicesByDateRange,
-  fetchPendingCommissions,
-  fetchPendingPayments,
+  fetchInvoicesData,
+  fetchInvoicesWithFilters,
 } from "@/app/store/clientify/clientifyThunks";
+import DataCalendarsInvoices from "../Calendars/DataCalendarsInvoices/DataCalendarsInvoices";
+import dayjs, { Dayjs } from "dayjs"; // Importamos Dayjs para las conversiones
 
 export const PopoverInvoice = () => {
   const dispatch = useDispatch<AppDispatch>();
+
+  const prevFiltersRef = useRef<any>({});
+  const hasFetchedRef = useRef(false);
 
   const { startDate, endDate } = useSelector(
     (state: RootState) => state.invoiceTable.calendaryRanger
   );
 
+  // Convertimos las fechas de strings a Dayjs para usar métodos como .isSame() y .format()
+  const startDateDayjs: Dayjs | null = startDate ? dayjs(startDate) : null;
+  const endDateDayjs: Dayjs | null = endDate ? dayjs(endDate) : null;
+
   const { activeFilters, activeFiltersCount } = useSelector(
+    (state: RootState) => state.invoiceTable
+  );
+
+  const { page, pageSize } = useSelector(
     (state: RootState) => state.invoiceTable
   );
 
@@ -37,35 +49,57 @@ export const PopoverInvoice = () => {
     (state: RootState) => state.clienty.modal.isModalOpen
   );
 
-  // Estado local sincronizado con Redux
-  const [pendingPaymentsChecked, setPendingPaymentsChecked] = React.useState(
-    activeFilters.pendingPayments
-  );
-  const [pendingCommissionsChecked, setPendingCommissionsChecked] =
-    React.useState(activeFilters.pendingCommissions);
-  const [dateRangeChecked, setDateRangeChecked] = React.useState(
-    activeFilters.dateRange
-  );
+  // Función para verificar si hay filtros activos
+  const hasActiveFilters = () => {
+    return (
+      activeFilters.pendingPayments ||
+      activeFilters.pendingCommissions ||
+      startDate ||
+      endDate
+    );
+  };
 
-  // Sincronizar estado local con Redux al montar
-  useEffect(() => {
-    setPendingPaymentsChecked(activeFilters.pendingPayments);
-    setPendingCommissionsChecked(activeFilters.pendingCommissions);
-    setDateRangeChecked(activeFilters.dateRange);
-  }, [activeFilters]);
+  // Función para construir y despachar filtros
+  const applyFilters = () => {
+    const partnerId = store.getState().clienty.currentPartnerId;
+    if (!partnerId) return;
+
+    const currentFilters = {
+      pending_payment: activeFilters.pendingPayments,
+      pending_commission: activeFilters.pendingCommissions,
+      date_start: startDate ?? undefined,
+      date_end: endDate ?? undefined,
+    };
+
+    // Comparar filtros actuales con los anteriores para evitar llamadas innecesarias
+    const hasFiltersChanged =
+      JSON.stringify(currentFilters) !== JSON.stringify(prevFiltersRef.current);
+
+    // Solo ejecutar si hay filtros activos y los filtros han cambiado
+    if (hasFiltersChanged && !hasFetchedRef.current) {
+      if (hasActiveFilters()) {
+        hasFetchedRef.current = true;
+        dispatch(setPage(0));
+        dispatch(
+          fetchInvoicesWithFilters(partnerId.toString(), currentFilters)
+        );
+        prevFiltersRef.current = { ...currentFilters };
+      } else {
+        hasFetchedRef.current = true;
+        dispatch(setPage(0));
+        dispatch(fetchInvoicesData(partnerId, 1, pageSize));
+        prevFiltersRef.current = { ...currentFilters };
+      }
+    }
+  };
 
   // Handlers para los switches
   const handlePendingPaymentsSwitch = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const checked = event.target.checked;
-    setPendingPaymentsChecked(checked);
     dispatch(togglePendingPayments(checked));
-
-    const partnerId = store.getState().clienty.currentPartnerId;
-    if (partnerId && checked) {
-      dispatch(fetchPendingPayments(partnerId.toString()));
-    } else {
+    if (!checked && !activeFilters.pendingCommissions && !startDate) {
       dispatch(setRemoteSearchRows([]));
     }
   };
@@ -74,57 +108,48 @@ export const PopoverInvoice = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const checked = event.target.checked;
-    setPendingCommissionsChecked(checked);
     dispatch(togglePendingCommissions(checked));
-
-    const partnerId = store.getState().clienty.currentPartnerId;
-    if (partnerId && checked) {
-      dispatch(fetchPendingCommissions(partnerId.toString()));
-    } else {
+    if (!checked && !activeFilters.pendingPayments && !startDate) {
       dispatch(setRemoteSearchRows([]));
     }
   };
 
   const handleDateRangeSwitch = (checked: boolean) => {
-    // Solo despachar si hay un cambio real
-    if (checked !== dateRangeChecked) {
-      setDateRangeChecked(checked);
+    if (checked !== activeFilters.dateRange) {
       dispatch(toggleDateRange(checked));
     }
   };
+
   const handleOpen = () => dispatch(openModal());
   const handleClose = () => dispatch(closeModal());
 
-  // const handleClick = () => {
-  //   console.info("You clicked the Chip.");
-  // };
-
   const handleDelete = () => {
     console.info("Fechas borradas.");
-    dispatch(resetCalendaryRanger()); // Limpia Redux
-    dispatch(openModal()); // Forzar sincronización con calendario
+    dispatch(resetCalendaryRanger());
+    dispatch(openModal());
   };
 
+  // Efecto para manejar cambios en los filtros
   useEffect(() => {
-    const partnerId = store.getState().clienty.currentPartnerId;
+    hasFetchedRef.current = false;
+    applyFilters();
 
     if (startDate && !endDate) {
       handleDateRangeSwitch(true);
-      if (partnerId) {
-        dispatch(fetchInvoicesByDateRange(partnerId.toString(), startDate));
-      }
     } else if (startDate && endDate) {
       handleDateRangeSwitch(true);
-      if (partnerId) {
-        dispatch(
-          fetchInvoicesByDateRange(partnerId.toString(), startDate, endDate)
-        );
-      }
-    } else if (!startDate && !endDate && dateRangeChecked) {
+    } else if (!startDate && !endDate && activeFilters.dateRange) {
       handleDateRangeSwitch(false);
-      dispatch(setRemoteSearchRows([])); // Limpiar si se borra todo
+      if (!activeFilters.pendingPayments && !activeFilters.pendingCommissions) {
+        dispatch(setRemoteSearchRows([]));
+      }
     }
-  }, [startDate, endDate, dateRangeChecked, dispatch]);
+  }, [
+    startDate,
+    endDate,
+    activeFilters.pendingPayments,
+    activeFilters.pendingCommissions,
+  ]);
 
   return (
     <>
@@ -147,7 +172,7 @@ export const PopoverInvoice = () => {
                 >
                   <Box className={PopoverInvoiceStyles["grandson1-children4"]}>
                     <AntSwitches
-                      checked={pendingCommissionsChecked}
+                      checked={activeFilters.pendingCommissions}
                       onChange={handlePendingCommissionsSwitch}
                     />
                   </Box>
@@ -172,7 +197,7 @@ export const PopoverInvoice = () => {
                 >
                   <Box className={PopoverInvoiceStyles["grandson1-children4"]}>
                     <AntSwitches
-                      checked={pendingPaymentsChecked}
+                      checked={activeFilters.pendingPayments}
                       onChange={handlePendingPaymentsSwitch}
                     />
                   </Box>
@@ -182,17 +207,17 @@ export const PopoverInvoice = () => {
           </Box>
           <VectorIconPopover />
           {/* Alternar entre Typography y Chip */}
-          {startDate && endDate ? (
+          {startDateDayjs && endDateDayjs ? (
             <Chip
               label={
-                startDate.isSame(endDate, "day")
-                  ? startDate.format("DD [de] MMMM YYYY")
-                  : `${startDate.format("DD  MMMM YYYY")} - ${endDate.format(
-                      "DD  MMMM YYYY"
-                    )}`
+                startDateDayjs.isSame(endDateDayjs, "day")
+                  ? startDateDayjs.format("DD [de] MMMM YYYY")
+                  : `${startDateDayjs.format(
+                      "DD MMMM YYYY"
+                    )} - ${endDateDayjs.format("DD MMMM YYYY")}`
               }
-              onClick={handleOpen} // Abre el modal de selección de fecha
-              onDelete={handleDelete} // Borra las fechas seleccionadas
+              onClick={handleOpen}
+              onDelete={handleDelete}
             />
           ) : (
             <Typography
@@ -204,7 +229,7 @@ export const PopoverInvoice = () => {
             </Typography>
           )}
 
-          <DataCalendarsAccounts open={isModalOpen} handleClose={handleClose} />
+          <DataCalendarsInvoices open={isModalOpen} handleClose={handleClose} />
         </Box>
       </Box>
     </>
