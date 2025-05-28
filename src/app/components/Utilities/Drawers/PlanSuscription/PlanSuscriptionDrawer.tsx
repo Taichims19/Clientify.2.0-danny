@@ -281,8 +281,7 @@ function PlanSuscriptionDrawer() {
                   component="span"
                   className={`${styles["Title-medium-grey1"]} ${poppins.className}`}
                 >
-                  {plan.value?.toString().padStart(2, "0") ||
-                    plan.count?.toString().padStart(2, "0")}
+                  {plan.count?.toString().padStart(2, "0") || "0"}
                 </Typography>
                 {plan.isFree && (
                   <Box
